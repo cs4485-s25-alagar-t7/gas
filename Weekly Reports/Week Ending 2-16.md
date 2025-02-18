@@ -32,4 +32,3 @@
 - Contributed to the software architecture diagram.  
 
 **Next steps:** Finalizing UI mockups, starting backend setup, and refining timeline.  
-"""
