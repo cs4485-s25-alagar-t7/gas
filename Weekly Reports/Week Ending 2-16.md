@@ -1,5 +1,6 @@
 # Weekly Report – Project Proposal Stage  
 **Week of February 16**  
+**Team Leader: Arsal Hussain**
 
 ## Team Accomplishments  
 ### Specifications & UI Design  
