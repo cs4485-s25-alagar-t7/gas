@@ -1,5 +1,5 @@
 ﻿# meeting minutes February 11th
-
+*Team Leader: Solomon Pierce*
 
 ## attendance:
 * All team 7 members were present
