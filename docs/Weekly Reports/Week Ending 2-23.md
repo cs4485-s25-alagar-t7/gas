@@ -15,6 +15,7 @@
 ### Solomon & Arsal (Backend Team)  
 - Created MySQL Database and reached initial stages of setting up database
 - Considering algorithm for handling grader matching, which is the constraint satisfaction problem
+- Starting on docker_compose.yml
 ### Sophie & Kevin (Frontend Team)  
 - Created a UI design on Figma
 - Planning stages of dashboard design
