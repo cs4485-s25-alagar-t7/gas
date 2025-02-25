@@ -9,6 +9,7 @@
 ### Accomplishment Template
 - Finalized timeline schedule, including parallels to each team's deliverables through project calendar
 - Considering expansion of implementation to project, including scheduling teams meetings for professors to interview graders
+- Retrieved sample data for resume parsing and course-grader matching
 
 ## Individual Contributions  
 ### Solomon & Arsal (Backend Team)  
@@ -21,3 +22,5 @@
 - Completed the Software Architecture Diagram
 
 **Next steps:** 
+- Finish UI wireframes and plan out component structures
+- Set up database models and consider initial API
