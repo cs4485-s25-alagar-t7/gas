@@ -40,4 +40,5 @@
 
 # Next Steps
 - See the Figma and UI of different views
-- 
+- translate timeline & issues into weekly sprints
+- do personal updates & action items
