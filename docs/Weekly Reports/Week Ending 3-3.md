@@ -1,9 +1,9 @@
 # Weekly Report  
 **3/4 - 3/10**  
-**Team Leader:**
+**Team Leader: Rayyan Waris**
 
 ## Team Accomplishments  
-### Rayyan
+### Rayyan Waris
 - **Total Hours Worked: 5**
 - **Tasks Completed:**
   - Generalized Software Arch Diagram
