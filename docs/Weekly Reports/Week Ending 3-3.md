@@ -9,10 +9,13 @@
   - Generalized Software Arch Diagram
 - **Tasks For Next Week:**
 
-### Member 2
-- **Total Hours Worked:**
+### Solomon Pierce
+- **Total Hours Worked: **
 - **Tasks Completed:**
-- **Tasks For Next Week:**
+  - initial docker setup PR
+  - readme instructions
+  - database server & db admin ui setup
+- **Tasks For Next Week: create dockerfile for frontend & backend container**
 
 ### Member 3
 - **Total Hours Worked:**
