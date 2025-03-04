@@ -18,7 +18,9 @@
   - initial docker setup PR
   - readme instructions
   - database server & db admin ui setup
-- **Tasks For Next Week: create dockerfile for frontend & backend container**
+- **Tasks For Next Week:**
+  - create dockerfile for frontend & backend container
+  - meet with Rayyan to create database schema & refine the API spec 
 
 ### Sophie Tran
 - **Total Hours Worked: 3**
