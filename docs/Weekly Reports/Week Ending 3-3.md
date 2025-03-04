@@ -4,10 +4,12 @@
 
 ## Team Accomplishments  
 ### Rayyan Waris
-- **Total Hours Worked: 5**
+- **Total Hours Worked: 2**
 - **Tasks Completed:**
-  - Generalized Software Arch Diagram
+  - [Generalized Software Arch Diagram](https://lucid.app/lucidchart/20a73029-349f-4a5c-9112-95cd707142c8/edit?invitationId=inv_233ee0d4-7489-46d8-aa90-0ba83413f3fd&page=0_0#)
 - **Tasks For Next Week:**
+  - Get Docker setup and test out the UT Dallas VM on my device
+  - Working on API structure and endpoints
 
 ### Solomon Pierce
 - **Total Hours Worked: **
