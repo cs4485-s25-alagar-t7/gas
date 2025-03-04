@@ -20,7 +20,7 @@
 - **Tasks For Next Week: create dockerfile for frontend & backend container**
 
 ### Sophie Tran
-- **Total Hours Worked: 4**
+- **Total Hours Worked: 3**
 - **Tasks Completed:**
   - added pie chart to represent data based off the schools of applicants
   - adjusted color scheme 
