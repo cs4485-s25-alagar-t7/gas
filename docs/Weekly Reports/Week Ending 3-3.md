@@ -30,6 +30,15 @@
   - solidify functions of hiring manager
   - finishing implementing functions on figma
 
+  ### Ji Min Yoon
+- **Total Hours Worked: 4**
+- **Tasks Completed:**
+  - improved the dashboard based on last meetings comments
+  - created and designed the recommended candidates page with features that manually override the algorithm
+- **Tasks For Next Week:**
+  - finish candidate pages
+  - finalize designs such as color schemes, logo, and theme
+
 ### Arsal Hussain
 - **Total Hours Worked: 3**
 - **Tasks Completed:**
