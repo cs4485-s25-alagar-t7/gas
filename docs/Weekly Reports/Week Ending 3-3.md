@@ -21,14 +21,13 @@
   - database server & db admin ui setup
 - **Tasks For Next Week:**
   - meet with Arsal to create dockerfile for frontend & backend container
-  - create database schema
-  - try making some sample data in the collections
   - meet with Rayyan to refine the API spec
-  - create basic backend server
-  - create controller/service for assignments
-  - look into resume parsing
-  - identify what parts of the resume we are going to look at and use for decisions
+    - create database schema
+    - try making some sample data in the collections
   - try some prototype matching algorithms
+    - look into resume parsing
+    - identify what parts of the resume we are going to look at and use for decisions
+ 
 
 ### Sophie Tran
 - **Total Hours Worked: 3**
@@ -59,5 +58,7 @@
 - **Tasks For Next Week:**
   - meet with Solomon to set up dockerfile for frontend and backend container
   - Consider implementation with VM
+  - create basic backend server
+  - create controller/service for assignments
 
 
