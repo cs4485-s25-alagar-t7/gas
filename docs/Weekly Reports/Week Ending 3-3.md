@@ -13,7 +13,7 @@
   - Finish working on API structure and endpoints
 
 ### Solomon Pierce
-- **Total Hours Worked: **
+- **Total Hours Worked: 3**
 - **Tasks Completed:**
   - initial docker setup PR
   - readme instructions
