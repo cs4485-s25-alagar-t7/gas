@@ -11,6 +11,7 @@
 - **Tasks For Next Week:**
   - Get Docker setup and test out the UT Dallas VM on my device
   - Finish working on API structure and endpoints
+  - meet with Solomon to create database schema & refine the API spec
 
 ### Solomon Pierce
 - **Total Hours Worked: 3**
@@ -19,8 +20,9 @@
   - readme instructions
   - database server & db admin ui setup
 - **Tasks For Next Week:**
-  - create dockerfile for frontend & backend container
-  - meet with Rayyan to create database schema & refine the API spec 
+  - meet with Arsal to create dockerfile for frontend & backend container
+  - create database schema
+  - meet with Rayyan to refine the API spec 
 
 ### Sophie Tran
 - **Total Hours Worked: 3**
@@ -49,7 +51,7 @@
   - Experimented working on the UT Dallas VM
   - Using Docker Compose for setting up the networking between containers
 - **Tasks For Next Week:**
-  - Assist on setting up dockerfile for frontend and backend container
+  - meet with Solomon to set up dockerfile for frontend and backend container
   - Consider implementation with VM
 
 
