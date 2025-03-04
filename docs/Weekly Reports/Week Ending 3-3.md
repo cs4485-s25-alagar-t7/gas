@@ -28,11 +28,15 @@
   - solidify functions of hiring manager
   - finishing implementing functions on figma
 
-### Member 4
-- **Total Hours Worked:**
+### Arsal Hussain
+- **Total Hours Worked: 3**
 - **Tasks Completed:**
+  - Set up dockerfile on PC
+  - Experimented working on the UT Dallas VM
+  - Using Docker Compose for setting up the networking between containers
 - **Tasks For Next Week:**
-
+  - Assist on setting up dockerfile for frontend and backend container
+  - Consider implementation with VM
 ### Member 5
 - **Total Hours Worked:**
 - **Tasks Completed:**
