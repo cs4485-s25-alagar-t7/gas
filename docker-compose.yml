@@ -22,3 +22,19 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: ${ME_CONFIG_MONGODB_ADMINPASSWORD}
       ME_CONFIG_MONGODB_URL: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/
       ME_CONFIG_BASICAUTH: ${ME_CONFIG_BASICAUTH}
+
+  backend:
+    build: ./backend
+    ports:
+      - 5000:5000
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - mongo
+
+  frontend:
+    build: ./frontend
+    ports:
+      - 3000:3000
+    depends_on:
+      - backend
