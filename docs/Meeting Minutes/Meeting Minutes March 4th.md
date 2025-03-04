@@ -2,7 +2,7 @@
 **Team Leader: Rayyan Waris**
 
 ## Attendance:
-* All members present, Thenn present, Prof Alagar absent
+* All members present, Thenn present, Prof. Alagar absent
 
 
 
@@ -30,6 +30,12 @@
 
 # Thenn Suggestions
 - Consider situation where professor has specific grader recommendation, ignores all other candidates
+- Speed process out of brainstorm and planning phase and consider starting code
 
 # Next Steps
 - Set Up Dockerfile frontend and backend containers
+- Start algorithm process (CRUD)
+- Start database schema
+- Start frontend coding with Node.js
+- Look into resume parsing
+- Identify parts of resume that will be used for algorithm
