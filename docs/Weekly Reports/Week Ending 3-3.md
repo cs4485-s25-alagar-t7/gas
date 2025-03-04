@@ -17,10 +17,16 @@
   - database server & db admin ui setup
 - **Tasks For Next Week: create dockerfile for frontend & backend container**
 
-### Member 3
-- **Total Hours Worked:**
+### Sophie Tran
+- **Total Hours Worked: 4
 - **Tasks Completed:**
+  - added pie chart to represent data based off the schools of applicants
+  - adjusted color scheme 
+  - initiated candidate page
 - **Tasks For Next Week:**
+  - finalize candidate management page
+  - solidify functions of hiring manager
+  - finishing implementing functions on figma
 
 ### Member 4
 - **Total Hours Worked:**
