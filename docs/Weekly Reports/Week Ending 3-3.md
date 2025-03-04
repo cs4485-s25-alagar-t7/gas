@@ -22,7 +22,11 @@
 - **Tasks For Next Week:**
   - meet with Arsal to create dockerfile for frontend & backend container
   - create database schema
-  - meet with Rayyan to refine the API spec 
+  - meet with Rayyan to refine the API spec
+  - create basic backend server
+  - create controller/service for assignments
+  - look into resume parsing
+  - think about matching algorithm
 
 ### Sophie Tran
 - **Total Hours Worked: 3**
