@@ -22,11 +22,13 @@
 - **Tasks For Next Week:**
   - meet with Arsal to create dockerfile for frontend & backend container
   - create database schema
+  - try making some sample data in the collections
   - meet with Rayyan to refine the API spec
   - create basic backend server
   - create controller/service for assignments
   - look into resume parsing
-  - think about matching algorithm
+  - identify what parts of the resume we are going to look at and use for decisions
+  - try some prototype matching algorithms
 
 ### Sophie Tran
 - **Total Hours Worked: 3**
