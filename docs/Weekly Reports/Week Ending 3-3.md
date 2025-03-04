@@ -6,7 +6,7 @@
 ### Rayyan Waris
 - **Total Hours Worked: 2**
 - **Tasks Completed:**
-  - [Generalized Software Arch Diagram](https://lucid.app/lucidchart/20a73029-349f-4a5c-9112-95cd707142c8/edit?invitationId=inv_233ee0d4-7489-46d8-aa90-0ba83413f3fd&page=0_0#)
+  - [Improved Software Arch Diagram](https://lucid.app/lucidchart/20a73029-349f-4a5c-9112-95cd707142c8/edit?invitationId=inv_233ee0d4-7489-46d8-aa90-0ba83413f3fd&page=0_0#)
 - **Tasks For Next Week:**
   - Get Docker setup and test out the UT Dallas VM on my device
   - Working on API structure and endpoints
@@ -30,7 +30,7 @@
   - solidify functions of hiring manager
   - finishing implementing functions on figma
 
-  ### Ji Min Yoon
+### Ji Min Yoon
 - **Total Hours Worked: 4**
 - **Tasks Completed:**
   - improved the dashboard based on last meetings comments
@@ -48,9 +48,5 @@
 - **Tasks For Next Week:**
   - Assist on setting up dockerfile for frontend and backend container
   - Consider implementation with VM
-### Member 5
-- **Total Hours Worked:**
-- **Tasks Completed:**
-- **Tasks For Next Week:**
 
 
