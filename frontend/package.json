@@ -3,10 +3,15 @@
     "version": "1.0.0",
     "main": "src/index.tsx",
     "scripts": {
-        "start": "export NODE_OPTIONS=--openssl-legacy-provider && react-scripts start",
+        "start": "export NODE_OPTIONS=--openssl-legacy-provider && concurrently \"npm run build:css\" \"react-scripts start\"",
         "build": "react-scripts build",
         "test": "react-scripts test",
-        "eject": "react-scripts eject"
+        "eject": "react-scripts eject",
+        "build:css": "npx tailwindcss -i ./src/index.css -o ./src/output.css --watch"
+    },
+    "devDependencies": {
+        "concurrently": "^9.1.2",
+        "react-error-overlay": "6.0.9"
     },
     "dependencies": {
         "@tailwindcss/cli": "^4.0.12",
