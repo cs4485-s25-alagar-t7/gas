@@ -1,11 +1,11 @@
 # Weekly Report  
-**Week Start Date - End Date**  
-**Team Leader:**
+**Week 3/4 - 3/10**  
+**Team Leader: Rayyan Waris**
 
 ## Team Accomplishments  
-### Member 1 (Team Lead)
-- **Total Hours Worked:**
-- **Tasks Completed:**
+### Rayyan Waris
+- **Total Hours Worked: 7**
+- **Tasks Completed: Nearly done with frontend for dashboard and candidate page**
 - **Tasks For Next Week:**
 
 ### Member 2
