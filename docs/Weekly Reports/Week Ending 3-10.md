@@ -5,7 +5,9 @@
 ## Team Accomplishments  
 ### Rayyan Waris
 - **Total Hours Worked: 7**
-- **Tasks Completed: Nearly done with frontend for dashboard and candidate page**
+- **Tasks Completed:**
+    - Nearly done with coding frontend for dashboard and candidate page
+    - Worked on Database Design 
 - **Tasks For Next Week:**
 
 ### Member 2
