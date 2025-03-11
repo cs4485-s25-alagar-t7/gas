@@ -53,7 +53,7 @@
 - **Tasks Completed:**
 	- Refined the API spec, adding sample request/reply body data
 	- Created database schema / data model
-	- Made some sample data in the collections
+	- Made some sample data in the collections - CLARIFY ASSUMPTION: graders will only be in 1 section and sections will only have 1 grader
 	- Looked into resume parsing libraries / tools
 		- Open Resume Parser website (open source so we can just use the backend + its already dockerized) https://github.com/xitanggg/open-resume 
 		- Python LLM powered parsing API https://github.com/hxu296/nlp-resume-parser (Requires GPT-3)
