@@ -49,8 +49,32 @@
     - Add more features and design to create easier navigation
     - Maybe: focus on design for various devices (mobile, laptop, desktop)
   
-
-### Member 5
-- **Total Hours Worked:**
+### Solomon Pierce
+- **Total Hours Worked: 5**
 - **Tasks Completed:**
+- [ ] refine the API spec
+- [ ] create database schema
+- [ ] try making some sample data in the collections
+- [ ] try some prototype matching algorithms
+- [ ] look into resume parsing
+	- Open Resume Parser website (open source so we can just use the backend + its already dockerized) https://github.com/xitanggg/open-resume 
+	- Python LLM powered parsing API https://github.com/hxu296/nlp-resume-parser (Requires GPT-3)
+		- either we pay the subscription/API credits or we have to find a way to run it or another similar enough LLM locally
+  			- https://github.com/nomic-ai/gpt4all (one such library)
+	- Java classical NLP approach (would need to dockerize) https://github.com/iadityak/resume-parser?tab=readme-ov-file 
+ - 
+- [ ] also realized we need to figure out how to separate all the resume PDFs
+	- Idea 1: split them on the name since thats always at the top https://github.com/psolin/namecrawler 
+ 		- convert the PDF to JSON or TXT first and then split them on the name (PDFs are not fun to work with programmatically)
+- [ ] identify what parts of the resume we are going to look at and use for decisions
+	- GPA (higher = better? or threshold value = good enough?)
+	- Major
+	- Minor
+	- Classes taken
+ 	- Previous grader experience
+  	- seniority (based on graduation date)
 - **Tasks For Next Week:**
+- research software licenses to make sure I can use the code I found for resumes 
+- Decide which resume library / tool to use
+- local setup (incl. dockerfile) of resume parsing API
+
