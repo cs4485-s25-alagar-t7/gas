@@ -14,7 +14,6 @@
     - Finish Database Schema and API Endpoints with Arsal and Solomon
     - Work on implementing more figma views with Kevin and Sophie
 
-### Member 2
 ### Arsal Hussain
 - **Total Hours Worked: 8**
 - **Tasks Completed:**
@@ -27,6 +26,7 @@
     - Verified API functionality using curl to check GET /assignments response.
 - **Tasks For Next Week:**
     - Expand API, work with Rayyan on backend composition
+
 ### Member 3
 - **Total Hours Worked:**
 - **Tasks Completed:**
