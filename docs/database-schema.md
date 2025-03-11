@@ -1,17 +1,25 @@
 ## Graders Collection
 stores grader information
 
-```{
+```json
+{
   "_id": ObjectId("60c72b2f9b1d8b5a3c8e4e1a"),
   "name": "John Doe",
   "netid": "jxd100000",
+  "gpa" : 3.3,
+  "major" : "Computer Science",
+  "minor" : "",
+  "classes" : ["CS4301", "CS4337"],
+  "previous_grader_experience" : true,
+  "seniority" : "Masters"
 }
 ```
-- subject to change, a lot more fields will be addded to support the algorithm
+- subject to change, a fields will be addded/removed to support the algorithm
 
 ## Course Sections Collection
 stores the course section information
-```{
+```json 
+{
   "_id": ObjectId("60c72b2f9b1d8b5a3c8e4e1b"),
   "course_id": "CS101",
   "section_id": "001",
@@ -25,7 +33,7 @@ stores the course section information
 
 ## Assignments Collection
 Stores the mappings between graders and sections (supports a Many to Many relationship)
-```
+```json
 {
   "_id": ObjectId("60c72b2f9b1d8b5a3c8e4e1e"),
   "grader_id": ObjectId("60c72b2f9b1d8b5a3c8e4e1a"),
