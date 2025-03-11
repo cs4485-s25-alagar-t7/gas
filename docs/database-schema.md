@@ -11,7 +11,8 @@ stores grader information
   "minor" : "",
   "classes" : ["CS4301", "CS4337"],
   "previous_grader_experience" : true,
-  "seniority" : "Masters"
+  "seniority" : "Masters",
+  "resume_keywords" : ["c++"]
 }
 ```
 - subject to change, a fields will be addded/removed to support the algorithm
@@ -27,7 +28,9 @@ stores the course section information
     "name": "Dr. Emily Smith",
     "email": "emily.smith@example.com"
   },
+  "keywords" : ["java"],
   "semester": "Spring 2025",
+  "num_required_graders" : 2
 }
 ```
 
