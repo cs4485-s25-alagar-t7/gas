@@ -11,7 +11,6 @@
     - Resolved TailwindCSS conflicts with repo
     - Fixed issues with dependencies
 - **Tasks For Next Week:**
-    - Finish Database Schema and API Endpoints with Arsal and Solomon
     - Work on implementing more figma views with Kevin and Sophie
 
 ### Arsal Hussain
