@@ -14,8 +14,8 @@ module.exports = { getAllAssignments };
 
 // Simulated database interaction
 const assignments = [
-    { id: 1, title: "Assignment 1", dueDate: "2025-03-15" },
-    { id: 2, title: "Assignment 2", dueDate: "2025-03-20" }
+    { id: 1, grader_id: 1, section_id: 4, status: "pending"},
+    { id: 2, grader_id: 2, section_id: 1, status: "pending"},
 ];
 
 async function getAllAssignments() {
