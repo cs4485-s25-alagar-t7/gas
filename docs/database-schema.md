@@ -12,7 +12,8 @@ stores grader information
   "classes" : ["CS4301", "CS4337"],
   "previous_grader_experience" : true,
   "seniority" : "Masters",
-  "resume_keywords" : ["c++"]
+  "resume_keywords" : ["c++"],
+  "semester" : "Spring 2025"
 }
 ```
 - subject to change, a fields will be addded/removed to support the algorithm
@@ -41,7 +42,8 @@ Stores the mappings between graders and sections (supports a Many to Many relati
   "_id": ObjectId("60c72b2f9b1d8b5a3c8e4e1e"),
   "grader_id": ObjectId("60c72b2f9b1d8b5a3c8e4e1a"),
   "course_section_id": ObjectId("60c72b2f9b1d8b5a3c8e4e1b"),
-  "status" : "pending"
+  "status" : "pending",
+  "semester" : "Spring 2025"
 }
 ```
 `status` can be "pending" or "accepted" based on whether the hiring manager has reviewed this assigment
