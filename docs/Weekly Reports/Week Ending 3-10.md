@@ -27,10 +27,13 @@
 - **Tasks For Next Week:**
     - Expand API, work with Rayyan on backend composition
 
-### Member 3
-- **Total Hours Worked:**
+### Ji Min Yoon
+- **Total Hours Worked:** 7 Hours
 - **Tasks Completed:**
+	◦	Helped setup the intial frontend using CRA
+	◦	Developed the frontend for the dashboard and candidate pages.
 - **Tasks For Next Week:**
+	◦	Improve existing wireframe and work on implementing more figma views with Rayyan and Sophie
 
 ### Member 4
 - **Total Hours Worked:**
