@@ -6,7 +6,7 @@
 ### Rayyan Waris
 - **Total Hours Worked: 7**
 - **Tasks Completed:**
-    - Setup the intial frontend using CRA 
+    - Helped setup the intial frontend using CRA 
     - Coded the frontend for dashboard and candidate page
     - Resolved TailwindCSS conflicts with repo
     - Fixed issues with dependencies
