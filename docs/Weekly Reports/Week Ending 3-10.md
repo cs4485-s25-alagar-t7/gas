@@ -38,16 +38,16 @@
 ### Sophie Tran
 - **Total Hours Worked: 5.5**
 - **Tasks Completed:**
-- 	Designed "Upload Documents" Page
-- 	Modified Recommendated Page to Professor Recommendation Page
-- 	Added and adjusted various designs on Figma
-- 	◦	Navigation bar on candidate page
-- 	◦	Upload document option on navigation bar
-- 	Helped develop frontend code structure for dashboard
+    - Designed "Upload Documents" Page
+    - Modified Recommendated Page to Professor Recommendation Page
+    - Added and adjusted various designs on Figma
+    - Navigation bar on candidate page
+    - Included document option on navigation bar
+    - Helped develop frontend code structure for dashboard
 - **Tasks For Next Week:**
-- 	Complete frontend for Upload Documents page
-- 	Add more features and design to create easier navigation
-- 	Maybe: focus on design for various devices (mobile, laptop, desktop)
+    - Complete frontend for Upload Documents page
+    - Add more features and design to create easier navigation
+    - Maybe: focus on design for various devices (mobile, laptop, desktop)
   
 
 ### Member 5
