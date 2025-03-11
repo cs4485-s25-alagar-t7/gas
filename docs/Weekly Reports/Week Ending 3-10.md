@@ -6,9 +6,13 @@
 ### Rayyan Waris
 - **Total Hours Worked: 7**
 - **Tasks Completed:**
-    - Nearly done with coding frontend for dashboard and candidate page
-    - Worked on Database Design 
+    - Setup the intial frontend using CRA 
+    - Coded the frontend for dashboard and candidate page
+    - Resolved TailwindCSS conflicts with repo
+    - Fixed issues with dependencies
 - **Tasks For Next Week:**
+    - Finish Database Schema and API Endpoints with Arsal and Solomon
+    - Work on implementing more figma views with Kevin and Sophie
 
 ### Member 2
 ### Arsal Hussain
