@@ -52,10 +52,10 @@
 ### Solomon Pierce
 - **Total Hours Worked: 5**
 - **Tasks Completed:**
-	- refined the API spec, adding sample request/reply body data
-	- created database schema / data model
-	- made some sample data in the collections
-	- looked into resume parsing libraries / tools
+	- Refined the API spec, adding sample request/reply body data
+	- Created database schema / data model
+	- Made some sample data in the collections
+	- Looked into resume parsing libraries / tools
 		- Open Resume Parser website (open source so we can just use the backend + its already dockerized) https://github.com/xitanggg/open-resume 
 		- Python LLM powered parsing API https://github.com/hxu296/nlp-resume-parser (Requires GPT-3)
 			- either we pay the subscription/API credits or we have to find a way to run it or another similar enough LLM locally
@@ -65,15 +65,15 @@
 		- also realized we need to figure out how to separate all the resume PDFs
 			- Idea 1: split them on the name since thats always at the top https://github.com/psolin/namecrawler 
  				- convert the PDF to JSON or TXT first and then split them on the name (PDFs are not fun to work with programmatically)
-	- identified (tentatively) what parts of the resume we are going to look at and use for decisions
+	- Identified (tentatively) what parts of the resume we are going to look at and use for decisions
 		- GPA (higher = better? or threshold value = good enough?)
 		- Major
 		- Minor
 		- Classes taken
  		- Previous grader experience
-  		- seniority (based on graduation date)
+  		- Seniority (based on graduation date)
 - **Tasks For Next Week:**
-	- research software licenses to make sure I can use the code I found for resumes 
+	- Research software licenses to make sure I can use the code I found for resumes 
 	- Decide which resume library / tool to use
-	- local setup (incl. dockerfile) of resume parsing API
+	- Do local setup (incl. dockerfile) of resume parsing API
 
