@@ -1,5 +1,5 @@
 import React from "react";
-import '../output.css';
+
 const Navbar = () => {
   return (
     <div className="flex justify-end items-center bg-[#D15716] shadow-md p-4">

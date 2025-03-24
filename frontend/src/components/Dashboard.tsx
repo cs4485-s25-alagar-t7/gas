@@ -2,7 +2,7 @@ import React from "react";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import PieChartComponent from "./PieChartComponent";
-import '../output.css';
+
 
 const Dashboard = () => {
   return (

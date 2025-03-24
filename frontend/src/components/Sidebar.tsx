@@ -1,6 +1,5 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import '../output.css';
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -29,6 +28,14 @@ const Sidebar = () => {
               className="w-full text-left p-2 hover:bg-gray-700 rounded-md"
             >
               View Candidates
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => handleClick("/upload")}
+              className="w-full text-left p-2 hover:bg-gray-700 rounded-md"
+            >
+              Upload
             </button>
           </li>
           <li>
