@@ -17,10 +17,10 @@
 - **Tasks For Next Week:**
   - Integrate more figma designs
 
-### Member 3
-- **Total Hours Worked:**
-- **Tasks Completed:**
-- **Tasks For Next Week:**
+### Ji Min Yoon
+- **Total Hours Worked:** 9
+- **Tasks Completed:** Improved the dashboard based on previous meetngs feedback, and also implemented the uploading page 
+- **Tasks For Next Week:** Implement all the stuff on Figma on HTML
 
 ### Member 4
 - **Total Hours Worked:**
