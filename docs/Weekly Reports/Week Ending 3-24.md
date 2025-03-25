@@ -9,9 +9,13 @@
 - **Tasks For Next Week:**
 
 ### Rayyan Waris
-- **Total Hours Worked:**
+- **Total Hours Worked:** 10
 - **Tasks Completed:**
+ - Migrated frontend from Create React App -> Vite
+ - Developed upload component
+ - Implement dockerfile for frontend 
 - **Tasks For Next Week:**
+ - Integrate more figma designs
 
 ### Member 3
 - **Total Hours Worked:**
