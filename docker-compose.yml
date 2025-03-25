@@ -20,7 +20,8 @@ services:
       ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       ME_CONFIG_MONGODB_URL: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/
-
+      ME_CONFIG_BASICAUTH: ${ME_CONFIG_BASICAUTH}
+      
   backend:
     build: ./backend
     container_name: gas-backend
@@ -34,3 +35,10 @@ services:
     depends_on:
       - mongo
     command: ["node", "server.js"]
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend

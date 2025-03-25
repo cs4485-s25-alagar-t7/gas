@@ -1,17 +1,30 @@
-# Weekly Report – Project Proposal Stage  
-**Week of Month Day**  
+# Weekly Report  
+**Week Start Date - End Date**  
 **Team Leader:**
 
 ## Team Accomplishments  
-### Accomplishment Template
-- Description
-- Description
+### Member 1 (Team Lead)
+- **Total Hours Worked:**
+- **Tasks Completed:**
+- **Tasks For Next Week:**
 
-## Individual Contributions  
-### Solomon & Arsal (Backend Team)  
+### Member 2
+- **Total Hours Worked:**
+- **Tasks Completed:**
+- **Tasks For Next Week:**
 
-### Sophie & Kevin (Frontend Team)  
+### Member 3
+- **Total Hours Worked:**
+- **Tasks Completed:**
+- **Tasks For Next Week:**
 
-### Rayyan (Full Stack)  
+### Member 4
+- **Total Hours Worked:**
+- **Tasks Completed:**
+- **Tasks For Next Week:**
 
-**Next steps:** 
+### Member 5
+- **Total Hours Worked:**
+- **Tasks Completed:**
+- **Tasks For Next Week:**
+
