@@ -56,8 +56,12 @@
 - **Tasks Completed:**
   - Tested muliple options for resume parsing libraries
   - Decided to go with typescript library
-  - Started on API that encapuslates the Resume Parsing
+  - Started on API that encapuslates the Resume Parsing (issue #20)
   - Merged 2 existing PRs
   - Created new issues for next weeks work in the backend
-  - closed issues finished by PRs 
+  - closed issues finished by PRs
+  - started work on prototype matching algorithm (issue #19)
 - **Tasks For Next Week:**
+  - finish the resume parsing API #20
+  - figure out how to separate all the resume PDFs
+  - finish protype algorithm #19
