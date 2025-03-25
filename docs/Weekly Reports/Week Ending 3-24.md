@@ -8,7 +8,7 @@
 - **Tasks Completed:**
 - **Tasks For Next Week:**
 
-### Member 2
+### Rayyan Waris
 - **Total Hours Worked:**
 - **Tasks Completed:**
 - **Tasks For Next Week:**
