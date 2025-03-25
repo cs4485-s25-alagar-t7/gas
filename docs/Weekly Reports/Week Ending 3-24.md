@@ -4,9 +4,25 @@
 
 ## Team Accomplishments  
 ### Sophie Tran (Team Lead)
-- **Total Hours Worked:**
+- **Total Hours Worked: 11**
 - **Tasks Completed:**
+  - Expanded "View" option on sidebar to include Candidate, Professor, and Course selections
+  - Created pages for "View" in Figma to include:
+      - Semester selection
+      - Added search, sort, filter options
+         
+    - Candidate View page
+      - Added "+ Add Candidate" button
+    - Professor View page
+      - Highlights mismartch between recommended and assigned candidate
+      - Included reason for mismatch
+    - Course View page
+      -  Includes assigned candidate and option to change
+      -  Two selections to change: auto assign and manual
+      -  Added pop up view when manual change is selected
+        
 - **Tasks For Next Week:**
+  - Continue integratin updated figma design into HTML website
 
 ### Rayyan Waris
 - **Total Hours Worked:** 10
