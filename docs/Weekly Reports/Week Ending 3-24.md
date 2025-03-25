@@ -51,7 +51,13 @@
   - Help Rayyan/Front End with API contract
   - Potentially test with dummy data of resumes
 
-### Member 5
-- **Total Hours Worked:**
+### Solomon Pierce
+- **Total Hours Worked: 6**
 - **Tasks Completed:**
+  - Tested muliple options for resume parsing libraries
+  - Decided to go with typescript library
+  - Started on API that encapuslates the Resume Parsing
+  - Merged 2 existing PRs
+  - Created new issues for next weeks work in the backend
+  - closed issues finished by PRs 
 - **Tasks For Next Week:**
