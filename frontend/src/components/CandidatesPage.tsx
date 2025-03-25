@@ -16,12 +16,10 @@ const candidates = [
 const CandidatePage: React.FC = () => {
   return (
     <div className="flex h-screen">
-      {/* Sidebar (Already Exists) */}
       <Sidebar />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col bg-gray-100">
-        {/* Navbar (Already Exists) */}
         <Navbar />
 
         {/* Content Area */}
