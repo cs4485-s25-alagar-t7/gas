@@ -1,19 +1,25 @@
-# Meeting Minutes 3/25
-**Team Leader: Sophie Tran**
+# Meeting Minutes: March 25
+**Team Leader: Sophie Tran**\
+**Started: 1:28pm**\
+**Ended: 2:25pm**\
+**Total Minutes: 57 minutes**
+
+
 
 ## Attendance:
-* Rayyan Waris absent, All other members and Thenn and Prof Alagar present
+* Absent: Rayyan Waris
+* Present: Arsal Hussain, Sophie Tran, Kevin Yoon, Solomon Pierce
+* Professor Alagar and Thenn also present
 
 
 
-
-
-## updates: 
-- Figma updated to match the requirements view of Candidate, Professor, and Course
-- Removed tools and settings as there is no necessity
-- Candidate view allows search and sort/filter, can add candidates
-- Professor view specifies which semester and regular sorting and filter
-- Course view allows for similar features to professor view, additionally adding course number to the professor that will be instructing
+# Updates: 
+- Figma updated to include Candidate, Professor and Course views 
+- Removed tools and settings seletion on sidebar as there is no necessity
+- All three views allow search and sort/filter, and semester selection
+  - Candidate view allows add candidates
+  - Professor view specifies mismatch in recommended and assigned candidates
+  - Course view allows changing assignments; Choices for change: auto and manual change
 - Upload page has been altered to match last meeting request, accepting only pdf and excel sheets
 
 # Back End Notes
@@ -21,21 +27,38 @@
 - Found libraries for API for resume building and parsing, only issue is extracting
   - possibly using microservice to parse resume
 - Worked on Course, Candidate, and Assignment files, defining the variables and data that will be used
-- 
 
 # Front End Notes
 - Full Stack is working on integration to HTML
-
-# Professor Alagar Suggestions
+**Dashboard**
 - Giving Admin ability to start a new semester
-- Keep candidate view simple
+- Allow option to give perference to graders from previous semester
+  - If "yes" selected, check to see if they are still in candidate pool
+**Candidate View**
+- Make sure to account for candidates that are not being assigned yet
+  - Implement another column to display if they have been assigned or not
+- Add a function to allow display of candidate information when clicking on candidate's name
+**Professor View**
+- Add in "Add Grader" buttono to add a grader directly to a professor (?)
+**Course View**
+- Need to account for multiple graders for one course
+- Add in a selection to change a specific candidate/grader
+**Upload Documents**
+- Account for files from Handshake, or resume files
+    
+# Professor Alagar Suggestions
+- Remove subcategories for "View" and change it to just the main selection 
 - Need to account for candidates already assigned, or those that need to be removed
-  - To save visual space you can remove candidate ID from view
-- Consider an assignment view
+- Remove candidate ID from candidate view to save space
+- Possibly incorporate a "assign" feature in candidate view
+- Consider changing "Course View" name to Assignment View or something more appropriate
+
+- In database for professor view, the key will be professor name and course name
 - Consider standalone product for resume parsing rather than reliability of library
 
 # Thenn Suggestions
 - 
 
 # Next Steps
-- 
+- Update figma accordingly
+- Start implementing HTML code
