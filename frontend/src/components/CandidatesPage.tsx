@@ -1,19 +1,43 @@
-import React from "react";
+import React, { useState } from "react";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 
 const candidates = [
-  { name: "Jane Cooper", school: "ECS", phone: "(225) 555-0118", email: "EMAIL@UTDALLAS.EDU", gpa: "4.00" },
-  { name: "Floyd Miles", school: "ECS", phone: "(205) 555-0100", email: "EMAIL@UTDALLAS.EDU", gpa: "4.00" },
-  { name: "Ronald Richards", school: "ECS", phone: "(302) 555-0107", email: "EMAIL@UTDALLAS.EDU", gpa: "3.92" },
-  { name: "Marvin McKinney", school: "ECS", phone: "(252) 555-0126", email: "EMAIL@UTDALLAS.EDU", gpa: "3.92" },
-  { name: "Jerome Bell", school: "ECS", phone: "(629) 555-0129", email: "EMAIL@UTDALLAS.EDU", gpa: "3.82" },
-  { name: "Kathryn Murphy", school: "ECS", phone: "(400) 555-0120", email: "EMAIL@UTDALLAS.EDU", gpa: "3.82" },
-  { name: "Jacob Jones", school: "ECS", phone: "(200) 555-0112", email: "EMAIL@UTDALLAS.EDU", gpa: "3.56" },
-  { name: "Kristin Watson", school: "ECS", phone: "(704) 555-0127", email: "EMAIL@UTDALLAS.EDU", gpa: "3.89" },
+  { candidateID: "jxc210000", name: "Jane Cooper", courseNumber: "CS1337", professorName: "Srimathi Srinavasan", className: "Computer Science I" },
+  { candidateID: "fxm210000", name: "Floyd Miles", courseNumber: "CS2305", professorName: "James Wilson", className: "Discrete Math I" },
+  { candidateID: "rxr210000", name: "Ronald Richards", courseNumber: "CS2337", professorName: "Doug Degroot", className: "Computer Science II" },
+  { candidateID: "mxm210000", name: "Marvin McKinney", courseNumber: "CS2340", professorName: "John Cole", className: "Computer Architecture" },
+  { candidateID: "jxb210000", name: "Jerome Bell", courseNumber: "CS2336", professorName: "Arnold Gordon", className: "Computer Science II" },
+  { candidateID: "kxm210000", name: "Kathryn Murphy", courseNumber: "CS1436", professorName: "Brian Ricks", className: "Programming Fundamentals" },
+  { candidateID: "jxj210000", name: "Jacob Jones", courseNumber: "CS3354", professorName: "Mark Paulk", className: "Software Engineering" },
+  { candidateID: "kxw210000", name: "Kristin Watson", courseNumber: "CS3377", professorName: "Karami Gity", className: "Systems Programming in UNIX" },
 ];
 
 const CandidatePage: React.FC = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortField, setSortField] = useState<"name" | "courseNumber" | "professorName" | "">("");
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value.toLowerCase());
+  };
+
+  const handleSort = (field: "name" | "courseNumber" | "professorName") => {
+    setSortField(field);
+  };
+
+  const filteredCandidates = candidates
+    .filter((candidate) =>
+      candidate.name.toLowerCase().includes(searchQuery) ||
+      candidate.courseNumber.toLowerCase().includes(searchQuery) ||
+      candidate.professorName.toLowerCase().includes(searchQuery) ||
+      candidate.className.toLowerCase().includes(searchQuery) ||
+      candidate.candidateID.toLowerCase().includes(searchQuery)
+    )
+    .sort((a, b) => {
+      if (!sortField) return 0;
+      return a[sortField].localeCompare(b[sortField]);
+    });
+
   return (
     <div className="flex h-screen">
       <Sidebar />
@@ -26,12 +50,43 @@ const CandidatePage: React.FC = () => {
         <div className="p-8">
           {/* Title and Search */}
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-semibold text-gray-800">Recommend Candidates</h1>
-            <input
-              type="text"
-              placeholder="Search"
-              className="border border-gray-300 rounded-lg px-4 py-2 w-64 shadow-sm focus:ring focus:ring-orange-400 outline-none"
-            />
+            <h1 className="text-2xl font-semibold text-gray-800">Candidate View</h1>
+            <div className="flex items-center space-x-4">
+              <input
+                type="text"
+                placeholder="Search Candidates"
+                value={searchQuery}
+                onChange={handleSearch}
+                className="border border-gray-300 rounded-lg px-4 py-2 w-64 shadow-sm focus:ring focus:ring-orange-400 outline-none"
+              />
+              <div className="relative">
+                <button
+                  onClick={() => handleSort("name")}
+                  className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
+                >
+                  Sort by Candidate Name
+                </button>
+              </div>
+              <div className="relative">
+                <button
+                  onClick={() => handleSort("courseNumber")}
+                  className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
+                >
+                  Sort by Course Number
+                </button>
+              </div>
+              <div className="relative">
+                <button
+                  onClick={() => handleSort("professorName")}
+                  className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
+                >
+                  Sort by Professor Name
+                </button>
+              </div>
+              <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">
+                All Filters
+              </button>
+            </div>
           </div>
 
           {/* Candidate Table */}
@@ -39,25 +94,24 @@ const CandidatePage: React.FC = () => {
             <table className="w-full border-collapse">
               <thead className="bg-gray-200">
                 <tr className="text-left">
-                  <th className="p-4">Customer Name</th>
-                  <th className="p-4">School</th>
-                  <th className="p-4">Phone Number</th>
-                  <th className="p-4">Email</th>
-                  <th className="p-4">GPA</th>
+                  <th className="p-4">Candidate ID</th>
+                  <th className="p-4">Candidate Name</th>
+                  <th className="p-4">Course Number</th>
+                  <th className="p-4">Professor Name</th>
+                  <th className="p-4">Course Name</th>
                   <th className="p-4">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {candidates.map((candidate, index) => (
+                {filteredCandidates.map((candidate, index) => (
                   <tr key={index} className="border-t">
+                    <td className="p-4">{candidate.candidateID}</td>
                     <td className="p-4">{candidate.name}</td>
-                    <td className="p-4">{candidate.school}</td>
-                    <td className="p-4">{candidate.phone}</td>
-                    <td className="p-4 text-blue-600">{candidate.email}</td>
-                    <td className="p-4">{candidate.gpa}</td>
+                    <td className="p-4">{candidate.courseNumber}</td>
+                    <td className="p-4">{candidate.professorName}</td>
+                    <td className="p-4">{candidate.className}</td>
                     <td className="p-4 flex gap-2">
-                      <button className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600">More Details</button>
-                      <button className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">Not Interested</button>
+                      <button className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">Remove</button>
                     </td>
                   </tr>
                 ))}

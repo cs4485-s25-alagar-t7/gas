@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const [expanded, setExpanded] = useState(false);
 
   const handleClick = (path: string) => {
     console.log(`Navigating to ${path}`);
@@ -22,14 +23,43 @@ const Sidebar = () => {
               Dashboard
             </button>
           </li>
-          <li>
+            <li>
             <button
-              onClick={() => handleClick("/candidates")}
+              onClick={() => setExpanded(!expanded)}
               className="w-full text-left p-2 hover:bg-gray-700 rounded-md"
             >
-              View Candidates
+              <span>Views</span>
+              <span>{expanded ? " ↓" : " →" }</span>
             </button>
-          </li>
+            {expanded && (
+              <ul className="pl-4 space-y-2">
+              <li>
+                <button
+                onClick={() => handleClick("/CandidatesPage")}
+                className="w-full text-left p-2 hover:bg-gray-700 rounded-md"
+                >
+                Candidate
+                </button>
+              </li>
+              <li>
+                <button
+                onClick={() => handleClick("/ProfessorsPage")}
+                className="w-full text-left p-2 hover:bg-gray-700 rounded-md"
+                >
+                Professor
+                </button>
+              </li>
+              <li>
+                <button
+                onClick={() => handleClick("/CoursesPage")}
+                className="w-full text-left p-2 hover:bg-gray-700 rounded-md"
+                >
+                Course
+                </button>
+              </li>
+              </ul>
+            )}
+            </li>
           <li>
             <button
               onClick={() => handleClick("/upload")}
