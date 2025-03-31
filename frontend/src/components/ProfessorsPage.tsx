@@ -14,9 +14,12 @@ const professorData = [
   { profName: "Chris Davis", courseNumber: "CS3377", className: "Systems Programming in UNIX", section: "008", assignedCandidate: "Kristin Watson", recommendedCandidate: "Kristin Watson", reasonForMismatch: "" },
 ];
 
+const ITEMS_PER_PAGE = 5;
+
 const ProfessorPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<"profName" | "className" | "courseNumber" | "">("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value.toLowerCase());
@@ -39,6 +42,16 @@ const ProfessorPage: React.FC = () => {
       if (!sortField) return 0;
       return a[sortField].localeCompare(b[sortField]);
     });
+
+  const totalPages = Math.ceil(filteredProfessors.length / ITEMS_PER_PAGE);
+  const currentProfessors = filteredProfessors.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   return (
     <div className="flex h-screen">
@@ -85,9 +98,6 @@ const ProfessorPage: React.FC = () => {
                   Sort by Course Number
                 </button>
               </div>
-              <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">
-                All Filters
-              </button>
             </div>
           </div>
 
@@ -106,7 +116,7 @@ const ProfessorPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredProfessors.map((professor, index) => (
+                {currentProfessors.map((professor, index) => (
                   <tr key={index} className="border-t">
                     <td className="p-4">{professor.profName}</td>
                     <td className="p-4">{professor.className}</td>
@@ -123,11 +133,45 @@ const ProfessorPage: React.FC = () => {
 
           {/* Pagination */}
           <div className="flex justify-end items-center mt-4 space-x-2">
-            <button className="px-3 py-1 bg-gray-300 rounded-lg">1</button>
-            <button className="px-3 py-1 bg-gray-300 rounded-lg">2</button>
-            <button className="px-3 py-1 bg-gray-300 rounded-lg">3</button>
-            <button className="px-3 py-1 bg-gray-300 rounded-lg">4</button>
-            <button className="px-3 py-1 bg-gray-300 rounded-lg">...</button>
+            <button
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded-lg ${currentPage === 1 ? "bg-gray-300" : "bg-gray-200 hover:bg-gray-300"}`}
+            >
+              First
+            </button>
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded-lg ${currentPage === 1 ? "bg-gray-300" : "bg-gray-200 hover:bg-gray-300"}`}
+            >
+              Previous
+            </button>
+            {[...Array(totalPages)].map((_, index) => (
+              <button
+                key={index}
+                onClick={() => handlePageChange(index + 1)}
+                className={`px-3 py-1 rounded-lg ${
+                  currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-200 hover:bg-gray-300"
+                }`}
+              >
+                {index + 1}
+              </button>
+            ))}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded-lg ${currentPage === totalPages ? "bg-gray-300" : "bg-gray-200 hover:bg-gray-300"}`}
+            >
+              Next
+            </button>
+            <button
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded-lg ${currentPage === totalPages ? "bg-gray-300" : "bg-gray-200 hover:bg-gray-300"}`}
+            >
+              Last
+            </button>
           </div>
         </div>
       </div>

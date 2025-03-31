@@ -13,10 +13,13 @@ const courseData = [
   { numOfGraders: "1", name: "Kristin Watson", courseNumber: "CS3377", professorName: "Karami Gity", className: "Systems Programming in UNIX" },
 ];
 
+const ITEMS_PER_PAGE = 5;
+
 const CoursesPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<"professorName" | "className" | "courseNumber" | "">("");
   const [dropdownIndex, setDropdownIndex] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const toggleDropdown = (index: number | null) => {
     setDropdownIndex(dropdownIndex === index ? null : index);
@@ -41,6 +44,16 @@ const CoursesPage: React.FC = () => {
       if (!sortField) return 0;
       return a[sortField].localeCompare(b[sortField]);
     });
+
+  const totalPages = Math.ceil(filteredCourses.length / ITEMS_PER_PAGE);
+  const currentCourses = filteredCourses.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   return (
     <div className="flex h-screen">
@@ -87,9 +100,6 @@ const CoursesPage: React.FC = () => {
                   Sort by Course Number
                 </button>
               </div>
-              <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">
-                All Filters
-              </button>
             </div>
           </div>
 
@@ -107,14 +117,14 @@ const CoursesPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredCourses.map((course, index) => (
+                {currentCourses.map((course, index) => (
                   <tr key={index} className="border-t">
                     <td className="p-4">{course.courseNumber}</td>
                     <td className="p-4">{course.className}</td>
                     <td className="p-4">{course.numOfGraders}</td>
                     <td className="p-4">{course.professorName}</td>
                     <td className="p-4">{course.name}</td>
-                                        <td className="p-4">
+                    <td className="p-4">
                       <div className="relative">
                         {dropdownIndex === index ? (
                           <div className="flex space-x-2">
@@ -155,11 +165,45 @@ const CoursesPage: React.FC = () => {
 
           {/* Pagination */}
           <div className="flex justify-end items-center mt-4 space-x-2">
-            <button className="px-3 py-1 bg-gray-300 rounded-lg">1</button>
-            <button className="px-3 py-1 bg-gray-300 rounded-lg">2</button>
-            <button className="px-3 py-1 bg-gray-300 rounded-lg">3</button>
-            <button className="px-3 py-1 bg-gray-300 rounded-lg">4</button>
-            <button className="px-3 py-1 bg-gray-300 rounded-lg">...</button>
+            <button
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded-lg ${currentPage === 1 ? "bg-gray-300" : "bg-gray-200 hover:bg-gray-300"}`}
+            >
+              First
+            </button>
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded-lg ${currentPage === 1 ? "bg-gray-300" : "bg-gray-200 hover:bg-gray-300"}`}
+            >
+              Previous
+            </button>
+            {[...Array(totalPages)].map((_, index) => (
+              <button
+                key={index}
+                onClick={() => handlePageChange(index + 1)}
+                className={`px-3 py-1 rounded-lg ${
+                  currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-200 hover:bg-gray-300"
+                }`}
+              >
+                {index + 1}
+              </button>
+            ))}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded-lg ${currentPage === totalPages ? "bg-gray-300" : "bg-gray-200 hover:bg-gray-300"}`}
+            >
+              Next
+            </button>
+            <button
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded-lg ${currentPage === totalPages ? "bg-gray-300" : "bg-gray-200 hover:bg-gray-300"}`}
+            >
+              Last
+            </button>
           </div>
         </div>
       </div>
