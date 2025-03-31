@@ -29,21 +29,21 @@
 - Worked on Course, Candidate, and Assignment files, defining the variables and data that will be used
 
 # Front End Notes
-- Full Stack is working on integration to HTML\
-**Dashboard**
+- Full Stack is working on integration to HTML
+## Dashboard
 - Giving Admin ability to start a new semester
 - Allow option to give perference to graders from previous semester
-  - If "yes" selected, check to see if they are still in candidate pool\
-**Candidate View**
+  - If "yes" selected, check to see if they are still in candidate pool
+## Candidate View
 - Make sure to account for candidates that are not being assigned yet
   - Implement another column to display if they have been assigned or not
-- Add a function to allow display of candidate information when clicking on candidate's name\
-**Professor View**
-- Add in "Add Grader" buttono to add a grader directly to a professor (?)\
-**Course View**
+- Add a function to allow display of candidate information when clicking on candidate's name
+## Professor View
+- Add in "Add Grader" buttono to add a grader directly to a professor (?)
+## Course View
 - Need to account for multiple graders for one course
-- Add in a selection to change a specific candidate/grader\
-**Upload Documents**
+- Add in a selection to change a specific candidate/grader
+## Upload Documents
 - Account for files from Handshake, or resume files
     
 # Professor Alagar Suggestions
