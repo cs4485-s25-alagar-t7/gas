@@ -1,10 +1,10 @@
 # Weekly Report  
-**Week Start Date - End Date**  
-**Team Leader:**
+**3/25 - 4/1**  
+**Team Leader: Sophie Tran**
 
 ## Team Accomplishments  
-### Member 1 (Team Lead)
-- **Total Hours Worked:**
+### Sophie Tran (Team Lead)
+- **Total Hours Worked: 8**
 - **Tasks Completed:**
 - **Tasks For Next Week:**
 
