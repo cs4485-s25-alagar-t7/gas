@@ -49,6 +49,7 @@
 - **Tasks For Next Week:**
   - debug resume parsing API
   - replace pdfjs library with something that works on the backend (i.e. not a service worker)
+  - think about interaction between other backend server and the resume API
   - test out the matching algorithm
 
 ### Arsal Hussain
