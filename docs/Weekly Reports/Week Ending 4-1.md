@@ -19,8 +19,8 @@
    - Implement more views from the Figma
    - Assist with anything backend if extra hands are needed
 
-### Member 3
-- **Total Hours Worked:**
+### Ji Min Yoon
+- **Total Hours Worked: 8 **
 - **Tasks Completed:**
 - **Tasks For Next Week:**
 
