@@ -44,7 +44,13 @@
   - start migrating open-resume code to the API
 - **Tasks For Next Week:**
 
-### Member 5
-- **Total Hours Worked:**
+### Arsal Hussain
+- **Total Hours Worked: 6**
 - **Tasks Completed:**
+   - Created mongoose models for Candidate, Course, and Assignment
+      - still marking up, have not pushed to git
+   - Looking into REST API best practices, as I have no prior experience
+   - Confirming model relationships for linking (Candidate to Course, etc.)
 - **Tasks For Next Week:**
+   - Finalizing API endpoints, working with Rayyan this week
+   - Ensuring schemas match conditions set by Solomon
