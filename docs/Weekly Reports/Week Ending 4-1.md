@@ -44,8 +44,11 @@
 - **Total Hours Worked: 7**
 - **Tasks Completed:**
   - create basic typescript resume microservice API
+  - added endpoint to upload resume PDF
   - start migrating open-resume code to the API
 - **Tasks For Next Week:**
+  - debug resume parsing API
+  - replace pdfjs library with something that works on the backend (i.e. not a service worker)
 
 ### Arsal Hussain
 - **Total Hours Worked: 6**
