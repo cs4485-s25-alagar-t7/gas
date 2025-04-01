@@ -1,26 +1,20 @@
-const AssignmentService = require('../services/assignments.service');
+const express = require('express');
+const router = express.Router();
+const service = require('../services/assignments.service');
 
-const getAllAssignments = async (req, res) => {
-  try {
-    const assignments = await AssignmentService.getAllAssignments();
-    res.json(assignments);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+// GET all assignments
+router.get('/', service.getAllAssignments);
 
-module.exports = { getAllAssignments };
-21
+// GET assignments by course number
+router.get('/course/:courseNumber', service.getAssignmentsByCourse);
 
-// Simulated database interaction
-const assignments = [
-    { id: 1, grader_id: 1, section_id: 4, status: "pending"},
-    { id: 2, grader_id: 2, section_id: 1, status: "pending"},
-];
+// GET assignments by professor name
+router.get('/professor/:professorName', service.getAssignmentsByProfessor);
 
-async function getAllAssignments() {
-    return assignments;
-}
+// GET assignments by candidate ID
+router.get('/candidate/:candidateID', service.getAssignmentsByCandidate);
 
-module.exports = { getAllAssignments };
+// POST to assign a candidate to a course
+router.post('/assign', service.assignCandidateToCourse);
 
+module.exports = router;
