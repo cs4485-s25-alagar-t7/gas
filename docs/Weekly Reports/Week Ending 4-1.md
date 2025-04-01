@@ -8,10 +8,16 @@
 - **Tasks Completed:**
 - **Tasks For Next Week:**
 
-### Member 2
-- **Total Hours Worked:**
+### Rayyan Waris
+- **Total Hours Worked: 12**
 - **Tasks Completed:**
+   - Implemented 3 new components
+     - Course View
+     - Professor View
+     - Candidate View
 - **Tasks For Next Week:**
+   - Implement more views from the Figma
+   - Assist with anything backend if extra hands are needed
 
 ### Member 3
 - **Total Hours Worked:**
