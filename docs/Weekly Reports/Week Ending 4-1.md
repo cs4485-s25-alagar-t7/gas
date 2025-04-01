@@ -22,7 +22,13 @@
 ### Ji Min Yoon
 - **Total Hours Worked: 8 **
 - **Tasks Completed:**
+   - Redesigned the upload page to implement both excel files, PDF, and uploads from Handshake
+   - Implemented a detailed student profile page with various information
+   - Cleaned up some design aspects based on last meetings recommendations 
 - **Tasks For Next Week:**
+   - Redesign and implement new features based on this week feedbacks
+   - Assist with fullstack if etra hands are needed
+   - Implenment new visual designs and color combination    
 
 ### Solomon Pierce
 - **Total Hours Worked: 7**
