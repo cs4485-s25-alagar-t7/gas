@@ -16,7 +16,7 @@
    -    Assist with backend if needed
 
 ### Rayyan Waris
-- **Total Hours Worked: 12**
+- **Total Hours Worked: 9**
 - **Tasks Completed:**
    - Implemented 3 new components
      - Course View
