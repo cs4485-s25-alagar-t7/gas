@@ -6,7 +6,14 @@
 ### Sophie Tran (Team Lead)
 - **Total Hours Worked: 8**
 - **Tasks Completed:**
+   - Removed subcategories for views in sidebar
+   - Removed CandidateID category in Candidate view and added candidate information hover function
+   - Renamed Course View to Assignment View
+   - Incorporated features for multiple canidates in Assignment view to change specific candidates
 - **Tasks For Next Week:**
+   -    Continue moving figma into HTML code
+   -    Begin connecting backend and frontend together
+   -    Assist with backend if needed
 
 ### Rayyan Waris
 - **Total Hours Worked: 12**
@@ -20,7 +27,7 @@
    - Assist with anything backend if extra hands are needed
 
 ### Ji Min Yoon
-- **Total Hours Worked: 8 **
+- **Total Hours Worked: 8**
 - **Tasks Completed:**
    - Redesigned the upload page to implement both excel files, PDF, and uploads from Handshake
    - Implemented a detailed student profile page with various information
