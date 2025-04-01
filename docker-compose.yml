@@ -26,6 +26,18 @@ services:
     networks:
       - app-network
       
+  resume-parser:
+    build: ./resume-parser
+    container_name: resume-parser
+    restart: always
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./resume-parser:/app
+    environment:
+      - NODE_ENV=development
+    command: ["node", "server.js"]
+
   backend:
     build: ./backend
     container_name: gas-backend
@@ -42,7 +54,7 @@ services:
       BACKEND_AUTH_REQUIRED: ${BACKEND_AUTH_REQUIRED}
       NODE_ENV: "development"
     depends_on:
-      - mongo
+      - mongo, resume-parser
     command: ["node", "server.js"]
     networks:
       - app-network
