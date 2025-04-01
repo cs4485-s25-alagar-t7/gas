@@ -24,9 +24,11 @@
 - **Tasks Completed:**
 - **Tasks For Next Week:**
 
-### Member 4
-- **Total Hours Worked:**
+### Solomon Pierce
+- **Total Hours Worked: 7**
 - **Tasks Completed:**
+  - create basic typescript resume microservice API
+  - start migrating open-resume code to the API
 - **Tasks For Next Week:**
 
 ### Member 5
