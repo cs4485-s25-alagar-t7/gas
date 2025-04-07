@@ -10,13 +10,14 @@
    - Removed CandidateID category in Candidate view and added candidate information hover function
    - Renamed Course View to Assignment View
    - Incorporated features for multiple canidates in Assignment view to change specific candidates
+   - Updated dashboard to add in semester features
 - **Tasks For Next Week:**
    -    Continue moving figma into HTML code
    -    Begin connecting backend and frontend together
    -    Assist with backend if needed
 
 ### Rayyan Waris
-- **Total Hours Worked: 12**
+- **Total Hours Worked: 9**
 - **Tasks Completed:**
    - Implemented 3 new components
      - Course View
@@ -31,7 +32,9 @@
 - **Tasks Completed:**
    - Redesigned the upload page to implement both excel files, PDF, and uploads from Handshake
    - Implemented a detailed student profile page with various information
-   - Cleaned up some design aspects based on last meetings recommendations 
+   - Cleaned up some design aspects based on last meetings recommendations
+   - Implemented Dashboard page to contain New and Previous semesters
+   - Added semester specification in upload documents page
 - **Tasks For Next Week:**
    - Redesign and implement new features based on this week feedbacks
    - Assist with fullstack if etra hands are needed
@@ -41,8 +44,13 @@
 - **Total Hours Worked: 7**
 - **Tasks Completed:**
   - create basic typescript resume microservice API
+  - added endpoint to upload resume PDF
   - start migrating open-resume code to the API
 - **Tasks For Next Week:**
+  - debug resume parsing API
+  - replace pdfjs library with something that works on the backend (i.e. not a service worker)
+  - think about interaction between other backend server and the resume API
+  - test out the matching algorithm
 
 ### Arsal Hussain
 - **Total Hours Worked: 6**
