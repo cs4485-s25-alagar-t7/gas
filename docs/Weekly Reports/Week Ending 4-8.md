@@ -17,16 +17,19 @@
   - Improve the visual aspect of the project (ie color, logo, format) 
 
 ### Rayyan Waris
-- **Total Hours Worked: **
+- **Total Hours Worked: 8**
 - **Tasks Completed:**
+  - Connected Mongo to frontend
+  - Worked with Arsal to finalize API endpoints
 - **Tasks For Next Week:**
-
+  - Get all tables connected to Mongo
+  - Work on implementing upload feat that allows users to upload files into the db
+  - Implement more figma views
 
 ### Sophie Tran
 - **Total Hours Worked: **
 - **Tasks Completed:**
 - **Tasks For Next Week:**
-  
 
 ### Solomon Pierce
 - **Total Hours Worked: 7**
