@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
 
-const AssignmentSchema = new mongoose.Schema({
-    courseNumber: String,
-    candidateID: String,
-    assignedBy: String,
-  });
-  
+const assignmentSchema = new mongoose.Schema({
+  candidateId: String,
+  courseId: String,
+  professorId: String,
+  role: String,
+  isReturning: Boolean,
+  skillsMatched: [String]
+});
 
 module.exports = mongoose.model('Assignment', assignmentSchema);

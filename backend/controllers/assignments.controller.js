@@ -3,18 +3,20 @@ const router = express.Router();
 const service = require('../services/assignments.service');
 
 // GET all assignments
-router.get('/', service.getAllAssignments);
+router.get('/', async (req, res) => {
+  try {
+    const assignments = await service.getAllAssignments();
+    res.json(assignments);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
-// GET assignments by course number
+// GET by course
 router.get('/course/:courseNumber', service.getAssignmentsByCourse);
-
-// GET assignments by professor name
 router.get('/professor/:professorName', service.getAssignmentsByProfessor);
-
-// GET assignments by candidate ID
 router.get('/candidate/:candidateID', service.getAssignmentsByCandidate);
-
-// POST to assign a candidate to a course
 router.post('/assign', service.assignCandidateToCourse);
 
 module.exports = router;

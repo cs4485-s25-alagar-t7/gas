@@ -1,11 +1,14 @@
-const Assignment = require('../models/Assignment');
-const Candidate = require('../models/Candidate');
-const Course = require('../models/Course');
-
-// Get all assignments
+const Assignment = require('../services/models/Assignments');
+const Candidate = require('../services/models/Candidate');
+const Course = require('../services/models/Course');
 async function getAllAssignments(req, res) {
-  const assignments = await Assignment.find();
-  res.json(assignments);
+  try {
+    const assignments = await Assignment.find();
+    return assignments;
+  } catch (err) {
+    console.error("Error in getAllAssignments", err);
+    throw err;
+   }
 }
 
 // Get assignments by course number
