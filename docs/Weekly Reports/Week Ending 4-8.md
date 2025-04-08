@@ -21,6 +21,7 @@
 - **Tasks Completed:**
   - Connected Mongo to frontend
   - Worked with Arsal to finalize API endpoints
+  - Minor changes to frontend design 
 - **Tasks For Next Week:**
   - Get all tables connected to Mongo
   - Work on implementing upload feat that allows users to upload files into the db
