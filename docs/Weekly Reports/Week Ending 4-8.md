@@ -48,7 +48,16 @@
 - **Tasks For Next Week:**
 
 ### Arsal Hussain
-- **Total Hours Worked: **
+- **Total Hours Worked: 12**
 - **Tasks Completed:**
+  - Dockerized Backend and frontend services
+  - Fixed controller and routing issues for API endpoints
+  - Synced and merged updated with backend branch (Solomon merged to main)
+  - Resolved schema reference issues
+  - Connected backend to Mongo via mongoose
+  - Started backend seeding with sample data + created assignment data for rest of team to utilize
 - **Tasks For Next Week:**
+  - Finalize and test backend seeding with real time data
+  - Assist with frontend sample data usage and API integration
+  - Help refine assignment logic based on professor recommendations
 
