@@ -1,21 +1,23 @@
 import { getAllAssignments as _getAllAssignments } from '../services/assignments.service';
+import express from 'express';
+const router = express.Router();
+import * as service from '../services/assignments.service.js';
 
-const getAllAssignments = async (req, res) => {
+// GET all assignments
+router.get('/', async (req, res) => {
   try {
-    const assignments = await _getAllAssignments();
+    const assignments = await service.getAllAssignments();
     res.json(assignments);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
   }
-};
+});
 
-export default { getAllAssignments };
-// Simulated database interaction
-const assignments = [
-    { id: 1, grader_id: 1, section_id: 4, status: "pending"},
-    { id: 2, grader_id: 2, section_id: 1, status: "pending"},
-];
+// GET by course
+router.get('/course/:courseNumber', service.getAssignmentsByCourse);
+router.get('/professor/:professorName', service.getAssignmentsByProfessor);
+router.get('/candidate/:candidateID', service.getAssignmentsByCandidate);
+router.post('/assign', service.assignCandidateToCourse);
 
-async function getAllAssignments() {
-    return assignments;
-}
+export default router; // Export the router

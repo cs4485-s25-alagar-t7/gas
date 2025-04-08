@@ -2,24 +2,59 @@ import Assignment from '../models/Assignment';
 import Candidate from '../models/Candidate';
 import Course from '../models/Course';
 
-// Get all assignments
-async function findAllAssignments() {
-  return find()
-    .populate('candidate')
-    .populate({
-      path: 'course',
-      populate: { path: 'professor' }
-    });
+async function getAllAssignments(req, res) {
+  try {
+    const assignments = await Assignment.find();
+    return assignments;
+  } catch (err) {
+    console.error("Error in getAllAssignments", err);
+    throw err;
+   }
 }
 
-// Manually assign a candidate to a course
-async function createAssignment(candidateId, courseId) {
-  const candidate = await _findById(candidateId);
-  const course = await __findById(courseId);
+// Get assignments by course number
+async function getAssignmentsByCourse(req, res) {
+  const { courseNumber } = req.params;
+  const assignments = await Assignment.find({ courseNumber });
+  res.json(assignments);
+}
 
-  if (!candidate || !course) throw new Error('Candidate or course not found');
+// Get assignments by professor name
+async function getAssignmentsByProfessor(req, res) {
+  const { professorName } = req.params;
+  const assignments = await Assignment.find({ professorName });
+  res.json(assignments);
+}
+
+// Get assignments by candidate ID
+async function getAssignmentsByCandidate(req, res) {
+  const { candidateID } = req.params;
+  const assignments = await Assignment.find({ candidateID });
+  res.json(assignments);
+}
+
+// Assign a candidate to a course
+async function assignCandidateToCourse(req, res) {
+  const { candidateID, courseNumber } = req.body;
+
+  // Check if candidate and course exist
+  const candidate = await Candidate.findOne({ candidateID });
+  const course = await Course.findOne({ courseNumber });
+
+  if (!candidate || !course) {
+    return res.status(404).json({ message: "Candidate or Course not found." });
+  }
 
   // Create assignment
+  const newAssignment = new Assignment({
+    candidateID,
+    courseNumber,
+    professorName: course.professorName,
+    assignedAt: new Date()
+  });
+
+  await newAssignment.save();
+  res.status(201).json({ message: "Assignment created.", assignment: newAssignment });
   const assignment = new Assignment({
     candidate: candidate._id,
     course: course._id,
@@ -45,7 +80,7 @@ const weights = {
 
 // Create assignments for all candidates for a specific course section
 async function createAssignmentsForSection(courseId) {
-  const course = await __findById(courseId);
+  const course = await Course.find(courseId);
   if (!course) throw new Error('Course not found');
 
   const candidates = await _findAllCandidates(); // Fetch all candidates
@@ -87,12 +122,12 @@ async function createAssignmentsForSection(courseId) {
 
 // Delete an assignment
 async function deleteAssignment(assignmentId) {
-  const assignment = await findById(assignmentId);
+  const assignment = await Assignment.find(assignmentId);
   if (!assignment) throw new Error('Assignment not found');
 
   // Cleanup references
-  const candidate = await _findById(assignment.candidate);
-  const course = await __findById(assignment.course);
+  const candidate = await Candidate.find(assignment.candidate);
+  const course = await Course.find(assignment.course);
 
   if (candidate) {
     candidate.assignedCourse = null;
@@ -110,9 +145,11 @@ async function deleteAssignment(assignmentId) {
 }
 
 export default {
-  getAllAssignments1,
-  createAssignment,
-  deleteAssignment,
+  getAllAssignments,
+  getAssignmentsByCourse,
+  getAssignmentsByProfessor,
+  getAssignmentsByCandidate,
+  assignCandidateToCourse,
   createAssignmentsForSection
 };
 
