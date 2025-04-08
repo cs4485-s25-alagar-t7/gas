@@ -1,3 +1,4 @@
+// This file adds some example data to the database. Can be run from outside any docker container
 import {connect} from 'mongoose';
 import Assignment from './services/models/Assignments.js';
 import { configDotenv } from 'dotenv';
