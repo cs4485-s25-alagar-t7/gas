@@ -47,6 +47,7 @@
   - helping squash bugs with backend CRUD API
 - **Tasks For Next Week:**
   - test the algorithm
+  - maybe try generating test resume/candidate data with chatgpt
   - resumes pdfs -> populate database Candidates collection with this info.
 
 ### Arsal Hussain
