@@ -29,8 +29,11 @@
   
 
 ### Solomon Pierce
-- **Total Hours Worked: **
+- **Total Hours Worked: 7**
 - **Tasks Completed:**
+  - algorithm implementation
+  - merging TS react code with resume API
+  - helping squash bugs with backend CRUD API
 - **Tasks For Next Week:**
 
 ### Arsal Hussain
