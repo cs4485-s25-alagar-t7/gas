@@ -1,12 +1,12 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const assignmentSchema = new mongoose.Schema({
-  grader_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Candidate', required: true },
-  course_section_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true },
+const assignmentSchema = new Schema({
+  grader_id: { type: Schema.Types.ObjectId, ref: 'Candidate', required: true },
+  course_section_id: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
   status: { type: String, enum: ['pending', 'accepted'], default: 'pending' },
   semester: { type: String, required: true },
   score: { type: Number, default: 0 },
   manuallyAssigned: { type: Boolean, default: false }
 });
 
-module.exports = mongoose.model('Assignment', assignmentSchema);
+export default model('Assignment', assignmentSchema);

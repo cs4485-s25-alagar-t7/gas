@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const assignmentSchema = new mongoose.Schema({
+const assignmentSchema = new Schema({
   candidateId: String,
   courseId: String,
   professorId: String,
@@ -9,4 +9,4 @@ const assignmentSchema = new mongoose.Schema({
   skillsMatched: [String]
 });
 
-module.exports = mongoose.model('Assignment', assignmentSchema);
+export default model('Assignment', assignmentSchema);

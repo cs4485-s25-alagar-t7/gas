@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const courseSchema = new mongoose.Schema({
+const courseSchema = new Schema({
   course_id: { type: String, required: true },
   section_id: { type: String, required: true },
   instructor: {
@@ -12,4 +12,4 @@ const courseSchema = new mongoose.Schema({
   num_required_graders: { type: Number, required: true }
 });
 
-module.exports = mongoose.model('Course', courseSchema);
+export default model('Course', courseSchema);

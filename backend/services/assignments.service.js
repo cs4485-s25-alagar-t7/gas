@@ -1,6 +1,6 @@
-import Assignment from '../models/Assignment';
-import Candidate from '../models/Candidate';
-import Course from '../models/Course';
+import Assignment from '../models/Assignment.js';
+import Candidate from '../models/Candidate.js';
+import Course from '../models/Course.js';
 
 async function getAllAssignments(req, res) {
   try {
@@ -144,7 +144,7 @@ async function deleteAssignment(assignmentId) {
   return assignment.deleteOne();
 }
 
-export default {
+export {
   getAllAssignments,
   getAssignmentsByCourse,
   getAssignmentsByProfessor,

@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const candidateSchema = new mongoose.Schema({
+const candidateSchema = new Schema({
   name: { type: String, required: true },
   netid: { type: String, required: true, unique: true },
   gpa: { type: Number, required: true },
@@ -14,4 +14,4 @@ const candidateSchema = new mongoose.Schema({
   unassigned: { type: Boolean, default: true }
 });
 
-module.exports = mongoose.model('Candidate', candidateSchema);
+export default model('Candidate', candidateSchema);
