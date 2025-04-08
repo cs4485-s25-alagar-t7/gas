@@ -4,9 +4,17 @@
 
 ## Team Accomplishments  
 ### Ji Min Yoon (Team Lead)
-- **Total Hours Worked: **
-- **Tasks Completed:**   
+- **Total Hours Worked: 9 **
+- **Tasks Completed:**
+  - Changed the frontend on Figma based on feedback from last meeting
+    - Removed unnecessary filler functions from the dashboard and added "upload button" and "create new sem" button
+    - Removed the upload page for efficiency
+    - In professor view, add feature to see if candidate has applied or not
+    - Assignment View: add a search by option
+    - In everyview: change the page function to scroll feature  
 - **Tasks For Next Week:**
+  - If figma is finalized, work on converting it into HTML
+  - Improve the visual aspect of the project (ie color, logo, format) 
 
 ### Rayyan Waris
 - **Total Hours Worked: **
