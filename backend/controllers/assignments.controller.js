@@ -1,6 +1,13 @@
 import express from 'express';
 const router = express.Router();
-import {getAllAssignments, getAssignmentsByCandidate, getAssignmentsByCourse, getAssignmentsByProfessor, assignCandidateToCourse} from '../services/assignments.service.js';
+import {
+  getAllAssignments,
+  getAssignmentsByCandidate,
+  getAssignmentsByCourse,
+  getAssignmentsByProfessor,
+  assignCandidateToCourse,
+  deleteAssignment
+} from '../services/assignments.service.js';
 
 // GET all assignments
 router.get('/', async (req, res) => {
@@ -18,5 +25,6 @@ router.get('/course/:courseNumber', getAssignmentsByCourse);
 router.get('/professor/:professorName', getAssignmentsByProfessor);
 router.get('/candidate/:candidateID', getAssignmentsByCandidate);
 router.post('/assign', assignCandidateToCourse);
+router.delete('/', deleteAssignment);
 
 export default router; // Export the router

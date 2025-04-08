@@ -150,7 +150,8 @@ export {
   getAssignmentsByProfessor,
   getAssignmentsByCandidate,
   assignCandidateToCourse,
-  createAssignmentsForSection
+  createAssignmentsForSection,
+  deleteAssignment
 };
 
 
