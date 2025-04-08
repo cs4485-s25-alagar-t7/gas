@@ -46,6 +46,8 @@
   - merging TS react code with resume API
   - helping squash bugs with backend CRUD API
 - **Tasks For Next Week:**
+  - test the algorithm
+  - resumes pdfs -> populate database Candidates collection with this info.
 
 ### Arsal Hussain
 - **Total Hours Worked: 12**
