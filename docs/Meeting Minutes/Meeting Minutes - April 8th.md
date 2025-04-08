@@ -20,11 +20,10 @@
   
 # Back End Notes
 - Instead of logging in through SSO, create one admin login
-  - Create SSO login if have extra time  
+  - Create SSO login if have extra time
+- Got the API and Mongose
 
 # Front End Notes
-- 
-  
 ### Dashboard:
 - dont hit third party api everytime we log in (??)
 specify what the "adds" are, clarify the naming of the buttons. don't put add button at the bottom, maybe put it next to create new semester
@@ -47,11 +46,13 @@ export 2 views: assignment and professor maybe at the top
 # Next Steps
 ### Frontend:
 - Will have around 400 candidates applied in fall, 300 on average
+
 ### Backend:
--
+- 
+
 ### Fullstack:
-connected database to the html
-need to:
-include section number into the fields
-change the search bar to just have "search keyboard" instead of "search professor" etc
-this is kinda a rough scribble of notes that were mentioned
+- connected database to the html
+- need to:
+  - include section number into the fields
+  - change the search bar to just have "search keyboard" instead of "search professor" etc
+  - this is kinda a rough scribble of notes that were mentioned
