@@ -17,7 +17,7 @@
 - Went over Final Report expectations and template
   
 # Back End Notes
--
+- Instead of logging in through SSO, create one login
 
 # Front End Notes
 - 
