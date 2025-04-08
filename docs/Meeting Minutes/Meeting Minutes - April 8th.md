@@ -1,8 +1,8 @@
 # Meeting Minutes: April 8th
 **Team Leader: Ji Min Yoon**\
-**Started: 1:31pm**\
-**Ended: 2:23pm**\
-**Total Minutes: 52 minutes**
+**Started: 1:30pm**\
+**Ended: pm**\
+**Total Minutes:  minutes**
 
 
 
