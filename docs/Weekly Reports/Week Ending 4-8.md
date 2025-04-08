@@ -28,9 +28,16 @@
   - Implement more figma views
 
 ### Sophie Tran
-- **Total Hours Worked: **
+- **Total Hours Worked: 7**
 - **Tasks Completed:**
+  - Updated figma to reflect previous week's suggestions
+  - Updated dashboard to be more cohesive and simple
+    - Implemented function for creation of new semesters
+  - Integreated whole page view in each of the views
+  - Aided in polishing HTML code for website
 - **Tasks For Next Week:**
+  - Continue converting figma views to HTML code
+  - Begin combining frontend and backend functions
 
 ### Solomon Pierce
 - **Total Hours Worked: 7**
