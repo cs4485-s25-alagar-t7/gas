@@ -29,6 +29,8 @@
 specify what the "adds" are, clarify the naming of the buttons. don't put add button at the bottom, maybe put it next to create new semester
 change the add to "continue" or something
 "make the add graders from previous semester" -> we have
+-Combine "Create new" "create new popup" and "history" page into one documents
+- also should have three different upload section
 
 ### Candidate View:
 
@@ -48,7 +50,7 @@ export 2 views: assignment and professor maybe at the top
 - Will have around 400 candidates applied in fall, 300 on average
 
 ### Backend:
-- 
+- Make our own test data. (Cannot provide us with real data due to privacy concerns)
 
 ### Fullstack:
 - connected database to the html
