@@ -4,7 +4,7 @@
 
 ## Team Accomplishments  
 ### Ji Min Yoon (Team Lead)
-- **Total Hours Worked: 9 **
+- **Total Hours Worked: 9**
 - **Tasks Completed:**
   - Changed the frontend on Figma based on feedback from last meeting
     - Removed unnecessary filler functions from the dashboard and added "upload button" and "create new sem" button
