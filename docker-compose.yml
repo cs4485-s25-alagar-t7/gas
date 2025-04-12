@@ -27,14 +27,14 @@ services:
     container_name: gas-backend
     restart: always
     ports:
-      - "5000:5000"
+      - "5001:5000"
     volumes:
       - ./backend:/app
     environment: 
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
-      MONGO_DB_AUTH_SOURCE: ${MONGO_DB_AUTH_SOURCE}
+      MONGO_DB_AUTH_SOURCE: admin
       BACKEND_AUTH_REQUIRED: ${BACKEND_AUTH_REQUIRED}
       NODE_ENV: "development"
     depends_on:
@@ -44,6 +44,12 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "3000:3000"
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules  
     depends_on:
       - backend
+
+
+
