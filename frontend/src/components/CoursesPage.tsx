@@ -15,7 +15,7 @@ const courseData = [
 
 const ITEMS_PER_PAGE = 5;
 
-const AssignmentsPage: React.FC = () => {
+const CoursesPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<"professorName" | "className" | "courseNumber" | "">("");
   const [dropdownIndex, setDropdownIndex] = useState<number | null>(null);
@@ -67,7 +67,7 @@ const AssignmentsPage: React.FC = () => {
         <div className="p-8">
           {/* Title and Search */}
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-semibold text-gray-800">Assignment View</h1>
+            <h1 className="text-2xl font-semibold text-gray-800">Course View</h1>
             <div className="flex items-center space-x-4">
               <input
                 type="text"
@@ -211,4 +211,4 @@ const AssignmentsPage: React.FC = () => {
   );
 };
 
-export default AssignmentsPage;
+export default CoursesPage;
