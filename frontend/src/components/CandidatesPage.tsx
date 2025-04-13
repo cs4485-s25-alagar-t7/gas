@@ -1,44 +1,74 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 
-const candidates = [
-  { candidateID: "jxc210000", name: "Jane Cooper", courseNumber: "CS1337", professorName: "Srimathi Srinavasan", className: "Computer Science I" },
-  { candidateID: "fxm210000", name: "Floyd Miles", courseNumber: "CS2305", professorName: "James Wilson", className: "Discrete Math I" },
-  { candidateID: "rxr210000", name: "Ronald Richards", courseNumber: "CS2337", professorName: "Doug Degroot", className: "Computer Science II" },
-  { candidateID: "mxm210000", name: "Marvin McKinney", courseNumber: "CS2340", professorName: "John Cole", className: "Computer Architecture" },
-  { candidateID: "jxb210000", name: "Jerome Bell", courseNumber: "CS2336", professorName: "Arnold Gordon", className: "Computer Science II" },
-  { candidateID: "kxm210000", name: "Kathryn Murphy", courseNumber: "CS1436", professorName: "Brian Ricks", className: "Programming Fundamentals" },
-  { candidateID: "jxj210000", name: "Jacob Jones", courseNumber: "CS3354", professorName: "Mark Paulk", className: "Software Engineering" },
-  { candidateID: "kxw210000", name: "Kristin Watson", courseNumber: "CS3377", professorName: "Karami Gity", className: "Systems Programming in UNIX" },
-];
+interface Candidate {
+  _id: string;
+  name: string;
+  netid: string;
+  assignmentStatus: boolean;
+  course: {
+    course_id: string;
+    section_id: string;
+    instructor: {
+      name: string;
+      email: string;
+    };
+    course_name?: string; // optional for future
+  } | null;
+}
 
 const ITEMS_PER_PAGE = 5;
 
 const CandidatePage: React.FC = () => {
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortField, setSortField] = useState<"name" | "courseNumber" | "professorName" | "">("");
+  const [sortField, setSortField] = useState<"name" | "netid" | "course_id" | "">("");
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    fetch("/api/candidates")
+      .then(async res => {
+        const text = await res.text();
+        try {
+          const data = JSON.parse(text);
+          console.log("Candidates received:", data);
+          setCandidates(data);
+        } catch (err) {
+          console.error("Failed to parse JSON from /api/candidates. Raw response:");
+          console.error(text); // show what your backend returned
+        }
+      })
+      .catch(error => {
+        console.error("Network error fetching candidates:", error);
+      });
+  }, []);  
+
+  const handleDelete = async (id: string) => {
+    await fetch(`/api/candidates/${id}`, { method: "DELETE" });
+    setCandidates(prev => prev.filter(c => c._id !== id));
+  };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value.toLowerCase());
   };
 
-  const handleSort = (field: "name" | "courseNumber" | "professorName") => {
+  const handleSort = (field: "name" | "netid" | "course_id") => {
     setSortField(field);
   };
 
   const filteredCandidates = candidates
-    .filter((candidate) =>
+    .filter(candidate =>
       candidate.name.toLowerCase().includes(searchQuery) ||
-      candidate.courseNumber.toLowerCase().includes(searchQuery) ||
-      candidate.professorName.toLowerCase().includes(searchQuery) ||
-      candidate.className.toLowerCase().includes(searchQuery) ||
-      candidate.candidateID.toLowerCase().includes(searchQuery)
+      candidate.netid.toLowerCase().includes(searchQuery) ||
+      candidate.course?.course_id?.toLowerCase().includes(searchQuery) ||
+      candidate.course?.instructor?.name.toLowerCase().includes(searchQuery)
     )
     .sort((a, b) => {
       if (!sortField) return 0;
-      return a[sortField].localeCompare(b[sortField]);
+      const aField = sortField === "course_id" ? a.course?.course_id || "" : a[sortField];
+      const bField = sortField === "course_id" ? b.course?.course_id || "" : b[sortField];
+      return aField.localeCompare(bField);
     });
 
   const totalPages = Math.ceil(filteredCandidates.length / ITEMS_PER_PAGE);
@@ -54,48 +84,37 @@ const CandidatePage: React.FC = () => {
   return (
     <div className="flex h-screen">
       <Sidebar />
-
-      {/* Main Content */}
       <div className="flex-1 flex flex-col bg-gray-100">
         <Navbar />
-
-        {/* Content Area */}
         <div className="p-8">
-          {/* Title and Search */}
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-semibold text-gray-800">Candidate View</h1>
             <div className="flex items-center space-x-4">
               <input
                 type="text"
-                placeholder="Search Candidates"
+                placeholder="Search"
                 value={searchQuery}
                 onChange={handleSearch}
                 className="border border-gray-300 rounded-lg px-4 py-2 w-64 shadow-sm focus:ring focus:ring-orange-400 outline-none"
               />
-              <div className="relative">
-                <button
-                  onClick={() => handleSort("name")}
-                  className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
-                >
-                  Sort by Candidate Name
-                </button>
-              </div>
-              <div className="relative">
-                <button
-                  onClick={() => handleSort("courseNumber")}
-                  className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
-                >
-                  Sort by Course Number
-                </button>
-              </div>
-              <div className="relative">
-                <button
-                  onClick={() => handleSort("professorName")}
-                  className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
-                >
-                  Sort by Professor Name
-                </button>
-              </div>
+              <button
+                onClick={() => handleSort("name")}
+                className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
+              >
+                Sort by Name
+              </button>
+              <button
+                onClick={() => handleSort("netid")}
+                className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
+              >
+                Sort by NetID
+              </button>
+              <button
+                onClick={() => handleSort("course_id")}
+                className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
+              >
+                Sort by Course
+              </button>
             </div>
           </div>
 
@@ -104,24 +123,36 @@ const CandidatePage: React.FC = () => {
             <table className="w-full border-collapse">
               <thead className="bg-gray-200">
                 <tr className="text-left">
-                  <th className="p-4">Candidate ID</th>
+                  <th className="p-4">Assignment Status</th>
                   <th className="p-4">Candidate Name</th>
                   <th className="p-4">Course Number</th>
+                  <th className="p-4">Section</th>
                   <th className="p-4">Professor Name</th>
                   <th className="p-4">Course Name</th>
-                  <th className="p-4">Actions</th>
+                  <th className="p-4">Remove</th>
                 </tr>
               </thead>
               <tbody>
-                {currentCandidates.map((candidate, index) => (
-                  <tr key={index} className="border-t">
-                    <td className="p-4">{candidate.candidateID}</td>
-                    <td className="p-4">{candidate.name}</td>
-                    <td className="p-4">{candidate.courseNumber}</td>
-                    <td className="p-4">{candidate.professorName}</td>
-                    <td className="p-4">{candidate.className}</td>
-                    <td className="p-4 flex gap-2">
-                      <button className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">Remove</button>
+                {currentCandidates.map((candidate) => (
+                  <tr key={candidate._id} className="border-t">
+                    <td className="p-4">{candidate.assignmentStatus ? "True" : "False"}</td>
+                    <td className="p-4">
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-blue-600">{candidate.name}</span>
+                        <span className="text-xs text-gray-500">NetID: {candidate.netid}</span>
+                      </div>
+                    </td>
+                    <td className="p-4">{candidate.course?.course_id || "N/A"}</td>
+                    <td className="p-4">{candidate.course?.section_id || "N/A"}</td>
+                    <td className="p-4">{candidate.course?.instructor?.name || "N/A"}</td>
+                    <td className="p-4">{candidate.course?.course_name || "N/A"}</td>
+                    <td className="p-4">
+                      <button
+                        onClick={() => handleDelete(candidate._id)}
+                        className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+                      >
+                        Remove
+                      </button>
                     </td>
                   </tr>
                 ))}
