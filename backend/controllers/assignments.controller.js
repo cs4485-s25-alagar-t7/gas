@@ -1,5 +1,4 @@
 import express from 'express';
-const router = express.Router();
 import {
   getAllAssignments,
   getAssignmentsByCandidate,
@@ -9,22 +8,14 @@ import {
   deleteAssignment
 } from '../services/assignments.service.js';
 
-// GET all assignments
-router.get('/', async (req, res) => {
-  try {
-    const assignments = await getAllAssignments();
-    res.json(assignments);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+const router = express.Router();
 
-// GET by course
+router.get('/', getAllAssignments); // ✅ direct ref to function
+
 router.get('/course/:courseNumber', getAssignmentsByCourse);
 router.get('/professor/:professorName', getAssignmentsByProfessor);
 router.get('/candidate/:candidateID', getAssignmentsByCandidate);
 router.post('/assign', assignCandidateToCourse);
-router.delete('/', deleteAssignment);
+router.delete('/:id', deleteAssignment); // pass id via req.params
 
-export default router; // Export the router
+export default router;
