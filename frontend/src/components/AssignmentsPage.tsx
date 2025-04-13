@@ -38,7 +38,7 @@ const AssignmentPage: React.FC = () => {
       })
       .then(setAssignments)
       .catch((err) => {
-        console.error("❌ Error fetching assignments:", err);
+        console.error("Error fetching assignments:", err);
       });
   }, []);
 
@@ -93,7 +93,7 @@ const AssignmentPage: React.FC = () => {
             <div className="flex items-center space-x-4">
               <input
                 type="text"
-                placeholder="Search Assignments"
+                placeholder="Search"
                 value={searchQuery}
                 onChange={handleSearch}
                 className="border border-gray-300 rounded-lg px-4 py-2 w-64 shadow-sm focus:ring focus:ring-orange-400 outline-none"
