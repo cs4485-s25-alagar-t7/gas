@@ -1,4 +1,4 @@
-// This file adds some example data to the database. Can be run from outside any Docker container
+// seed.js
 import { connect } from 'mongoose';
 import { configDotenv } from 'dotenv';
 import Candidate from './models/Candidate.js';
@@ -12,103 +12,161 @@ const pw = process.env.MONGO_INITDB_ROOT_PASSWORD;
 const authSource = process.env.MONGO_DB_AUTH_SOURCE;
 
 connect(`mongodb://${admin}:${pw}@mongo:27017/gas?authSource=${authSource}`)
-  .then(() => {
+  .then(async () => {
     console.log('✅ Connected to MongoDB');
-    return Promise.all([
+
+    await Promise.all([
       Candidate.deleteMany({}),
       Course.deleteMany({}),
       Assignment.deleteMany({})
     ]);
-  })
-  .then(() => {
     console.log('🧹 Cleared Candidates, Courses, and Assignments');
 
-    const candidate1 = new Candidate({
-      name: "John Doe",
-      netid: "jxd210000",
-      gpa: 3.8,
-      major: "Computer Science",
-      minor: "Mathematics",
-      classes: ["CS1337", "CS2305"],
-      previous_grader_experience: true,
-      seniority: "Masters",
-      resume_keywords: ["algorithms", "data structures", "teaching"],
-      semester: "Spring 2025",
-      unassigned: false
-    });
-    
-    const candidate2 = new Candidate({
-      name: "Jane Smith",
-      netid: "jxs210000",
-      gpa: 3.6,
-      major: "Software Engineering",
-      minor: "",
-      classes: ["CS2340", "CS2336"],
-      previous_grader_experience: false,
-      seniority: "Undergraduate",
-      resume_keywords: ["systems", "debugging", "c++"],
-      semester: "Spring 2025",
-      unassigned: false
-    });
-    const course1 = new Course({
-      course_id: "CS1337",
-      section_id: "001",
-      instructor: {
-        name: "Sridhar Alagar",
-        email: "sxa123456@utdallas.edu"
+    const [johnDoe, chonDo, thenMalli, donJoe, jonJoe] = await Candidate.insertMany([
+      {
+        name: "John Doe",
+        netid: "jxd210000",
+        gpa: 3.9,
+        major: "Computer Science",
+        minor: "",
+        classes: ["CS1336"],
+        previous_grader_experience: true,
+        seniority: "Masters",
+        resume_keywords: ["algorithms", "data structures"],
+        semester: "Spring 2025"
       },
-      keywords: ["algorithms", "data structures"],
-      semester: "Spring 2025",
-      num_required_graders: 1
-    });
-
-    const course2 = new Course({
-      course_id: "CS2340",
-      section_id: "005",
-      instructor: {
-        name: "John Cole",
-        email: "jxc123456@utdallas.edu"
+      {
+        name: "Chon Do",
+        netid: "cdo210000",
+        gpa: 3.6,
+        major: "Software Engineering",
+        minor: "",
+        classes: ["CS4348", "CS4384"],
+        previous_grader_experience: false,
+        seniority: "Undergraduate",
+        resume_keywords: ["systems", "architecture"],
+        semester: "Spring 2025"
       },
-      keywords: ["computer architecture", "systems"],
-      semester: "Spring 2025",
-      num_required_graders: 1
-    });
-
-    return Promise.all([
-      candidate1.save(),
-      candidate2.save(),
-      course1.save(),
-      course2.save()
+      {
+        name: "Then Malligarjun",
+        netid: "tml210000",
+        gpa: 3.7,
+        major: "Computer Engineering",
+        minor: "",
+        classes: ["CS4348", "CS4384"],
+        previous_grader_experience: true,
+        seniority: "PhD",
+        resume_keywords: ["operating systems"],
+        semester: "Spring 2025"
+      },
+      {
+        name: "Don Joe",
+        netid: "djo210000",
+        gpa: 3.5,
+        major: "Computer Science",
+        minor: "Math",
+        classes: ["CS3345", "CS4341"],
+        previous_grader_experience: false,
+        seniority: "Masters",
+        resume_keywords: ["algorithms"],
+        semester: "Spring 2025"
+      },
+      {
+        name: "Jon Joe",
+        netid: "jjo210000",
+        gpa: 3.8,
+        major: "CS",
+        minor: "",
+        classes: ["CS3345", "CS4341"],
+        previous_grader_experience: true,
+        seniority: "PhD",
+        resume_keywords: ["algorithms", "math"],
+        semester: "Spring 2025"
+      }
     ]);
-  })
-  .then(([savedCandidate1, savedCandidate2, savedCourse1, savedCourse2]) => {
-    console.log('📦 Saved Candidates and Courses');
 
-    const assignment1 = new Assignment({
-      grader_id: savedCandidate1._id,
-      course_section_id: savedCourse1._id,
-      status: "accepted",
-      semester: "Spring 2025",
-      score: 4.5,
-      manuallyAssigned: true
-    });
+    const [course1, course2, course3, course4, course5] = await Course.insertMany([
+      {
+        course_id: "CS1336",
+        section_id: "001",
+        instructor: { name: "Sridhar Alagar", email: "sridhar@utd.edu" },
+        keywords: ["intro", "programming"],
+        semester: "Spring 2025",
+        num_required_graders: 1
+      },
+      {
+        course_id: "CS4348",
+        section_id: "501",
+        instructor: { name: "Eric Becker", email: "becker@utd.edu" },
+        keywords: ["os", "memory"],
+        semester: "Spring 2025",
+        num_required_graders: 1
+      },
+      {
+        course_id: "CS3345",
+        section_id: "500",
+        instructor: { name: "John Cole", email: "cole@utd.edu" },
+        keywords: ["data structures", "algorithms"],
+        semester: "Spring 2025",
+        num_required_graders: 1
+      },
+      {
+        course_id: "CS4341",
+        section_id: "123",
+        instructor: { name: "Neeraj Gupta", email: "gupta@utd.edu" },
+        keywords: ["digital", "logic"],
+        semester: "Spring 2025",
+        num_required_graders: 1
+      },
+      {
+        course_id: "CS4384",
+        section_id: "502",
+        instructor: { name: "Emily Fox", email: "fox@utd.edu" },
+        keywords: ["automata", "theory"],
+        semester: "Spring 2025",
+        num_required_graders: 1
+      }
+    ]);
 
-    const assignment2 = new Assignment({
-      grader_id: savedCandidate2._id,
-      course_section_id: savedCourse2._id,
-      status: "accepted",
-      semester: "Spring 2025",
-      score: 3.7,
-      manuallyAssigned: false
-    });
+    await Assignment.insertMany([
+      {
+        grader_id: johnDoe._id,
+        course_section_id: course1._id,
+        status: "accepted",
+        semester: "Spring 2025",
+        score: 4.8,
+        manuallyAssigned: true
+      },
+      {
+        grader_id: chonDo._id,
+        course_section_id: course2._id,
+        status: "accepted",
+        semester: "Spring 2025",
+        score: 3.9,
+        manuallyAssigned: true
+      },
+      {
+        grader_id: donJoe._id,
+        course_section_id: course3._id,
+        status: "accepted",
+        semester: "Spring 2025",
+        score: 4.1,
+        manuallyAssigned: true
+      },
+      {
+        grader_id: thenMalli._id,
+        course_section_id: course5._id,
+        status: "accepted",
+        semester: "Spring 2025",
+        score: 4.6,
+        manuallyAssigned: true
+      }
+    ]);
 
-    return Assignment.insertMany([assignment1, assignment2]);
-  })
-  .then(() => {
-    console.log('✅ Sample data seeded!');
+    console.log("✅ Sample professor-related data seeded!");
     process.exit(0);
   })
   .catch(err => {
-    console.error('❌ Seeding error:', err);
+    console.error("❌ Seeding error:", err);
     process.exit(1);
   });

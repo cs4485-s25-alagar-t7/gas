@@ -3,6 +3,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import assignmentsRouter from './controllers/assignments.controller.js';
 import candidatesRouter from './controllers/candidates.controller.js'; 
+import professorsRouter from './controllers/professors.controller.js';
 
 const username = process.env.MONGO_INITDB_ROOT_USERNAME;
 const pw = process.env.MONGO_INITDB_ROOT_PASSWORD;
@@ -27,6 +28,7 @@ app.use(json());
 // Routers
 app.use('/api/assignments', assignmentsRouter);
 app.use('/api/candidates', candidatesRouter); 
+app.use('/api/professors', professorsRouter);
 const PORT = process.env.PORT || 5000;
 
 app.get('/', (req, res) => {

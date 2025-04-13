@@ -40,10 +40,10 @@ const Sidebar = () => {
           </li>
           <li>
             <button
-              onClick={() => handleClick("/CoursesPage")}
+              onClick={() => handleClick("/ProfessorsPage")}
               className="w-full text-left p-2 hover:bg-gray-700 rounded-md"
             >
-              Course
+              Professor
             </button>
           </li>
           <li>
