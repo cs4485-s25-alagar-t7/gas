@@ -14,32 +14,32 @@ async function getAllAssignments(req, res) {
 
 // Get assignments by course number
 async function getAssignmentsByCourse(req, res) {
-  const { courseNumber } = req.params;
-  const assignments = await Assignment.find({ courseNumber });
+  const { courseId } = req.params;
+  const assignments = await Assignment.find({ course_section_id : courseId });
   res.json(assignments);
 }
 
 // Get assignments by professor name
 async function getAssignmentsByProfessor(req, res) {
-  const { professorName } = req.params;
-  const assignments = await Assignment.find({ professorName });
+  const { professorId } = req.params;
+  const assignments = await Assignment.find({ professorId: professorId });
   res.json(assignments);
 }
 
 // Get assignments by candidate ID
 async function getAssignmentsByCandidate(req, res) {
-  const { candidateID } = req.params;
-  const assignments = await Assignment.find({ candidateID });
+  const { candidateId } = req.params;
+  const assignments = await Assignment.find({ candidateId: candidateId });
   res.json(assignments);
 }
 
 // Assign a candidate to a course
-async function assignCandidateToCourse(req, res) {
-  const { candidateID, courseNumber } = req.body;
+async function assignCandidateToSection(req, res) {
+  const { candidateId, courseId } = req.body;
 
   // Check if candidate and course exist
-  const candidate = await Candidate.findOne({ candidateID });
-  const course = await Course.findOne({ courseNumber });
+  const candidate = await Candidate.findOne({ candidateID: candidateId });
+  const course = await Course.findOne({ course_id: courseId });
 
   if (!candidate || !course) {
     return res.status(404).json({ message: "Candidate or Course not found." });
@@ -47,7 +47,7 @@ async function assignCandidateToCourse(req, res) {
 
   // Create assignment
   const newAssignment = new Assignment({
-    candidateID,
+    candidateID: candidateId,
     courseNumber,
     professorName: course.professorName,
     assignedAt: new Date()
@@ -85,8 +85,10 @@ async function createAssignmentsForSection(courseId) {
 
   const candidates = await _findAllCandidates(); // Fetch all candidates
   // filter out candidates who are already assigned to a course
-  const unassignedCandidates = candidates.filter(candidate => !candidate.assignedCourse);
-  if (unassignedCandidates.length === 0) throw new Error('No unassigned candidates found');
+  // find assignments from the previous semester
+  const prev_assignments = await Assignment.find({ semester: previousSemester(course.semester) });
+  const prev_candidates = prev_assignments.map(assignment => assignment.candidate);
+
   const assignments = [];
 
   for (const candidate of unassignedCandidates) {
@@ -144,14 +146,55 @@ async function deleteAssignment(assignmentId) {
   return assignment.deleteOne();
 }
 
+async function assignReturningCandidates(courseId) {
+  const course = await Course.find(courseId);
+  if (!course) throw new Error('Course not found');
+
+  const prev_candidates = await Candidate.find({ semester: previousSemester(course.semester) });
+  if (!candidates || candidates.length === 0) throw new Error('No candidates found for the previous semester');
+
+  // filter candidates that had an assignment in the previous semester
+  const candidates = prev_candidates.filter(candidate => candidate.assigned === false);
+  if (candidates.length === 0) throw new Error('No candidates found for the previous semester');
+
+  const assignments = [];
+
+  for (const candidate of candidates) {
+    const assignment = new Assignment({
+      candidate: candidate._id,
+      course: course._id,
+      status: 'pending',
+      semester: course.semester,
+      manuallyAssigned: false,
+    });
+
+    assignments.push(await assignment.save());
+  }
+
+  return assignments;
+}
+
+async function previousSemester(semester) {
+  const currentSemester = semester.split(' ');
+  const semesterYear = parseInt(currentSemester[1]);
+  const semesterTerm = currentSemester[0];
+
+  if (semesterTerm === 'spring') {
+    return `fall${semesterYear - 1}`;
+  } else if (semesterTerm === 'fall') {
+    return `spring${semesterYear}`;
+  }
+}
+
 export {
   getAllAssignments,
   getAssignmentsByCourse,
   getAssignmentsByProfessor,
   getAssignmentsByCandidate,
-  assignCandidateToCourse,
+  assignCandidateToSection,
   createAssignmentsForSection,
-  deleteAssignment
+  deleteAssignment,
+  assignReturningCandidates
 };
 
 

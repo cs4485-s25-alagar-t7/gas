@@ -5,8 +5,8 @@ import {
   getAssignmentsByCandidate,
   getAssignmentsByCourse,
   getAssignmentsByProfessor,
-  assignCandidateToCourse,
-  deleteAssignment
+  deleteAssignment,
+  assignCandidateToSection
 } from '../services/assignments.service.js';
 
 // GET all assignments
@@ -21,10 +21,10 @@ router.get('/', async (req, res) => {
 });
 
 // GET by course
-router.get('/course/:courseNumber', getAssignmentsByCourse);
-router.get('/professor/:professorName', getAssignmentsByProfessor);
-router.get('/candidate/:candidateID', getAssignmentsByCandidate);
-router.post('/assign', assignCandidateToCourse);
+router.get('/course/:courseId', getAssignmentsByCourse);
+router.get('/professor/:professorId', getAssignmentsByProfessor);
+router.get('/candidate/:candidateId', getAssignmentsByCandidate);
+router.post('/assign', assignCandidateToSection);
 router.delete('/', deleteAssignment);
 
 export default router; // Export the router

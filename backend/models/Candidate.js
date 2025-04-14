@@ -11,7 +11,6 @@ const candidateSchema = new Schema({
   seniority: { type: String, enum: ['Undergraduate', 'Masters', 'PhD'], required: true },
   resume_keywords: [{ type: String }],
   semester: { type: String, required: true },
-  unassigned: { type: Boolean, default: true }
 });
 
 export default model('Candidate', candidateSchema);
