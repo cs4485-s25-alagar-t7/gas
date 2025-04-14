@@ -3,7 +3,7 @@ import Dashboard from "./components/Dashboard";
 import CandidatePage from "./components/CandidatesPage";
 import ProfessorsPage from "./components/ProfessorsPage";
 import AssignmentsPage from "./components/AssignmentsPage";
-import Upload from "./components/Upload";
+import CreateSemester from "./components/CreateSemester";
 
 function App() {
   return (
@@ -13,7 +13,7 @@ function App() {
         <Route path="/CandidatesPage" element={<CandidatePage />} />
         <Route path="/ProfessorsPage" element={<ProfessorsPage />} />
         <Route path="/AssignmentsPage" element={<AssignmentsPage />} />
-        <Route path="/upload" element={<Upload />} />
+        <Route path="/create-semester" element={<CreateSemester />} />
       </Routes>
     </BrowserRouter>
   );

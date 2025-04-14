@@ -46,14 +46,6 @@ const Sidebar = () => {
               Professor
             </button>
           </li>
-          <li>
-            <button
-              onClick={() => handleClick("/upload")}
-              className="w-full text-left p-2 hover:bg-gray-700 rounded-md"
-            >
-              Upload
-            </button>
-          </li>
         </ul>
       </nav>
       <button
