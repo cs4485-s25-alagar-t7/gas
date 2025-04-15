@@ -83,12 +83,12 @@ connect(`mongodb://${admin}:${pw}@localhost:27017/gas?authSource=${process.env.M
       }
       return Assignment.insertMany([
       {
-        course_section_num: cs1331._id,
+        course_section_id: cs1331._id,
         grader_id: alice._id,
         semester: 'fall2025'
       },
       {
-        course_section_num: cs2340._id,
+        course_section_id: cs2340._id,
         grader_id: bob._id,
         semester: 'fall2025'
       }

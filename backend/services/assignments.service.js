@@ -8,12 +8,6 @@ class AssignmentService {
     // Constructor logic if needed
   }
 
-  static weights = {
-    gpa: 0.5,
-    seniority: 0.2,
-    experience: 0.2,
-    keywords: 0.1
-  }
 
   static async getAllAssignments(semester) {
     try {
@@ -60,38 +54,78 @@ class AssignmentService {
     return assignment.save();
   }
 
-  static async createAssignmentsForSection(sectionId, semester, weights) {
+  static getSeniorityScore(seniority) {
+    switch (seniority) {
+      case 'Undergraduate':
+        return 0.5;
+      case 'Masters':
+        return 1;
+      case 'PhD':
+        return 1.5;
+      default:
+        return 0;
+    }
+  }
+
+  static async createAssignmentsForSection(sectionId, semester) {
     const section = await Section.findById(sectionId);
     if (!section) throw new Error('Section not found');
 
-    const candidates = await Candidate.find();
-    const prevAssignments = await Assignment.find({ semester: previousSemester(section.semester) });
-    const prevCandidates = prevAssignments.map(assignment => assignment.candidate);
-
+    const candidates = await Candidate.find({ semester: semester });
+    if (!candidates || candidates.length === 0) throw new Error('No candidates found for this semester');
     const assignments = [];
 
-    for (const candidate of candidates) {
-      if (prevCandidates.includes(candidate._id)) continue;
+    // filter candidates who are not already assigned to a section
+    const existingAssignments = await Assignment.find({ semester: semester });
+    const assignedCandidateIds = existingAssignments.map(assignment => assignment.grader_id);
+    const setOfAssignedCandidateIds = new Set(assignedCandidateIds);
+    const unassignedCandidates = candidates.filter(candidate => !setOfAssignedCandidateIds.has(candidate._id));
 
-      const score =
-        (candidate.gpa * weights.gpa) +
-        ((candidate.seniority === 'Masters' ? 1 : 0) * weights.seniority) +
-        (candidate.previous_grader_experience ? weights.experience : 0) +
-        (candidate.resume_keywords.filter(keyword => section.keywords.includes(keyword)).length * weights.keywords);
-
+    const weights = {
+      gpa: 0.5,
+      seniority: 0.2,
+      experience: 0.2,
+      keywords: 0.1
+    }
+    for (const candidate of unassignedCandidates) {
       const assignment = new Assignment({
         grader_id: candidate._id,
         course_section_id: section._id,
         status: 'pending',
         semester: semester,
-        score,
         manuallyAssigned: false,
       });
 
+
+      const matchingKeywords = section.keywords.filter(keyword => candidate.resume_keywords.includes(keyword));
+      const matchingKeywordsRatio = matchingKeywords.length / section.keywords.length;
+
+      const seniorityScore = this.getSeniorityScore(candidate.seniority);
+      const experienceScore = candidate.previous_grader_experience ? 1 : 0;
+
+      // Calculate the score based on the weights
+      const score = (candidate.gpa * weights.gpa) + (seniorityScore * weights.seniority) +
+        (experienceScore * weights.experience) + (matchingKeywordsRatio * weights.keywords);
+      console.log(`Candidate: ${candidate.name}, GPA: ${candidate.gpa},
+         Seniority: ${candidate.seniority}, Seniority Score: ${seniorityScore},
+          Experience: ${candidate.experience}, ExperienceScore: ${experienceScore},
+           Keywords: ${matchingKeywordsRatio}, Score: ${score}`);
+      assignment.score = score;
+
+      assignments.push(assignment);
+    }
+
+    // take top n scoring candidates where n == section.num_required_graders
+    assignments.sort((a, b) => b.score - a.score);
+    assignments.splice(section.num_required_graders);
+    // save the assignments to the database
+    for (const assignment of assignments) {
+      await assignment.save();
     }
 
     return assignments;
   }
+
 
   static async deleteAssignment(assignmentId) {
     const assignment = await Assignment.findById(assignmentId);
@@ -102,7 +136,7 @@ class AssignmentService {
 
   // This function assigns candidates from the previous semester to the current semester
   static async assignReturningCandidates(semester) {
-    
+
     const prevCandidates = await Candidate.find({ semester: previousSemester(semester) });
 
     const assignments = [];

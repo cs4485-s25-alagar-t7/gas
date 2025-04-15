@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose';
 
 const sectionSchema = new Schema({
   course_name: { type: String, required: true },
-  section_number: { type: String, required: true },
+  section_num: { type: String, required: true },
   instructor: {
     name: { type: String, required: true },
     netid: { type: String, required: true }
