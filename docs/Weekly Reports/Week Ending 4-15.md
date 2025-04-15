@@ -17,11 +17,9 @@
   - Sucessfully fully connected MongoDB with frontend
   - Worked with Kevin and Sophie on implementing frontend modifications based on last week's suggestions
     - New dashboard page
+    - Create Semester page
     - Delete upload comp from sidebar
     - Various changes on all of the tables
-  - Created new frontend views
-    - New dashboard page
-    - Create Semester page
     - A bunch of new pop-ups when you click certain buttons on some of the tables
 - **Tasks For Next Week:**
   - Implement resume parser and algo onto the frontend
