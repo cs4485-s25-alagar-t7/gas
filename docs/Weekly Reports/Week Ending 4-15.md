@@ -4,9 +4,17 @@
 
 ## Team Accomplishments  
 ### Ji Min Yoon (Team Lead)
-- **Total Hours Worked:**
+- **Total Hours Worked: 7**
 - **Tasks Completed:**
+  - Collaborated with Sophie and Rayyan to implement features on website from last week's suggestion
+  - Started working on Final Project Report, finished the introduction part of the report
+  - Improved the visual aspect of the figma website
 - **Tasks For Next Week:**
+  - Finish up the final report
+  - Finish up implementing features on the website
+  - Implement features based on this weeks feedback
+  - Assist in creating the login page if needed
+
 
 ### Rayyan Waris
 - **Total Hours Worked: 14**
