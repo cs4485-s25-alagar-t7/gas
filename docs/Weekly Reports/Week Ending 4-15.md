@@ -23,9 +23,14 @@
 - **Tasks Completed:**
 - **Tasks For Next Week:**
 
-### Member 5
-- **Total Hours Worked:**
+### Arsal Hussain
+- **Total Hours Worked: 6**
 - **Tasks Completed:**
+  - Finalized all API endpoints and functionality
+  - Collaborated with Rayyan and the Frontend Team via call to successfully connect React frontend to MongoDB
+  - Debugged connectivity issues and helped integrate frontend API calls
 - **Tasks For Next Week:**
+  - Implement temporary login credentials to access as part of the admin (since full SSO not required)
+  - Work on deployment and pushing application to UTD Server
 
 
