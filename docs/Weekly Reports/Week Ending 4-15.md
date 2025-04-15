@@ -28,7 +28,7 @@
   - Make sure all buttons and functionalites are working as intended 
 
 ### Sophie Tran
-- **Total Hours Worked: 6**
+- **Total Hours Worked: 7**
 - **Tasks Completed:**
   - Collaborated with Kevin and Rayyan to update website from last week's suggestion
   - Started working on Final Project Report
