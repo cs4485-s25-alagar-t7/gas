@@ -2,6 +2,7 @@ import express from 'express';
 const router = express.Router();
 import AssignmentService from '../services/assignments.service.js';
 
+// get all assignments
 router.get('/', async (req, res) => {
   try {
     const assignments = await AssignmentService.getAllAssignments();
@@ -12,6 +13,7 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get all assignments for a specific course
 router.get('/course/:courseId', async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -23,6 +25,7 @@ router.get('/course/:courseId', async (req, res) => {
   }
 });
 
+// Get all assignments for a specific professor
 router.get('/professor/:professorId', async (req, res) => {
   try {
     const { professorId } = req.params;
@@ -34,6 +37,7 @@ router.get('/professor/:professorId', async (req, res) => {
   }
 });
 
+// Get all assignments for a specific candidate
 router.get('/candidate/:candidateId', async (req, res) => {
   try {
     const { candidateId } = req.params;
@@ -45,6 +49,7 @@ router.get('/candidate/:candidateId', async (req, res) => {
   }
 });
 
+// Create assignment for a specific course section
 router.post('/assign', async (req, res) => {
   try {
     const { candidateId, courseId } = req.body;
@@ -56,6 +61,7 @@ router.post('/assign', async (req, res) => {
   }
 });
 
+// Delete an assignment
 router.delete('/:assignmentId', async (req, res) => {
   try {
     const { assignmentId } = req.params;
