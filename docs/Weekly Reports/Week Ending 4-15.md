@@ -57,7 +57,7 @@
 - **Tasks For Next Week:**
   - Finish resume parsing API endpoint
   - Test resume parsing API
-    - requires a controller + service in backend
+    - (this requires the candidate controller so thats why I did that first)
     - use test data Thenn sent us
 
 ### Arsal Hussain
