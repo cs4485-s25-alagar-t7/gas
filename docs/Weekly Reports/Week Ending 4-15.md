@@ -8,10 +8,26 @@
 - **Tasks Completed:**
 - **Tasks For Next Week:**
 
-### Member 2
-- **Total Hours Worked:**
+### Rayyan Waris
+- **Total Hours Worked: 14**
 - **Tasks Completed:**
+  - Fixed bug with docker and frontend container, docker fully working with docker compose up 
+  - Worked with Arsal to finish coding the API endpoints for Candidates and Professors
+  - Seeded new data into seed.js thats closer to real life test cases  
+  - Sucessfully fully connected MongoDB with frontend
+  - Worked with Kevin and Sophie on implementing frontend modifications based on last week's suggestions
+    - New dashboard page
+    - Delete upload comp from sidebar
+    - Various changes on all of the tables
+  - Created new frontend views
+    - New dashboard page
+    - Create Semester page
+    - A bunch of new pop-ups when you click certain buttons on some of the tables
 - **Tasks For Next Week:**
+  - Implement resume parser and algo onto the frontend
+  - Test project with real life test cases provided by Thenn
+  - Improve UI if anything isn't working how it should
+  - Makr sure all buttons and functionalites are working as intended 
 
 ### Sophie Tran
 - **Total Hours Worked: 6**
