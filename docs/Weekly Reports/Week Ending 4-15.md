@@ -49,12 +49,16 @@
 ### Solomon Pierce
 - **Total Hours Worked: 7**
 - **Tasks Completed:**
-  - Added Candidates Controller + Service
-  - Created matching algorithm endpoint
-  - Tested matching algorithm
+  - Added another Controller + Service for Candidates (PR #23)
+  - Created matching algorithm endpoint in the Assignments service  (PR #23)
+  - Tested matching algorithm using Postman
+  - Modified Schema to disambiguate course/section IDs (PR #23)
+  - Debugging typescript compile issues with imports in resume parsing API
 - **Tasks For Next Week:**
-  - Finish resume parsing API
+  - Finish resume parsing API endpoint
   - Test resume parsing API
+    - requires a controller + service in backend
+    - use test data Thenn sent us
 
 ### Arsal Hussain
 - **Total Hours Worked: 6**
