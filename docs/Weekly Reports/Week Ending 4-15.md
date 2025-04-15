@@ -46,10 +46,15 @@
   - Assist in testing of website
   - Polish up website design and login page
 
-### Member 4
-- **Total Hours Worked:**
+### Solomon Pierce
+- **Total Hours Worked: 7**
 - **Tasks Completed:**
+  - Added Candidates Controller + Service
+  - Created matching algorithm endpoint
+  - Tested matching algorithm
 - **Tasks For Next Week:**
+  - Finish resume parsing API
+  - Test resume parsing API
 
 ### Arsal Hussain
 - **Total Hours Worked: 6**
