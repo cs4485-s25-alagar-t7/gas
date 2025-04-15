@@ -13,10 +13,16 @@
 - **Tasks Completed:**
 - **Tasks For Next Week:**
 
-### Member 3
-- **Total Hours Worked:**
+### Sophie Tran
+- **Total Hours Worked: 6**
 - **Tasks Completed:**
+  - Collaborated with Kevin and Rayyan to update website from last week's suggestion
+  - Started working on Final Project Report
+  - Contributed to design and identified improvements for logical flow
 - **Tasks For Next Week:**
+  - Continue working on final report
+  - Assist in testing of website
+  - Polish up website design and login page
 
 ### Member 4
 - **Total Hours Worked:**
