@@ -76,16 +76,17 @@ class AssignmentService {
     const assignments = [];
 
     // filter candidates who are not already assigned to a section
-    const existingAssignments = await Assignment.find({ semester: semester });
-    const assignedCandidateIds = existingAssignments.map(assignment => assignment.grader_id);
+    const existingAssignments = await this.getAllAssignments(semester);
+    const assignedCandidateIds = existingAssignments.map(assignment => assignment.grader_id.toString());
     const setOfAssignedCandidateIds = new Set(assignedCandidateIds);
-    const unassignedCandidates = candidates.filter(candidate => !setOfAssignedCandidateIds.has(candidate._id));
+    const unassignedCandidates = candidates.filter(candidate => !setOfAssignedCandidateIds.has(candidate._id.toString()));
+    if (unassignedCandidates.length === 0) throw new Error('No unassigned candidates found for this semester');
 
     const weights = {
       gpa: 0.5,
       seniority: 0.2,
-      experience: 0.2,
-      keywords: 0.1
+      experience: 0.8,
+      keywords: 0.3
     }
     for (const candidate of unassignedCandidates) {
       const assignment = new Assignment({
