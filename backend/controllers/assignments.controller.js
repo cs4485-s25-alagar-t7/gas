@@ -5,7 +5,7 @@ import AssignmentService from '../services/assignments.service.js';
 // get all assignments for a specific semester
 router.get('/', async (req, res) => {
   try {
-    const assignments = await AssignmentService.getAllAssignments(semester);
+    const assignments = await AssignmentService.getAllAssignments(req.get("semester"));
     res.json(assignments);
   } catch (error) {
     console.error(error);

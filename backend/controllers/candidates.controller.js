@@ -1,6 +1,6 @@
 import { Router } from 'express';
 const router = Router();
-import CandidatesService from '../services/candidates.service';
+import CandidatesService from '../services/candidates.service.js';
 
 // get candidates by netId
 router.get('/candidate/:netId', async (req, res) => {
@@ -13,3 +13,5 @@ router.get('/candidate/:netId', async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
+
+export default router;

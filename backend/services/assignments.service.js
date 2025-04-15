@@ -40,17 +40,17 @@ class AssignmentService {
     return await Assignment.find({ grader_id: candidateId, semester: semester });
   }
 
-  static async assignCandidateToSection(candidateId, section, semester) {
+  static async assignCandidateToSection(candidateId, sectionId, semester) {
     const candidate = await Candidate.findOne({ _id: candidateId });
-    const section = await Section.findOne({ _id: section });
+    const section = await Section.findOne({ _id: sectionId });
 
-    if (!candidate || !section) {
+    if (!candidate || !sectionId) {
       throw new Error("Candidate or Section not found.");
     }
 
     const assignment = new Assignment({
       grader_id: candidate._id,
-      course_section_id: section._id,
+      course_section_id: sectionId._id,
       manuallyAssigned: true,
       status: 'pending',
       semester: semester,
