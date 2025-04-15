@@ -1,6 +1,7 @@
 import express, { json } from 'express';
 import cors from 'cors';
 import assignmentsRouter from './controllers/assignments.controller.js';
+import candidatesRouter from './controllers/candidates.controller.js';
 import mongoose from 'mongoose';
 
 const username = process.env.MONGO_INITDB_ROOT_USERNAME;
@@ -21,6 +22,7 @@ app.use(cors());
 app.use(json());
 
 app.use('/api/assignments', assignmentsRouter);
+app.use('/api/candidates', candidatesRouter);
 
 const PORT = process.env.PORT || 5000;
 
