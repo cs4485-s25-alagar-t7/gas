@@ -38,5 +38,6 @@
 - **Tasks For Next Week:**
   - Implement temporary login credentials to access as part of the admin (since full SSO not required)
   - Work on deployment and pushing application to UTD Server
+  - Work on Final Report
 
 
