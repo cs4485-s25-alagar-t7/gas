@@ -106,10 +106,10 @@ class AssignmentService {
       // Calculate the score based on the weights
       const score = (candidate.gpa * weights.gpa) + (seniorityScore * weights.seniority) +
         (experienceScore * weights.experience) + (matchingKeywordsRatio * weights.keywords);
-      console.log(`Candidate: ${candidate.name}, GPA: ${candidate.gpa},
-         Seniority: ${candidate.seniority}, Seniority Score: ${seniorityScore},
-          Experience: ${candidate.experience}, ExperienceScore: ${experienceScore},
-           Keywords: ${matchingKeywordsRatio}, Score: ${score}`);
+      // console.log(`Candidate: ${candidate.name}, GPA: ${candidate.gpa},
+      //    Seniority: ${candidate.seniority}, Seniority Score: ${seniorityScore},
+      //     Experience: ${candidate.previous_grader_experience}, ExperienceScore: ${experienceScore},
+      //      Keywords: ${matchingKeywordsRatio}, Score: ${score}`);
       assignment.score = score;
 
       assignments.push(assignment);
