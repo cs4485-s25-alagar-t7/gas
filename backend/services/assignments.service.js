@@ -1,6 +1,6 @@
 import Assignment from '../models/Assignment.js';
 import Candidate from '../models/Candidate.js';
-import Course from '../models/Course.js';
+import Section from '../models/Section.js';
 
 class AssignmentService {
   static async getAllAssignments() {
@@ -12,47 +12,45 @@ class AssignmentService {
     }
   }
 
-  static async getAssignmentsByCourse(courseId) {
-    return await Assignment.find({ course_section_id: courseId });
+  static async getAssignmentsBySection(sectionId) {
+    return await Assignment.find({ course_section_id: sectionId });
   }
 
   static async getAssignmentsByProfessor(professorId) {
-    return await Assignment.find({ professorId });
+    // Assuming that the professorId is stored in the course section
+    // and that the Assignment model has a reference to the course section
+    const professors_sections = await Section.find({ instructor: { $elemMatch: { netid: professorId } } });
+    const sectionIds = professors_sections.map(section => section._id);
+    return await Assignment.find({ course_section_id: { $in: sectionIds } });
   }
 
   static async getAssignmentsByCandidate(candidateId) {
-    return await Assignment.find({ candidateId });
+    return await Assignment.find({ grader_id: candidateId });
   }
 
-  static async assignCandidateToSection(candidateId, courseId) {
-    const candidate = await Candidate.findOne({ candidateID: candidateId });
-    const course = await Course.findOne({ course_id: courseId });
+  static async assignCandidateToSection(candidateId, section) {
+    const candidate = await Candidate.findOne({ netid: candidateId });
+    const section = await Section.findOne({ _id: section });
 
-    if (!candidate || !course) {
-      throw new Error("Candidate or Course not found.");
+    if (!candidate || !section) {
+      throw new Error("Candidate or Section not found.");
     }
 
     const assignment = new Assignment({
       candidate: candidate._id,
-      course: course._id,
+      course_section_id: section._id,
       manuallyAssigned: true,
     });
-
-    candidate.assignedCourse = course._id;
-    await candidate.save();
-
-    course.assignedCandidates.push(candidate._id);
-    await course.save();
 
     return assignment.save();
   }
 
-  static async createAssignmentsForSection(courseId) {
-    const course = await Course.findById(courseId);
-    if (!course) throw new Error('Course not found');
+  static async createAssignmentsForSection(sectionId) {
+    const section = await Section.findById(sectionId);
+    if (!section) throw new Error('Section not found');
 
     const candidates = await Candidate.find();
-    const prevAssignments = await Assignment.find({ semester: previousSemester(course.semester) });
+    const prevAssignments = await Assignment.find({ semester: previousSemester(section.semester) });
     const prevCandidates = prevAssignments.map(assignment => assignment.candidate);
 
     const assignments = [];
@@ -64,24 +62,17 @@ class AssignmentService {
         (candidate.gpa * weights.gpa) +
         ((candidate.seniority === 'Masters' ? 1 : 0) * weights.seniority) +
         (candidate.previous_grader_experience ? weights.experience : 0) +
-        (candidate.resume_keywords.filter(keyword => course.keywords.includes(keyword)).length * weights.keywords);
+        (candidate.resume_keywords.filter(keyword => section.keywords.includes(keyword)).length * weights.keywords);
 
       const assignment = new Assignment({
         candidate: candidate._id,
-        course: course._id,
+        course: section._id,
         status: 'pending',
-        semester: course.semester,
+        semester: section.semester,
         score,
         manuallyAssigned: false,
       });
 
-      candidate.assignedCourse = course._id;
-      await candidate.save();
-
-      course.assignedCandidates.push(candidate._id);
-      await course.save();
-
-      assignments.push(await assignment.save());
     }
 
     return assignments;
@@ -91,30 +82,14 @@ class AssignmentService {
     const assignment = await Assignment.findById(assignmentId);
     if (!assignment) throw new Error('Assignment not found');
 
-    const candidate = await Candidate.findById(assignment.candidate);
-    const course = await Course.findById(assignment.course);
-
-    if (candidate) {
-      candidate.assignedCourse = null;
-      await candidate.save();
-    }
-
-    if (course) {
-      course.assignedCandidates = course.assignedCandidates.filter(
-        id => id.toString() !== candidate._id.toString()
-      );
-      await course.save();
-    }
-
     return assignment.deleteOne();
   }
 
   static async assignReturningCandidates(courseId) {
-    const course = await Course.findById(courseId);
+    const course = await Section.findById(courseId);
     if (!course) throw new Error('Course not found');
 
     const prevCandidates = await Candidate.find({ semester: previousSemester(course.semester) });
-    const candidates = prevCandidates.filter(candidate => !candidate.assignedCourse);
 
     const assignments = [];
 

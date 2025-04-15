@@ -2,7 +2,7 @@
 import {connect} from 'mongoose';
 import Assignment from './models/Assignment.js';
 import { configDotenv } from 'dotenv';
-import Course from './models/Course.js';
+import Section from './models/Section.js';
 import Candidate from './models/Candidate.js';
 configDotenv({"path" : "../.env"});
 
@@ -15,27 +15,27 @@ connect(`mongodb://${admin}:${pw}@localhost:27017/gas?authSource=${process.env.M
   })
   .then(() => {
     console.log('🧹 Cleared assignments');
-    return Course.deleteMany({});
+    return Section.deleteMany({});
   })
   .then(() => {
-    console.log('🧹 Cleared courses');
+    console.log('🧹 Cleared sections');
     return Candidate.deleteMany({});
   })
   .then(() => {
     console.log('🧹 Cleared candidates');
-    return Course.insertMany([
+    return Section.insertMany([
       {
-        course_id: 'CS2340',
-        section_id: '501',
-        instructor: { name: 'Dr. Smith', email: 'smith@example.edu' },
+        course_name: 'CS2340',
+        section_num: '501',
+        instructor: { name: 'Dr. Smith', netid: 'sll234545' },
         keywords: ['software', 'design'],
         semester: 'fall2025',
         num_required_graders: 1
       },
       {
-        course_id: 'CS1331',
-        section_id: '002',
-        instructor: { name: 'Dr. Johnson', email: 'johnson@example.edu' },
+        course_name: 'CS1331',
+        section_num: '002',
+        instructor: { name: 'Dr. Johnson', netid: 'jsx123300' },
         keywords: ['java', 'programming'],
         semester: 'fall2025',
         num_required_graders: 3
@@ -75,20 +75,20 @@ connect(`mongodb://${admin}:${pw}@localhost:27017/gas?authSource=${process.env.M
     return Promise.all([
       Candidate.findOne({ netid: 'axj220000' }).exec(),
       Candidate.findOne({ netid: 'bjs1234400' }).exec(),
-      Course.findOne({ course_id: 'CS1331', section_id: '002' }).exec(),
-      Course.findOne({ course_id: 'CS2340', section_id: '501' }).exec()
+      Section.findOne({ course_name: 'CS1331', section_num: '002' }).exec(),
+      Section.findOne({ course_name: 'CS2340', section_num: '501' }).exec()
     ]).then(([alice, bob, cs1331, cs2340]) => {
       if (!alice || !bob || !cs1331 || !cs2340) {
       throw new Error('Failed to fetch required data for assignments');
       }
       return Assignment.insertMany([
       {
-        course_section_id: cs1331._id,
+        course_section_num: cs1331._id,
         grader_id: alice._id,
         semester: 'fall2025'
       },
       {
-        course_section_id: cs2340._id,
+        course_section_num: cs2340._id,
         grader_id: bob._id,
         semester: 'fall2025'
       }

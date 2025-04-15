@@ -18,16 +18,16 @@ stores grader information
 ```
 - subject to change, a fields will be addded/removed to support the algorithm
 
-## Course Sections Collection
+## Sections Collection
 stores the course section information
 ```json 
 {
   "_id": ObjectId("60c72b2f9b1d8b5a3c8e4e1b"),
-  "course_id": "CS101",
-  "section_id": "001",
+  "course_name": "CS101",
+  "section_num": "001",
   "instructor": {
     "name": "Dr. Emily Smith",
-    "email": "emily.smith@example.com"
+    "netid": "exs132325"
   },
   "keywords" : ["java"],
   "semester": "Spring 2025",

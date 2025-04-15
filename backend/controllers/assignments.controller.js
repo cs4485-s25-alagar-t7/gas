@@ -13,11 +13,11 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get all assignments for a specific course
+// Get all assignments for a specific course (section)
 router.get('/course/:courseId', async (req, res) => {
   try {
     const { courseId } = req.params;
-    const assignments = await AssignmentService.getAssignmentsByCourse(courseId);
+    const assignments = await AssignmentService.getAssignmentsBySection(courseId);
     res.json(assignments);
   } catch (error) {
     console.error(error);
