@@ -27,7 +27,7 @@
   - Implement resume parser and algo onto the frontend
   - Test project with real life test cases provided by Thenn
   - Improve UI if anything isn't working how it should
-  - Makr sure all buttons and functionalites are working as intended 
+  - Make sure all buttons and functionalites are working as intended 
 
 ### Sophie Tran
 - **Total Hours Worked: 6**
