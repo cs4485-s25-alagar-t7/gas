@@ -2,10 +2,10 @@ import express from 'express';
 const router = express.Router();
 import AssignmentService from '../services/assignments.service.js';
 
-// get all assignments
+// get all assignments for a specific semester
 router.get('/', async (req, res) => {
   try {
-    const assignments = await AssignmentService.getAllAssignments();
+    const assignments = await AssignmentService.getAllAssignments(semester);
     res.json(assignments);
   } catch (error) {
     console.error(error);
@@ -16,8 +16,8 @@ router.get('/', async (req, res) => {
 // Get all assignments for a specific course (section)
 router.get('/course/:courseId', async (req, res) => {
   try {
-    const { courseId } = req.params;
-    const assignments = await AssignmentService.getAssignmentsBySection(courseId);
+    const { courseId, semester } = req.params;
+    const assignments = await AssignmentService.getAssignmentsBySection(courseId, semester);
     res.json(assignments);
   } catch (error) {
     console.error(error);
@@ -28,8 +28,8 @@ router.get('/course/:courseId', async (req, res) => {
 // Get all assignments for a specific professor
 router.get('/professor/:professorId', async (req, res) => {
   try {
-    const { professorId } = req.params;
-    const assignments = await AssignmentService.getAssignmentsByProfessor(professorId);
+    const { professorId, semester } = req.params;
+    const assignments = await AssignmentService.getAssignmentsByProfessor(professorId, semester);
     res.json(assignments);
   } catch (error) {
     console.error(error);
@@ -41,7 +41,7 @@ router.get('/professor/:professorId', async (req, res) => {
 router.get('/candidate/:candidateId', async (req, res) => {
   try {
     const { candidateId } = req.params;
-    const assignments = await AssignmentService.getAssignmentsByCandidate(candidateId);
+    const assignments = await AssignmentService.getAssignmentsByCandidate(candidateId, semester);
     res.json(assignments);
   } catch (error) {
     console.error(error);
@@ -52,8 +52,8 @@ router.get('/candidate/:candidateId', async (req, res) => {
 // Create assignment for a specific course section
 router.post('/assign', async (req, res) => {
   try {
-    const { candidateId, courseId } = req.body;
-    const assignment = await AssignmentService.assignCandidateToSection(candidateId, courseId);
+    const { candidateId, sectionId, semester } = req.body;
+    const assignment = await AssignmentService.assignCandidateToSection(candidateId, sectionId, semester);
     res.status(201).json({ message: 'Assignment created.', assignment });
   } catch (error) {
     console.error(error);

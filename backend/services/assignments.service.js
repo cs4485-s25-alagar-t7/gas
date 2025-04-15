@@ -3,33 +3,45 @@ import Candidate from '../models/Candidate.js';
 import Section from '../models/Section.js';
 
 class AssignmentService {
-  static async getAllAssignments() {
+
+  constructor() {
+    // Constructor logic if needed
+  }
+
+  static weights = {
+    gpa: 0.5,
+    seniority: 0.2,
+    experience: 0.2,
+    keywords: 0.1
+  }
+
+  static async getAllAssignments(semester) {
     try {
-      return await Assignment.find();
+      return await Assignment.find({ semester: semester });
     } catch (err) {
       console.error("Error in getAllAssignments", err);
       throw err;
     }
   }
 
-  static async getAssignmentsBySection(sectionId) {
-    return await Assignment.find({ course_section_id: sectionId });
+  static async getAssignmentsBySection(sectionId, semester) {
+    return await Assignment.find({ course_section_id: sectionId, semester: semester });
   }
 
-  static async getAssignmentsByProfessor(professorId) {
+  static async getAssignmentsByProfessor(professorId, semester) {
     // Assuming that the professorId is stored in the course section
     // and that the Assignment model has a reference to the course section
-    const professors_sections = await Section.find({ instructor: { $elemMatch: { netid: professorId } } });
+    const professors_sections = await Section.find({ instructor: { $elemMatch: { netid: professorId } }, semester: semester });
     const sectionIds = professors_sections.map(section => section._id);
     return await Assignment.find({ course_section_id: { $in: sectionIds } });
   }
 
-  static async getAssignmentsByCandidate(candidateId) {
-    return await Assignment.find({ grader_id: candidateId });
+  static async getAssignmentsByCandidate(candidateId, semester) {
+    return await Assignment.find({ grader_id: candidateId, semester: semester });
   }
 
-  static async assignCandidateToSection(candidateId, section) {
-    const candidate = await Candidate.findOne({ netid: candidateId });
+  static async assignCandidateToSection(candidateId, section, semester) {
+    const candidate = await Candidate.findOne({ _id: candidateId });
     const section = await Section.findOne({ _id: section });
 
     if (!candidate || !section) {
@@ -37,15 +49,18 @@ class AssignmentService {
     }
 
     const assignment = new Assignment({
-      candidate: candidate._id,
+      grader_id: candidate._id,
       course_section_id: section._id,
       manuallyAssigned: true,
+      status: 'pending',
+      semester: semester,
+      score: 0,
     });
 
     return assignment.save();
   }
 
-  static async createAssignmentsForSection(sectionId) {
+  static async createAssignmentsForSection(sectionId, semester, weights) {
     const section = await Section.findById(sectionId);
     if (!section) throw new Error('Section not found');
 
@@ -65,10 +80,10 @@ class AssignmentService {
         (candidate.resume_keywords.filter(keyword => section.keywords.includes(keyword)).length * weights.keywords);
 
       const assignment = new Assignment({
-        candidate: candidate._id,
-        course: section._id,
+        grader_id: candidate._id,
+        course_section_id: section._id,
         status: 'pending',
-        semester: section.semester,
+        semester: semester,
         score,
         manuallyAssigned: false,
       });
@@ -85,20 +100,19 @@ class AssignmentService {
     return assignment.deleteOne();
   }
 
-  static async assignReturningCandidates(courseId) {
-    const course = await Section.findById(courseId);
-    if (!course) throw new Error('Course not found');
-
-    const prevCandidates = await Candidate.find({ semester: previousSemester(course.semester) });
+  // This function assigns candidates from the previous semester to the current semester
+  static async assignReturningCandidates(semester) {
+    
+    const prevCandidates = await Candidate.find({ semester: previousSemester(semester) });
 
     const assignments = [];
 
-    for (const candidate of candidates) {
+    for (const candidate of prevCandidates) {
       const assignment = new Assignment({
         candidate: candidate._id,
         course: course._id,
         status: 'pending',
-        semester: course.semester,
+        semester: semester,
         manuallyAssigned: false,
       });
 
