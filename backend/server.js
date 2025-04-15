@@ -20,7 +20,6 @@ const app = express();
 app.use(cors());
 app.use(json());
 
-// Add this:
 app.use('/api/assignments', assignmentsRouter);
 
 const PORT = process.env.PORT || 5000;

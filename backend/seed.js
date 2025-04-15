@@ -43,7 +43,7 @@ connect(`mongodb://${admin}:${pw}@localhost:27017/gas?authSource=${process.env.M
     ]);
   })
   .then(() => {
-    console.log('✅ Courses seeded!');
+    console.log('✅ Sections seeded!');
     return Candidate.insertMany([
       {
         name: 'Alice Johnson',
