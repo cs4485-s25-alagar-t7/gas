@@ -1,98 +1,245 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import { useNavigate } from "react-router-dom";
 
+const seasons = ["Fall", "Spring", "Summer"] as const;
+
 const CreateSemester: React.FC = () => {
   const navigate = useNavigate();
+
+  const [season, setSeason] = useState<typeof seasons[number]>("Fall");
+  const [year, setYear] = useState<string>("2025");
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [sectionsFile, setSectionsFile] = useState<File | null>(null);
+  const [gradersFile, setGradersFile] = useState<File | null>(null);
+  const [uploadDone, setUploadDone] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
+
+  // NEW: import-previous modal
+  const [showImportModal, setShowImportModal] = useState(true);
+
+  useEffect(() => {
+    // show on mount
+    setShowImportModal(true);
+  }, []);
+
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    setter: React.Dispatch<React.SetStateAction<File | null>>
+  ) => {
+    if (e.target.files && e.target.files[0]) {
+      setter(e.target.files[0]);
+    }
+  };
+
+  const handleContinue = () => {
+    if (!resumeFile || !sectionsFile || !gradersFile) {
+      alert("Please upload all three files before continuing.");
+      return;
+    }
+    setUploadDone(true);
+    alert("Files ready! You can now start the assignment.");
+  };
+
+  const handleStartAssignment = () => {
+    setIsStarting(true);
+    setTimeout(() => {
+      alert(`Assignment started for ${season} ${year}!`);
+      setIsStarting(false);
+      navigate("/");
+    }, 500);
+  };
+
+  const handleResetLastSemester = () => {
+    if (window.confirm("Reset the most recent semester’s data? This cannot be undone.")) {
+      alert("Last semester data has been reset (simulated).");
+    }
+  };
+
+  const handleImportPrevious = () => {
+    alert("Importing previous/returning graders into assignment (simulated).");
+    setShowImportModal(false);
+  };
 
   return (
     <div className="flex h-screen bg-gray-100">
       <Sidebar />
-    <div className="flex-1 flex flex-col">
-      <Navbar />
+      <div className="flex-1 flex flex-col">
+        <Navbar />
 
-      <div className="flex justify-center items-center flex-1">
-        <div className="p-8 bg-orange-100 rounded-md shadow-md max-w-lg w-full">
-        <h1 className="text-2xl font-semibold mb-6 text-center">Create New Semester</h1>
+        <div className="flex justify-center items-center flex-1">
+          <div className="p-8 bg-orange-100 rounded-md shadow-md max-w-lg w-full space-y-6">
+            <h1 className="text-2xl font-semibold text-center">Create New Semester</h1>
 
-        <div className="flex justify-between mb-4">
-          <button className="bg-white px-6 py-2 rounded shadow hover:bg-orange-200 border border-orange-400 text-orange-600">
-            Fall
-          </button>
-          <button className="bg-white px-6 py-2 rounded shadow hover:bg-orange-200 border border-orange-400 text-orange-600">
-            Spring
-          </button>
-          <button className="bg-white px-6 py-2 rounded shadow hover:bg-orange-200 border border-orange-400 text-orange-600">
-            Summer
-          </button>
-        </div>
+            {/* Season Selector */}
+            <div className="flex justify-between">
+              {seasons.map(s => (
+                <button
+                  key={s}
+                  onClick={() => setSeason(s)}
+                  className={`px-6 py-2 rounded shadow border ${
+                    season === s
+                      ? "bg-orange-400 text-white border-orange-500"
+                      : "bg-white text-orange-600 border-orange-400 hover:bg-orange-200"
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
 
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-1">Enter Year (20xx):</label>
-          <input
-            type="text"
-            placeholder="2025"
-            className="w-full border px-4 py-2 rounded shadow-sm"
-          />
-        </div>
+            {/* Year Input */}
+            <div>
+              <label className="block text-gray-700 mb-1">Enter Year (20xx):</label>
+              <input
+                type="text"
+                value={year}
+                onChange={e => setYear(e.target.value)}
+                placeholder="2025"
+                className="w-full border px-4 py-2 rounded shadow-sm"
+              />
+            </div>
 
-        <div className="mb-6">
-          <label className="block text-gray-700 mb-2">Upload Resume PDF</label>
-          <div className="border-dashed border-2 border-gray-400 p-4 text-center rounded bg-white">
-            <input type="file" accept=".pdf" className="hidden" id="resume-upload" />
-            <label
-            htmlFor="resume-upload"
-            className="hover:bg-orange-200 border border-orange-400 text-orange-600 px-4 py-2 rounded font-semibold cursor-pointer"
-            >
-            Choose File
-            </label>
+            {/* File Uploads */}
+            <div className="space-y-4">
+              {/* Resume */}
+              <div>
+                <label className="block text-gray-700 mb-1">Upload Resume PDF</label>
+                <div className="border-dashed border-2 border-gray-400 p-4 text-center rounded bg-white">
+                  <input
+                    id="resume-upload"
+                    type="file"
+                    accept=".pdf"
+                    className="hidden"
+                    onChange={e => handleFileChange(e, setResumeFile)}
+                  />
+                  <label
+                    htmlFor="resume-upload"
+                    className="hover:bg-orange-200 border border-orange-400 text-orange-600 px-4 py-2 rounded font-semibold cursor-pointer"
+                  >
+                    Choose File
+                  </label>
+                  {resumeFile && <p className="mt-2 text-sm">{resumeFile.name}</p>}
+                </div>
+                <p className="text-sm text-gray-500">Format accepted: .pdf</p>
+              </div>
+
+              {/* Sections */}
+              <div>
+                <label className="block text-gray-700 mb-1">Upload Excel Sheet of Sections</label>
+                <div className="border-dashed border-2 border-gray-400 p-4 text-center rounded bg-white">
+                  <input
+                    id="sections-upload"
+                    type="file"
+                    accept=".xlsx"
+                    className="hidden"
+                    onChange={e => handleFileChange(e, setSectionsFile)}
+                  />
+                  <label
+                    htmlFor="sections-upload"
+                    className="hover:bg-orange-200 border border-orange-400 text-orange-600 px-4 py-2 rounded font-semibold cursor-pointer"
+                  >
+                    Choose File
+                  </label>
+                  {sectionsFile && <p className="mt-2 text-sm">{sectionsFile.name}</p>}
+                </div>
+                <p className="text-sm text-gray-500">Format accepted: .xlsx</p>
+              </div>
+
+              {/* Graders */}
+              <div>
+                <label className="block text-gray-700 mb-1">Upload Excel Sheet of Graders</label>
+                <div className="border-dashed border-2 border-gray-400 p-4 text-center rounded bg-white">
+                  <input
+                    id="graders-upload"
+                    type="file"
+                    accept=".xlsx"
+                    className="hidden"
+                    onChange={e => handleFileChange(e, setGradersFile)}
+                  />
+                  <label
+                    htmlFor="graders-upload"
+                    className="hover:bg-orange-200 border border-orange-400 text-orange-600 px-4 py-2 rounded font-semibold cursor-pointer"
+                  >
+                    Choose File
+                  </label>
+                  {gradersFile && <p className="mt-2 text-sm">{gradersFile.name}</p>}
+                </div>
+                <p className="text-sm text-gray-500">Format accepted: .xlsx</p>
+              </div>
+            </div>
+
+            {/* Bottom Actions */}
+            <div className="flex justify-between items-center">
+              <button
+                onClick={() => navigate("/")}
+                className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded flex-1 mr-2"
+              >
+                Back to Dashboard
+              </button>
+
+              {!uploadDone ? (
+                <button
+                  onClick={handleContinue}
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded flex-1 ml-2"
+                >
+                  Continue
+                </button>
+              ) : (
+                <button
+                  onClick={handleStartAssignment}
+                  disabled={isStarting}
+                  className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded flex-1 ml-2"
+                >
+                  {isStarting ? "Starting…" : "Start Assignment"}
+                </button>
+              )}
+            </div>
+
+            {/* Reset / Re-open Import */}
+            <div className="flex justify-between mt-4 text-sm">
+              <button
+                onClick={handleResetLastSemester}
+                className="text-red-600 hover:underline"
+              >
+                Reset Last Semester
+              </button>
+              <button
+                onClick={() => setShowImportModal(true)}
+                className="text-blue-600 hover:underline"
+              >
+                Import Previous Graders
+              </button>
+            </div>
           </div>
-          <p className="text-sm text-gray-500 mt-2">Format accepted: .pdf</p>
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-gray-700 mb-2">Upload Excel Sheet of Sections</label>
-          <div className="border-dashed border-2 border-gray-400 p-4 text-center rounded bg-white">
-            <input type="file" accept=".xlsx" className="hidden" id="sections-upload" />
-            <label
-            htmlFor="sections-upload"
-            className="hover:bg-orange-200 border border-orange-400 text-orange-600 px-4 py-2 rounded font-semibold cursor-pointer"
-            >
-            Choose File
-            </label>
-          </div>
-          <p className="text-sm text-gray-500 mt-2">Format accepted: .xlsx</p>
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-gray-700 mb-2">Upload Excel Sheet of Graders</label>
-          <div className="border-dashed border-2 border-gray-400 p-4 text-center rounded bg-white">
-            <input type="file" accept=".xlsx" className="hidden" id="graders-upload" />
-            <label
-            htmlFor="graders-upload"
-            className="hover:bg-orange-200 border border-orange-400 text-orange-600 px-4 py-2 rounded font-semibold cursor-pointer"
-            >
-            Choose File
-            </label>
-          </div>
-          <p className="text-sm text-gray-500 mt-2">Format accepted: .xlsx</p>
-        </div>
-
-        <div className="flex gap-4">
-          <button
-            onClick={() => navigate("/")}
-            className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded flex-1"
-          >
-            Back to Dashboard
-          </button>
-          <button className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded flex-1">
-            Continue
-          </button>
-        </div>
         </div>
       </div>
-    </div>
+
+      {/* Import Previous Graders Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
+            <h2 className="text-lg font-semibold mb-4">
+              Import previous/returning graders into assignment?
+            </h2>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => { setShowImportModal(false); }}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded"
+              >
+                No
+              </button>
+              <button
+                onClick={handleImportPrevious}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
