@@ -67,31 +67,41 @@ async function getAssignmentsByCandidate(req, res) {
 }
 
 // ✅ MANUAL ASSIGNMENT
+// Assign a candidate to a course
 async function assignCandidateToCourse(req, res) {
-  try {
-    const { candidateID, courseNumber, sectionID } = req.body;
+  const { candidateID, courseNumber, sectionID } = req.body;
 
-    const candidate = await Candidate.findOne({ netid: candidateID });
-    const course = await Course.findOne({ course_id: courseNumber, section_id: sectionID });
+  const candidate = await Candidate.findOne({ netid: candidateID });
+  const course = await Course.findOne({ course_id: courseNumber, section_id: sectionID });
 
-    if (!candidate || !course) {
-      return res.status(404).json({ message: "Candidate or Course not found." });
-    }
-
-    const assignment = new Assignment({
-      grader_id: candidate._id,
-      course_section_id: course._id,
-      manuallyAssigned: true,
-      semester: course.semester,
-      status: "pending"
-    });
-
-    const saved = await assignment.save();
-    res.status(201).json(saved);
-  } catch (err) {
-    res.status(500).json({ message: "Error assigning candidate", error: err.message });
+  if (!candidate || !course) {
+    return res.status(404).json({ message: "Candidate or Course not found." });
   }
+
+  // Remove any existing assignment for this course
+  const existingAssignment = await Assignment.findOne({ course_section_id: course._id });
+  if (existingAssignment) {
+    await Assignment.findByIdAndDelete(existingAssignment._id);
+  }
+
+  // Prevent assigning candidate if already assigned
+  const alreadyAssigned = await Assignment.findOne({ grader_id: candidate._id });
+  if (alreadyAssigned) {
+    return res.status(400).json({ message: "Candidate is already assigned to another course." });
+  }
+
+  const newAssignment = new Assignment({
+    grader_id: candidate._id,
+    course_section_id: course._id,
+    manuallyAssigned: true,
+    semester: course.semester,
+    status: "accepted"
+  });
+
+  await newAssignment.save();
+  return res.status(201).json({ message: "Assignment created", assignment: newAssignment });
 }
+
 
 // ✅ AUTO ASSIGNMENT
 const weights = {
