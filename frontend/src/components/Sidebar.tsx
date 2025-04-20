@@ -43,7 +43,7 @@ const Sidebar = () => {
               onClick={() => handleClick("/ProfessorsPage")}
               className="w-full text-left p-2 hover:bg-gray-700 rounded-md"
             >
-              Professor
+              Course Recommendation
             </button>
           </li>
         </ul>
