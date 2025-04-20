@@ -1,165 +1,170 @@
 import Assignment from '../models/Assignment.js';
 import Candidate from '../models/Candidate.js';
-import Course from '../models/Course.js';
+import Section from '../models/Section.js';
 
-// ✅ GET ALL ASSIGNMENTS
-async function getAllAssignments(req, res) {
-  try {
-    const assignments = await Assignment.find()
-      .populate('course_section_id')
-      .populate('grader_id');
+class AssignmentService {
 
-    const result = assignments
-      .filter(a => a.course_section_id && a.grader_id)
-      .map(a => ({
-        _id: a._id,
-        course: a.course_section_id,
-        assignedCandidate: a.grader_id
-      }));
-    console.log('📦 Populated assignments:', JSON.stringify(result, null, 2));
-    res.json(result);
-  } catch (err) {
-    console.error("Error in getAllAssignments", err);
-    res.status(500).json({ message: "Error fetching assignments", error: err.message });
-  }
-}
-
-// ✅ BY COURSE
-async function getAssignmentsByCourse(req, res) {
-  try {
-    const { courseNumber } = req.params;
-    const assignments = await Assignment.find()
-      .populate('course_section_id')
-      .populate('grader_id');
-    const filtered = assignments.filter(a => a.course_section_id.course_id === courseNumber);
-    res.json(filtered);
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching by course", error: err.message });
-  }
-}
-
-// ✅ BY PROFESSOR
-async function getAssignmentsByProfessor(req, res) {
-  try {
-    const { professorName } = req.params;
-    const assignments = await Assignment.find()
-      .populate('course_section_id')
-      .populate('grader_id');
-    const filtered = assignments.filter(a => a.course_section_id.instructor.name === professorName);
-    res.json(filtered);
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching by professor", error: err.message });
-  }
-}
-
-// ✅ BY CANDIDATE
-async function getAssignmentsByCandidate(req, res) {
-  try {
-    const { candidateID } = req.params;
-    const assignments = await Assignment.find()
-      .populate('course_section_id')
-      .populate('grader_id');
-    const filtered = assignments.filter(a => a.grader_id.netid === candidateID);
-    res.json(filtered);
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching by candidate", error: err.message });
-  }
-}
-
-// ✅ MANUAL ASSIGNMENT
-// Assign a candidate to a course
-async function assignCandidateToCourse(req, res) {
-  const { candidateID, courseNumber, sectionID } = req.body;
-
-  const candidate = await Candidate.findOne({ netid: candidateID });
-  const course = await Course.findOne({ course_id: courseNumber, section_id: sectionID });
-
-  if (!candidate || !course) {
-    return res.status(404).json({ message: "Candidate or Course not found." });
+  constructor() {
+    // Constructor logic if needed
   }
 
-  // Remove any existing assignment for this course
-  const existingAssignment = await Assignment.findOne({ course_section_id: course._id });
-  if (existingAssignment) {
-    await Assignment.findByIdAndDelete(existingAssignment._id);
+
+  static async getAllAssignments(semester) {
+    try {
+      return await Assignment.find({ semester: semester });
+    } catch (err) {
+      console.error("Error in getAllAssignments", err);
+      throw err;
+    }
   }
 
-  // Prevent assigning candidate if already assigned
-  const alreadyAssigned = await Assignment.findOne({ grader_id: candidate._id });
-  if (alreadyAssigned) {
-    return res.status(400).json({ message: "Candidate is already assigned to another course." });
+  static async getAssignmentsBySection(sectionId, semester) {
+    return await Assignment.find({ course_section_id: sectionId, semester: semester });
   }
 
-  const newAssignment = new Assignment({
-    grader_id: candidate._id,
-    course_section_id: course._id,
-    manuallyAssigned: true,
-    semester: course.semester,
-    status: "accepted"
-  });
+  static async getAssignmentsByProfessor(professorId, semester) {
+    // Assuming that the professorId is stored in the course section
+    // and that the Assignment model has a reference to the course section
+    const professors_sections = await Section.find({ instructor: { $elemMatch: { netid: professorId } }, semester: semester });
+    const sectionIds = professors_sections.map(section => section._id);
+    return await Assignment.find({ course_section_id: { $in: sectionIds } });
+  }
 
-  await newAssignment.save();
-  return res.status(201).json({ message: "Assignment created", assignment: newAssignment });
-}
+  static async getAssignmentsByCandidate(candidateId, semester) {
+    return await Assignment.find({ grader_id: candidateId, semester: semester });
+  }
 
+  static async assignCandidateToSection(candidateId, sectionId, semester) {
+    const candidate = await Candidate.findOne({ _id: candidateId });
+    const section = await Section.findOne({ _id: sectionId });
 
-// ✅ AUTO ASSIGNMENT
-const weights = {
-  gpa: 1,
-  seniority: 0.25,
-  experience: 0.5,
-  keywords: 0.5
-};
-
-async function createAssignmentsForSection(courseId) {
-  const course = await Course.findById(courseId);
-  if (!course) throw new Error('Course not found');
-
-  const candidates = await Candidate.find({ semester: course.semester });
-  const assignments = [];
-
-  for (const candidate of candidates) {
-    const score =
-      (candidate.gpa * weights.gpa) +
-      ((candidate.seniority === 'Masters' ? 1 : 0) * weights.seniority) +
-      (candidate.previous_grader_experience ? weights.experience : 0) +
-      (candidate.resume_keywords.filter(k => course.keywords.includes(k)).length * weights.keywords);
+    if (!candidate || !sectionId) {
+      throw new Error("Candidate or Section not found.");
+    }
 
     const assignment = new Assignment({
       grader_id: candidate._id,
-      course_section_id: course._id,
-      score,
-      manuallyAssigned: false,
-      semester: course.semester
+      course_section_id: sectionId._id,
+      manuallyAssigned: true,
+      status: 'pending',
+      semester: semester,
+      score: 0,
     });
 
-    assignments.push(await assignment.save());
+    return assignment.save();
   }
 
-  return assignments;
-}
-
-// ✅ DELETE
-async function deleteAssignment(req, res) {
-  try {
-    const { id } = req.params;
-    const assignment = await Assignment.findById(id);
-    if (!assignment) {
-      return res.status(404).json({ message: "Assignment not found." });
+  static getSeniorityScore(seniority) {
+    switch (seniority) {
+      case 'Undergraduate':
+        return 0.5;
+      case 'Masters':
+        return 1;
+      case 'PhD':
+        return 1.5;
+      default:
+        return 0;
     }
-    await assignment.deleteOne();
-    res.status(200).json({ message: "Assignment deleted." });
-  } catch (err) {
-    res.status(500).json({ message: "Error deleting assignment", error: err.message });
+  }
+
+  static async createAssignmentsForSection(sectionId, semester) {
+    const section = await Section.findById(sectionId);
+    if (!section) throw new Error('Section not found');
+
+    const candidates = await Candidate.find({ semester: semester });
+    if (!candidates || candidates.length === 0) throw new Error('No candidates found for this semester');
+    const assignments = [];
+
+    // filter candidates who are not already assigned to a section
+    const existingAssignments = await this.getAllAssignments(semester);
+    const assignedCandidateIds = existingAssignments.map(assignment => assignment.grader_id.toString());
+    const setOfAssignedCandidateIds = new Set(assignedCandidateIds);
+    const unassignedCandidates = candidates.filter(candidate => !setOfAssignedCandidateIds.has(candidate._id.toString()));
+    if (unassignedCandidates.length === 0) throw new Error('No unassigned candidates found for this semester');
+
+    const weights = {
+      gpa: 0.5,
+      seniority: 0.2,
+      experience: 0.8,
+      keywords: 0.3
+    }
+    for (const candidate of unassignedCandidates) {
+      const assignment = new Assignment({
+        grader_id: candidate._id,
+        course_section_id: section._id,
+        status: 'pending',
+        semester: semester,
+        manuallyAssigned: false,
+      });
+
+      const matchingKeywords = section.keywords.filter(keyword => candidate.resume_keywords.includes(keyword));
+      const matchingKeywordsRatio = matchingKeywords.length / section.keywords.length;
+
+      const seniorityScore = this.getSeniorityScore(candidate.seniority);
+      const experienceScore = candidate.previous_grader_experience ? 1 : 0;
+
+      // Calculate the score based on the weights
+      const score = (candidate.gpa * weights.gpa) + (seniorityScore * weights.seniority) +
+        (experienceScore * weights.experience) + (matchingKeywordsRatio * weights.keywords);
+      // console.log(`Candidate: ${candidate.name}, GPA: ${candidate.gpa},
+      //    Seniority: ${candidate.seniority}, Seniority Score: ${seniorityScore},
+      //     Experience: ${candidate.previous_grader_experience}, ExperienceScore: ${experienceScore},
+      //      Keywords: ${matchingKeywordsRatio}, Score: ${score}`);
+      assignment.score = score;
+
+      assignments.push(assignment);
+    }
+
+    // take top n scoring candidates where n == section.num_required_graders
+    assignments.sort((a, b) => b.score - a.score);
+    assignments.splice(section.num_required_graders);
+    // save the assignments to the database
+    for (const assignment of assignments) {
+      await assignment.save();
+    }
+
+    return assignments;
+  }
+
+  static async deleteAssignment(assignmentId) {
+    const assignment = await Assignment.findById(assignmentId);
+    if (!assignment) throw new Error('Assignment not found');
+
+    return assignment.deleteOne();
+  }
+
+  // This function assigns candidates from the previous semester to the current semester
+  static async assignReturningCandidates(semester) {
+
+    const prevCandidates = await Candidate.find({ semester: previousSemester(semester) });
+
+    const assignments = [];
+
+    for (const candidate of prevCandidates) {
+      const assignment = new Assignment({
+        candidate: candidate._id,
+        course: course._id,
+        status: 'pending',
+        semester: semester,
+        manuallyAssigned: false,
+      });
+
+      assignments.push(await assignment.save());
+    }
+
+    return assignments;
+  }
+
+  static previousSemester(semester) {
+    const [term, year] = semester.split(' ');
+    const semesterYear = parseInt(year);
+
+    if (term === 'spring') {
+      return `fall ${semesterYear - 1}`;
+    } else if (term === 'fall') {
+      return `spring ${semesterYear}`;
+    }
   }
 }
 
-export {
-  getAllAssignments,
-  getAssignmentsByCourse,
-  getAssignmentsByProfessor,
-  getAssignmentsByCandidate,
-  assignCandidateToCourse,
-  createAssignmentsForSection,
-  deleteAssignment
-};
+export default AssignmentService;

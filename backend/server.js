@@ -26,6 +26,7 @@ const app = express();
 app.use(cors());
 app.use(json());
 
+
 // Routers
 app.use('/api/assignments', assignmentsRouter);
 app.use('/api/candidates', candidatesRouter);
