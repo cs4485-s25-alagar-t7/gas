@@ -36,7 +36,7 @@ services:
       - ./resume-parser:/app
     environment:
       - NODE_ENV=development
-    command: ["node", "server.js"]
+    command: ["node", "dist/server.js"]
 
   backend:
     build: ./backend
@@ -54,7 +54,8 @@ services:
       BACKEND_AUTH_REQUIRED: ${BACKEND_AUTH_REQUIRED}
       NODE_ENV: "development"
     depends_on:
-      - mongo, resume-parser
+      - mongo
+      - resume-parser
     command: ["node", "server.js"]
     networks:
       - app-network

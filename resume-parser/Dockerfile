@@ -13,8 +13,13 @@ RUN npm install
 # Copy the rest of the application files
 COPY . .
 
+# Build the typescript files
+RUN npm run build
+
 # Expose port 5001
 EXPOSE 5001
 
+WORKDIR /app/dist
+
 # Start the application
-CMD ["node", "server.js"]
+CMD ["npm", "run", "start"]

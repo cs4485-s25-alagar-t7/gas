@@ -1,13 +1,10 @@
 // Getting pdfjs to work is tricky. The following 3 lines would make it work
 // https://stackoverflow.com/a/63486898/7699841
-import * as pdfjs from "pdfjs-dist";
-// @ts-ignore
-// import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry.js";
-// pdfjs.GlobalWorkerOptions.workerSrc = 'node_modules/pdfjs-dist/build/pdf.worker.js'
 
-import type { TextItem as PdfjsTextItem } from "pdfjs-dist/types/src/display/api";
+import pdfjs from "pdfjs-dist/legacy/build/pdf.js";
+
 import type { TextItem, TextItems } from "lib/parse-resume-from-pdf/types";
-
+import type { TextItem as PdfjsTextItem } from "pdfjs-dist/types/src/display/api";
 /**
  * Step 1: Read pdf and output textItems by concatenating results from each page.
  *
@@ -21,8 +18,11 @@ import type { TextItem, TextItems } from "lib/parse-resume-from-pdf/types";
  *     const textItems = await readPdf(fileUrl);
  * }
  */
-export const readPdf = async (fileUrl: string): Promise<TextItems> => {
-  const pdfFile = await pdfjs.getDocument(fileUrl).promise;
+export const readPdf = async (fileBuffer: Buffer<ArrayBufferLike>): Promise<TextItems> => {
+  const pdfAsTypedArray = convertBufToUint8Array(fileBuffer);
+  console.log("pdfAsTypedArray", pdfAsTypedArray);
+  //@ts-ignore
+  const pdfFile = await pdfjs.getDocument(pdfAsTypedArray).promise;
   let textItems: TextItems = [];
 
   for (let i = 1; i <= pdfFile.numPages; i++) {
@@ -35,7 +35,7 @@ export const readPdf = async (fileUrl: string): Promise<TextItems> => {
     const commonObjs = page.commonObjs;
 
     // Convert Pdfjs TextItem type to new TextItem type
-    const pageTextItems = textContent.items.map((item) => {
+    const pageTextItems = textContent.items.map((item: PdfjsTextItem) => {
       const {
         str: text,
         dir, // Remove text direction
@@ -87,3 +87,14 @@ export const readPdf = async (fileUrl: string): Promise<TextItems> => {
 
   return textItems;
 };
+
+/**
+ * Convert Buffer to Uint8Array
+ *
+ * @param fileBuffer - Buffer<ArrayBufferLike> to convert
+ * @returns Uint8Array
+ */
+function convertBufToUint8Array(fileBuffer: Buffer<ArrayBufferLike>): Uint8Array {
+  return new Uint8Array(fileBuffer.buffer, fileBuffer.byteOffset, fileBuffer.byteLength);
+}
+

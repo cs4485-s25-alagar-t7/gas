@@ -23,6 +23,6 @@
     "outDir": "./dist",
     "rootDir": "./",
   },
-  "include": ["**/*.ts", "**/*.tsx", "**/*.js", "server.js"],
+  "include": ["**/*.ts", "**/*.tsx", "**/*.js", "server.ts"],
   "exclude": ["node_modules", "dist/**/*"]
 }

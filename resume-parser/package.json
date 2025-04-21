@@ -5,18 +5,19 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc", 
+    "build": "tsc",
     "start": "NODE_OPTIONS='--experimental-specifier-resolution=node' node dist/server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/node": "^22.13.14",
+    "adm-zip": "^0.5.16",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "eslint": "^9.23.0",
     "express": "^4.21.2",
+    "multer": "^1.4.5-lts.2",
     "pdfjs": "^2.5.0",
     "pdfjs-dist": "^3.7.107",
     "typescript": "^5.8.2"
@@ -24,6 +25,11 @@
   "description": "",
   "devDependencies": {
     "@reduxjs/toolkit": "^2.6.1",
+    "@types/adm-zip": "^0.5.7",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.13.14",
     "redux": "^5.0.1"
   }
 }
