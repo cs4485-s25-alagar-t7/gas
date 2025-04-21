@@ -3,7 +3,7 @@
 **Team Leader:**
 
 ## Team Accomplishments  
-### Member 1 (Team Lead)
+### Solomon Pierce (Team Lead)
 - **Total Hours Worked:**
 - **Tasks Completed:**
 - **Tasks For Next Week:**
