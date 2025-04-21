@@ -1,6 +1,5 @@
 // Getting pdfjs to work is tricky. The following 3 lines would make it work
 // https://stackoverflow.com/a/63486898/7699841
-
 import pdfjs from "pdfjs-dist/legacy/build/pdf.js";
 
 import type { TextItem, TextItems } from "lib/parse-resume-from-pdf/types";
@@ -20,7 +19,6 @@ import type { TextItem as PdfjsTextItem } from "pdfjs-dist/types/src/display/api
  */
 export const readPdf = async (fileBuffer: Buffer<ArrayBufferLike>): Promise<TextItems> => {
   const pdfAsTypedArray = convertBufToUint8Array(fileBuffer);
-  console.log("pdfAsTypedArray", pdfAsTypedArray);
   //@ts-ignore
   const pdfFile = await pdfjs.getDocument(pdfAsTypedArray).promise;
   let textItems: TextItems = [];
@@ -35,7 +33,7 @@ export const readPdf = async (fileBuffer: Buffer<ArrayBufferLike>): Promise<Text
     const commonObjs = page.commonObjs;
 
     // Convert Pdfjs TextItem type to new TextItem type
-    const pageTextItems = textContent.items.map((item: PdfjsTextItem) => {
+    const pageTextItems = textContent.items.map((item) => {
       const {
         str: text,
         dir, // Remove text direction
