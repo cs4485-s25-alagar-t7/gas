@@ -1,6 +1,6 @@
 # Weekly Report  
 **4-16 - 4-22**  
-**Team Leader: ** Solomon Pierce
+**Team Leader:** Solomon Pierce
 
 ## Team Accomplishments  
 ### Solomon Pierce (Team Lead)
