@@ -1,5 +1,5 @@
 # Weekly Report  
-**4-16 - 4-22**  
+**4/16/2025 - 4/22/2025**  
 **Team Leader:** Solomon Pierce
 
 ## Team Accomplishments  
