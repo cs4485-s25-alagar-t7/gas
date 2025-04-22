@@ -1,11 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-interface Props {
-  onLogout: () => void;
-}
-
-const Sidebar = ({ onLogout }: Props) => {
+const Sidebar: React.FC = () => {
   const navigate = useNavigate();
 
   const handleClick = (path: string) => {
@@ -52,7 +48,6 @@ const Sidebar = ({ onLogout }: Props) => {
         </ul>
       </nav>
       <button
-        onClick={onLogout}
         className="mt-6 py-2 px-4 bg-orange-600 hover:bg-orange-700 rounded-md"
       >
         Logout

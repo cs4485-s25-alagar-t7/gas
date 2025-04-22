@@ -10,6 +10,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     ports:
       - "27017:27017"
+    networks:
+      - app-network
 
   mongo-express:
     image: mongo-express
@@ -21,6 +23,8 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       ME_CONFIG_MONGODB_URL: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/
       ME_CONFIG_BASICAUTH: ${ME_CONFIG_BASICAUTH}
+    networks:
+      - app-network
       
   backend:
     build: ./backend
@@ -40,6 +44,8 @@ services:
     depends_on:
       - mongo
     command: ["node", "server.js"]
+    networks:
+      - app-network
 
   frontend:
     build: ./frontend
@@ -50,6 +56,12 @@ services:
       - /app/node_modules  
     depends_on:
       - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 
 
 

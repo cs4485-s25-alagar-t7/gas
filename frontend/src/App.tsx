@@ -1,51 +1,136 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Dashboard from "./components/Dashboard";
 import CandidatePage from "./components/CandidatesPage";
 import ProfessorsPage from "./components/ProfessorsPage";
 import AssignmentsPage from "./components/AssignmentsPage";
 import CreateSemester from "./components/CreateSemester";
-import AdminLoginModal from "./components/AdminLoginModel";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "./components/Login";
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const checkAuth = async () => {
+    // Don't check auth if we're on the login page
+    if (window.location.pathname === '/login') {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:5001/api/auth/check-auth', {
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+        }
+      });
+      const data = await response.json();
+      setIsAuthenticated(!!data.isAuthenticated);
+    } catch (error) {
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
 
   useEffect(() => {
-    const auth = sessionStorage.getItem("adminLoggedIn");
-    setIsAuthenticated(auth === "true");
+    // Add a small delay before checking auth
+    const timer = setTimeout(() => {
+      checkAuth();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("adminLoggedIn");
-    setIsAuthenticated(false);
+  const handleLogout = async () => {
+    try {
+      await fetch('http://localhost:5001/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+        }
+      });
+      setIsAuthenticated(false);
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-screen">
+      <div className="text-xl">Loading...</div>
+    </div>;
+  }
+
+  // If we're on the login page and auth status is unknown, assume not authenticated
+  if (window.location.pathname === '/login' && isAuthenticated === null) {
+    setIsAuthenticated(false);
+  }
 
   return (
     <BrowserRouter>
-      {!isAuthenticated && (
-        <AdminLoginModal onLogin={() => setIsAuthenticated(true)} />
-      )}
-      {isAuthenticated && (
-        <Routes>
-          <Route path="/" element={<Dashboard onLogout={handleLogout} />} />
-          <Route
-            path="/CandidatesPage"
-            element={<CandidatePage onLogout={handleLogout} />}
-          />
-          <Route
-            path="/ProfessorsPage"
-            element={<ProfessorsPage onLogout={handleLogout} />}
-          />
-          <Route
-            path="/AssignmentsPage"
-            element={<AssignmentsPage onLogout={handleLogout} />}
-          />
-          <Route
-            path="/create-semester"
-            element={<CreateSemester onLogout={handleLogout} />}
-          />
-        </Routes>
-      )}
+      <Routes>
+        <Route
+          path="/login"
+          element={isAuthenticated ? <Navigate to="/" /> : <Login onLogin={handleLogin} />}
+        />
+        <Route
+          path="/"
+          element={
+            isAuthenticated ? (
+              <Dashboard onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/CandidatesPage"
+          element={
+            isAuthenticated ? (
+              <CandidatePage />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/ProfessorsPage"
+          element={
+            isAuthenticated ? (
+              <ProfessorsPage />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/AssignmentsPage"
+          element={
+            isAuthenticated ? (
+              <AssignmentsPage />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/create-semester"
+          element={
+            isAuthenticated ? (
+              <CreateSemester />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+      </Routes>
     </BrowserRouter>
   );
 }
