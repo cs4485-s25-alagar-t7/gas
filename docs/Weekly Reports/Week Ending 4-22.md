@@ -34,10 +34,14 @@
   - Continue working on final report
   - Assist backend and full stack in integrating algorithms onto frontend
 
-### Member 4
-- **Total Hours Worked:**
+### Ji Min Yoon
+- **Total Hours Worked: 6**
 - **Tasks Completed:**
+  - Finished until chapter 3 of the final report: Design and Architecture Diagrams, Overview of Tools Used,Technologies Used, Code Documentation, and Development Process
+  - Assisted in fixing features in the frontend based on last weeks feedback
 - **Tasks For Next Week:**
+  - Finish up Final report: Testing & Validation
+  - Assist full stack in integrating algorithms onto frontend
 
 ### Member 5
 - **Total Hours Worked:**
