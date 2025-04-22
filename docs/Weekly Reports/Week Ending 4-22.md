@@ -15,6 +15,7 @@
   - determine how to associate resumes with candidate IDs (filename would be ideal)
   - integrate parsing API with front end (so that user can upload ZIP of resume PDFs)
   - possibly add option to upload single PDF file as well
+  - map the resume parsing API output to the candidate format we have in the database
 
 ### Rayyan Waris
 - **Total Hours Worked: 16**
