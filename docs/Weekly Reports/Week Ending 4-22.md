@@ -14,6 +14,7 @@
   - integrate parsing API with database (so matching algorithm can use its output)
   - determine how to associate resumes with candidate IDs (filename would be ideal)
   - integrate parsing API with front end (so that user can upload ZIP of resume PDFs)
+  - possibly add option to upload single PDF file as well
 
 ### Rayyan Waris
 - **Total Hours Worked: 16**
