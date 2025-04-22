@@ -15,9 +15,9 @@
   - Implemented feedback from last week onto frontend
     - Added pagination and show all for table views
     - Added add section + add candidate button, both support bulk imports
-    - Made the remove button more descriptive, also added a popup double checking if user wants to remove candidate.
     - Added popup to add previous graders into the assignment
     - Added reset last sem button that we mentioned in teams chat
+    - Other minor button fixes 
 - **Tasks For Next Week:**
   - Implement resume parser onto frontend
   - Implement returning cand algo onto frontend
