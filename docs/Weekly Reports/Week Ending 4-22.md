@@ -4,9 +4,16 @@
 
 ## Team Accomplishments  
 ### Solomon Pierce (Team Lead)
-- **Total Hours Worked:**
+- **Total Hours Worked: 8**
 - **Tasks Completed:**
+  - added ZIP file upload functionality to resume service
+  - implemented unzipping & converted PDF parsing code to accept a buffer rather than a filepath
+  - tested resume parsing API endpoint PoC
+    - can demo this
 - **Tasks For Next Week:**
+  - integrate parsing API with database (so matching algorithm can use its output)
+  - determine how to associate resumes with candidate IDs (filename would be ideal)
+  - integrate parsing API with front end (so that user can upload ZIP of resume PDFs)
 
 ### Rayyan Waris
 - **Total Hours Worked: 16**
