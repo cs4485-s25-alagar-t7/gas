@@ -14,7 +14,7 @@ interface ProfessorCourseData {
 
 const ITEMS_PER_PAGE = 5;
 
-const ProfessorPage: React.FC = () => {
+const ProfessorsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [courses, setCourses] = useState<ProfessorCourseData[]>([]);
   const [sortConfig, setSortConfig] = useState<{
@@ -23,17 +23,35 @@ const ProfessorPage: React.FC = () => {
   } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [showAll, setShowAll] = useState(false);
+  const [currentSemester, setCurrentSemester] = useState("spring 2024");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Course-upload modal state
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [courseFile, setCourseFile] = useState<File | null>(null);
 
+  const fetchProfessorData = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`http://localhost:5001/api/professors?semester=${currentSemester}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setCourses(data);
+    } catch (error) {
+      console.error("Error fetching professor data:", error);
+      setError(error instanceof Error ? error.message : "Failed to fetch data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetch("/api/professors")
-      .then((res) => res.json())
-      .then(setCourses)
-      .catch(console.error);
-  }, []);
+    fetchProfessorData();
+  }, [currentSemester]);
 
   const handleSort = (key: keyof ProfessorCourseData | "courseSection") => {
     setSortConfig((prev) =>
@@ -109,7 +127,15 @@ const ProfessorPage: React.FC = () => {
               Recommendations View
             </h1>
             <div className="flex items-center space-x-4">
-              {/* Search */}
+              <select
+                value={currentSemester}
+                onChange={(e) => setCurrentSemester(e.target.value)}
+                className="border px-4 py-2 rounded shadow-sm focus:ring focus:ring-orange-400 outline-none"
+              >
+                <option value="spring 2024">Spring 2024</option>
+                <option value="fall 2024">Fall 2024</option>
+                <option value="spring 2025">Spring 2025</option>
+              </select>
               <input
                 type="text"
                 placeholder="Search"
@@ -120,8 +146,6 @@ const ProfessorPage: React.FC = () => {
                 }}
                 className="border border-gray-300 rounded-lg px-4 py-2 w-64 shadow-sm focus:ring focus:ring-orange-400 outline-none"
               />
-
-              {/* Sort Buttons */}
               <button
                 onClick={() => handleSort("professorName")}
                 className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300"
@@ -134,51 +158,59 @@ const ProfessorPage: React.FC = () => {
               >
                 Sort by Course & Section
               </button>
-
-              {/* Add Course Sections Button */}
               <button
                 onClick={() => setShowCourseModal(true)}
                 className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
               >
                 Add Course Sections
               </button>
-              {courseFile && (
-                <span className="text-sm text-gray-600">
-                  {courseFile.name}
-                </span>
-              )}
             </div>
           </div>
 
           {/* Table */}
-          <div className="bg-white shadow-md rounded-lg overflow-hidden">
-            <table className="w-full border-collapse">
-              <thead className="bg-gray-200 text-left">
-                <tr>
-                  <th className="p-4">Professor Name</th>
-                  <th className="p-4">Course & Section</th>
-                  <th className="p-4">Assigned Candidate</th>
-                  <th className="p-4">Recommended Candidate</th>
-                  <th className="p-4">Reason for mismatch</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paged.map((course, idx) => (
-                  <tr key={idx} className="border-t">
-                    <td className="p-4">{course.professorName}</td>
-                    <td className="p-4">
-                      {`${course.courseNumber}.${course.section}`}
-                    </td>
-                    <td className="p-4">{course.assignedCandidate}</td>
-                    <td className="p-4">{course.recommendedCandidate}</td>
-                    <td className="p-4 text-red-500 italic">
-                      {course.reason || "—"}
-                    </td>
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="text-xl text-gray-600">Loading data...</div>
+            </div>
+          ) : error ? (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+              <strong className="font-bold">Error: </strong>
+              <span className="block sm:inline">{error}</span>
+            </div>
+          ) : courses.length === 0 ? (
+            <div className="bg-white shadow-md rounded-lg p-6 text-center">
+              <p className="text-gray-600">No course data found</p>
+            </div>
+          ) : (
+            <div className="bg-white shadow-md rounded-lg overflow-hidden">
+              <table className="w-full border-collapse">
+                <thead className="bg-gray-200 text-left">
+                  <tr>
+                    <th className="p-4">Professor Name</th>
+                    <th className="p-4">Course & Section</th>
+                    <th className="p-4">Assigned Candidate</th>
+                    <th className="p-4">Recommended Candidate</th>
+                    <th className="p-4">Reason for mismatch</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {paged.map((course, idx) => (
+                    <tr key={idx} className="border-t">
+                      <td className="p-4">{course.professorName}</td>
+                      <td className="p-4">
+                        {`${course.courseNumber}.${course.section}`}
+                      </td>
+                      <td className="p-4">{course.assignedCandidate}</td>
+                      <td className="p-4">{course.recommendedCandidate}</td>
+                      <td className="p-4 text-red-500 italic">
+                        {course.reason || "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           {/* Pagination + Show All Toggle at Bottom */}
           <div className="flex justify-between items-center mt-6">
@@ -284,4 +316,4 @@ const ProfessorPage: React.FC = () => {
   );
 };
 
-export default ProfessorPage;
+export default ProfessorsPage;

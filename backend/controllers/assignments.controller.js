@@ -4,7 +4,7 @@ import AssignmentService from '../services/assignments.service.js';
 
 // get all assignments for a specific semester
 router.get('/', async (req, res) => {
-  const { semester } = req.body;
+  const { semester } = req.query;
   try {
     const assignments = await AssignmentService.getAllAssignments(semester);
     res.json(assignments);
@@ -68,6 +68,18 @@ router.post('/generate', async (req, res) => {
     const { sectionId, semester } = req.body;
     const assignments = await AssignmentService.createAssignmentsForSection(sectionId, semester);
     res.status(201).json({ message: 'Assignments created.', assignments });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Generate assignments for all sections
+router.post('/generate-all', async (req, res) => {
+  try {
+    const { semester } = req.body;
+    const assignments = await AssignmentService.createAssignmentsForAllSections(semester);
+    res.status(201).json({ message: 'All assignments created.', assignments });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });

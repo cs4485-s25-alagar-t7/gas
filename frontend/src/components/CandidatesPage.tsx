@@ -11,21 +11,25 @@ interface Candidate {
   resume_keywords?: string[];
   resume?: string;
   assignmentStatus: boolean;
+  seniority: string;
   course: {
-    course_id: string;
-    section_id: string;
+    _id: string;
+    course_name: string;
+    section_num: string;
     instructor: {
       name: string;
       email: string;
     };
-    course_name?: string;
+    num_required_graders: number;
   } | null;
 }
 
 const ITEMS_PER_PAGE = 5;
 
-const CandidatePage: React.FC = () => {
+const CandidatesPage: React.FC = () => {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<"name" | "netid" | "course_id" | "">("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -33,26 +37,73 @@ const CandidatePage: React.FC = () => {
   const [isAddCandidateModalOpen, setIsAddCandidateModalOpen] = useState(false);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [showAll, setShowAll] = useState(false);
+  const [currentSemester, setCurrentSemester] = useState("spring 2024");
+
+  const fetchCandidates = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      console.log("Fetching candidates...");
+      const response = await fetch(`http://localhost:5001/api/candidates?semester=${currentSemester}`);
+      console.log("Response status:", response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Server error response:", errorText);
+        throw new Error(`Server error (${response.status}): ${errorText || 'No error details available'}`);
+      }
+      
+      const text = await response.text();
+      console.log("Raw response:", text);
+      
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error("Failed to parse JSON:", e);
+        console.log("Raw text received:", text);
+        setError("Failed to parse server response. Check browser console for details.");
+        return;
+      }
+      
+      if (!Array.isArray(data)) {
+        console.error("Received data is not an array:", data);
+        setError("Invalid data format received from server");
+        return;
+      }
+      
+      console.log("Parsed data:", data);
+      setCandidates(data);
+    } catch (error) {
+      console.error("Error fetching candidates:", error);
+      setError(error instanceof Error ? error.message : "Failed to fetch candidates");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    fetch("/api/candidates")
-      .then(async res => {
-        const text = await res.text();
-        try {
-          const data = JSON.parse(text);
-          setCandidates(data);
-        } catch {
-          console.error("Failed to parse JSON from /api/candidates. Raw response:", text);
-        }
-      })
-      .catch(error => {
-        console.error("Network error fetching candidates:", error);
-      });
-  }, []);
+    console.log("CandidatesPage mounted");
+    fetchCandidates();
+  }, [currentSemester]);
 
   const handleDelete = async (id: string) => {
-    await fetch(`/api/candidates/${id}`, { method: "DELETE" });
-    setCandidates(prev => prev.filter(c => c._id !== id));
+    try {
+      const response = await fetch(`http://localhost:5001/api/candidates/${id}`, { 
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      setCandidates(prev => prev.filter(c => c._id !== id));
+      alert("Candidate deleted successfully");
+    } catch (error) {
+      console.error("Error deleting candidate:", error);
+      alert("Failed to delete candidate");
+    }
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,30 +125,32 @@ const CandidatePage: React.FC = () => {
     }
   };
 
-  const handleAddCandidateSubmit = () => {
-    if (resumeFile) {
+  const handleAddCandidateSubmit = async () => {
+    if (!resumeFile) {
+      alert("Please upload a resume.");
+      return;
+    }
+
+    try {
       const formData = new FormData();
       formData.append("resume", resumeFile);
 
-      fetch("/api/candidates/upload", {
+      const response = await fetch("http://localhost:5001/api/candidates/upload", {
         method: "POST",
         body: formData,
-      })
-        .then((response) => {
-          if (response.ok) {
-            alert("Candidate added successfully!");
-            setIsAddCandidateModalOpen(false);
-            setResumeFile(null);
-          } else {
-            alert("Failed to add candidate.");
-          }
-        })
-        .catch((error) => {
-          console.error("Error uploading resume:", error);
-          alert("An error occurred while adding the candidate.");
-        });
-    } else {
-      alert("Please upload a resume.");
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      alert("Candidate added successfully!");
+      setIsAddCandidateModalOpen(false);
+      setResumeFile(null);
+      fetchCandidates(); // Refresh the candidates list
+    } catch (error) {
+      console.error("Error uploading resume:", error);
+      alert("Failed to add candidate. Please try again.");
     }
   };
 
@@ -105,13 +158,13 @@ const CandidatePage: React.FC = () => {
     .filter(candidate =>
       candidate.name.toLowerCase().includes(searchQuery) ||
       candidate.netid.toLowerCase().includes(searchQuery) ||
-      candidate.course?.course_id?.toLowerCase().includes(searchQuery) ||
+      candidate.course?.course_name?.toLowerCase().includes(searchQuery) ||
       candidate.course?.instructor?.name.toLowerCase().includes(searchQuery)
     )
     .sort((a, b) => {
       if (!sortField) return 0;
-      const aField = sortField === "course_id" ? a.course?.course_id || "" : a[sortField];
-      const bField = sortField === "course_id" ? b.course?.course_id || "" : b[sortField];
+      const aField = sortField === "course_id" ? a.course?.course_name || "" : a[sortField];
+      const bField = sortField === "course_id" ? b.course?.course_name || "" : b[sortField];
       return aField.localeCompare(bField);
     });
 
@@ -135,6 +188,15 @@ const CandidatePage: React.FC = () => {
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-semibold text-gray-800">Candidate View</h1>
             <div className="flex items-center space-x-4">
+              <select
+                value={currentSemester}
+                onChange={(e) => setCurrentSemester(e.target.value)}
+                className="border px-4 py-2 rounded shadow-sm focus:ring focus:ring-orange-400 outline-none"
+              >
+                <option value="spring 2024">Spring 2024</option>
+                <option value="fall 2024">Fall 2024</option>
+                <option value="spring 2025">Spring 2025</option>
+              </select>
               <input
                 type="text"
                 placeholder="Search"
@@ -154,53 +216,72 @@ const CandidatePage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white shadow-md rounded-lg overflow-hidden">
-            <table className="w-full border-collapse">
-              <thead className="bg-gray-200">
-                <tr className="text-left">
-                  <th className="p-4">Assignment Status</th>
-                  <th className="p-4">Candidate Name</th>
-                  <th className="p-4">Course & Section</th>
-                  <th className="p-4">Professor Name</th>
-                  <th className="p-4">Remove Candidate</th>
-                </tr>
-              </thead>
-              <tbody>
-                {displayedCandidates.map((candidate) => (
-                  <tr key={candidate._id} className="border-t">
-                    <td className="p-4">{candidate.assignmentStatus ? "True" : "False"}</td>
-                    <td className="p-4">
-                      <button
-                        className="text-blue-600 hover:underline"
-                        onClick={() => setSelectedCandidate(candidate)}
-                      >
-                        {candidate.name}
-                      </button>
-                      <div className="text-xs text-gray-500">NetID: {candidate.netid}</div>
-                    </td>
-                    <td className="p-4">
-                      {candidate.course
-                        ? `${candidate.course.course_id || "N/A"}.${candidate.course.section_id || "N/A"}`
-                        : "N/A"}
-                    </td>
-                    <td className="p-4">{candidate.course?.instructor?.name || "N/A"}</td>
-                    <td className="p-4">
-                      <button
-                        onClick={() => {
-                          if (window.confirm("Are you sure you want to remove this candidate?")) {
-                            handleDelete(candidate._id);
-                          }
-                        }}
-                        className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
-                      >
-                        Remove Candidate
-                      </button>
-                    </td>
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="text-xl text-gray-600">Loading candidates...</div>
+            </div>
+          ) : error ? (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+              <strong className="font-bold">Error: </strong>
+              <span className="block sm:inline">{error}</span>
+            </div>
+          ) : candidates.length === 0 ? (
+            <div className="bg-white shadow-md rounded-lg p-6 text-center">
+              <p className="text-gray-600">No candidates found</p>
+            </div>
+          ) : (
+            <div className="bg-white shadow-md rounded-lg overflow-hidden">
+              <table className="w-full border-collapse">
+                <thead className="bg-gray-200">
+                  <tr className="text-left">
+                    <th className="p-4">Assignment Status</th>
+                    <th className="p-4">Candidate Name</th>
+                    <th className="p-4">Course & Section</th>
+                    <th className="p-4">Professor Name</th>
+                    <th className="p-4">Remove Candidate</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {displayedCandidates.map((candidate) => (
+                    <tr key={candidate._id} className="border-t">
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded ${candidate.assignmentStatus ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                          {candidate.assignmentStatus ? "Assigned" : "Unassigned"}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <button
+                          className="text-blue-600 hover:underline"
+                          onClick={() => setSelectedCandidate(candidate)}
+                        >
+                          {candidate.name}
+                        </button>
+                        <div className="text-xs text-gray-500">NetID: {candidate.netid}</div>
+                      </td>
+                      <td className="p-4">
+                        {candidate.course
+                          ? `${candidate.course.course_name || "N/A"}.${candidate.course.section_num || "N/A"}`
+                          : "Not Assigned"}
+                      </td>
+                      <td className="p-4">{candidate.course?.instructor?.name || "Not Assigned"}</td>
+                      <td className="p-4">
+                        <button
+                          onClick={() => {
+                            if (window.confirm("Are you sure you want to remove this candidate?")) {
+                              handleDelete(candidate._id);
+                            }
+                          }}
+                          className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+                        >
+                          Remove Candidate
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           {/* Pagination Controls + Show All Toggle */}
           <div className="flex justify-between items-center mt-4">
@@ -281,6 +362,7 @@ const CandidatePage: React.FC = () => {
             <p className="text-sm text-gray-600 mb-2">NetID: {selectedCandidate.netid}</p>
             <p className="text-sm text-gray-600 mb-2">Major: {selectedCandidate.major}</p>
             <p className="text-sm text-gray-600 mb-2">GPA: {selectedCandidate.gpa}</p>
+            <p className="text-sm text-gray-600 mb-2">Seniority: {selectedCandidate.seniority}</p>
             {selectedCandidate.resume && (
               <a
                 href={selectedCandidate.resume}
@@ -304,4 +386,4 @@ const CandidatePage: React.FC = () => {
   );
 };
 
-export default CandidatePage;
+export default CandidatesPage;

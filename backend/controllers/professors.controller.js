@@ -4,7 +4,8 @@ import { getProfessorView } from '../services/professors.service.js';
 
 router.get('/', async (req, res) => {
   try {
-    const data = await getProfessorView();
+    const { semester } = req.query;
+    const data = await getProfessorView(semester);
     res.json(data);
   } catch (err) {
     console.error("Failed to fetch professor view:", err);

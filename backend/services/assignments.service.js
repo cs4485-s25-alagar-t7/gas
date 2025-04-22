@@ -3,15 +3,34 @@ import Candidate from '../models/Candidate.js';
 import Section from '../models/Section.js';
 
 class AssignmentService {
-
-  constructor() {
-    // Constructor logic if needed
-  }
-
-
-  static async getAllAssignments(semester) {
+  static async getAllAssignments(semester) {  
     try {
-      return await Assignment.find({ semester: semester });
+      const assignments = await Assignment.find({ semester: semester })
+        .populate('grader_id')
+        .populate('course_section_id')
+        .exec();
+
+      // Transform the data to match frontend expectations
+      return assignments.map(assignment => ({
+        _id: assignment._id,
+        section: {
+          _id: assignment.course_section_id._id,
+          course_name: assignment.course_section_id.course_name,
+          section_num: assignment.course_section_id.section_num,
+          instructor: {
+            name: assignment.course_section_id.instructor.name,
+            email: assignment.course_section_id.instructor.netid // Using netid as email since that's what we have
+          },
+          num_required_graders: assignment.course_section_id.num_required_graders
+        },
+        assignedCandidate: {
+          name: assignment.grader_id.name,
+          netid: assignment.grader_id.netid
+        },
+        semester: assignment.semester,
+        status: assignment.status,
+        score: assignment.score
+      }));
     } catch (err) {
       console.error("Error in getAllAssignments", err);
       throw err;
@@ -68,61 +87,107 @@ class AssignmentService {
   }
 
   static async createAssignmentsForSection(sectionId, semester) {
-    const section = await Section.findById(sectionId);
-    if (!section) throw new Error('Section not found');
+    console.log('\n--- Starting assignment for section ---');
+    const section = await Section.findById(sectionId).exec();
+    if (!section) {
+      console.error('Section not found:', sectionId);
+      throw new Error('Section not found');
+    }
+    console.log(`Processing section: ${section.course_name}.${section.section_num}`);
+    console.log(`Number of graders needed: ${section.num_required_graders}`);
 
-    const candidates = await Candidate.find({ semester: semester });
-    if (!candidates || candidates.length === 0) throw new Error('No candidates found for this semester');
-    const assignments = [];
+    const candidates = await Candidate.find({ semester: semester }).exec();
+    console.log('Total candidates found:', candidates.length);
 
     // filter candidates who are not already assigned to a section
     const existingAssignments = await this.getAllAssignments(semester);
-    const assignedCandidateIds = existingAssignments.map(assignment => assignment.grader_id.toString());
-    const setOfAssignedCandidateIds = new Set(assignedCandidateIds);
-    const unassignedCandidates = candidates.filter(candidate => !setOfAssignedCandidateIds.has(candidate._id.toString()));
-    if (unassignedCandidates.length === 0) throw new Error('No unassigned candidates found for this semester');
+    console.log('Existing assignments:', existingAssignments.length);
+    
+    const assignedCandidateIds = existingAssignments.map(assignment => 
+      assignment.assignedCandidate.netid
+    );
+    console.log('Already assigned candidates:', assignedCandidateIds);
+    
+    const unassignedCandidates = candidates.filter(candidate => 
+      !assignedCandidateIds.includes(candidate.netid)
+    );
+    console.log('Available unassigned candidates:', unassignedCandidates.length);
+    
+    if (unassignedCandidates.length === 0) {
+      console.log('No unassigned candidates available');
+      throw new Error('No unassigned candidates found for this semester');
+    }
 
     const weights = {
       gpa: 0.5,
       seniority: 0.2,
       experience: 0.8,
       keywords: 0.3
-    }
+    };
+
+    const candidateAssignments = [];
     for (const candidate of unassignedCandidates) {
+      const matchingKeywords = section.keywords ? 
+        section.keywords.filter(keyword => candidate.resume_keywords.includes(keyword)) : [];
+      const matchingKeywordsRatio = section.keywords ? 
+        matchingKeywords.length / section.keywords.length : 0;
+
+      const seniorityScore = this.getSeniorityScore(candidate.seniority);
+      const experienceScore = candidate.previous_grader_experience ? 1 : 0;
+
+      // Calculate the score based on the weights
+      const score = (candidate.gpa * weights.gpa) + 
+        (seniorityScore * weights.seniority) +
+        (experienceScore * weights.experience) + 
+        (matchingKeywordsRatio * weights.keywords);
+
+      console.log(`Candidate ${candidate.name} (${candidate.netid}):`);
+      console.log(`  - GPA Score: ${candidate.gpa * weights.gpa}`);
+      console.log(`  - Seniority Score: ${seniorityScore * weights.seniority}`);
+      console.log(`  - Experience Score: ${experienceScore * weights.experience}`);
+      console.log(`  - Keywords Score: ${matchingKeywordsRatio * weights.keywords}`);
+      console.log(`  - Total Score: ${score}`);
+      console.log(`  - Matching Keywords: ${matchingKeywords.join(', ')}`);
+
+      candidateAssignments.push({
+        candidate,
+        score,
+      });
+    }
+
+    // Sort by score and take top n candidates
+    candidateAssignments.sort((a, b) => b.score - a.score);
+    const numRequired = section.num_required_graders || 1;
+    console.log(`Taking top ${numRequired} candidates from ${candidateAssignments.length} available`);
+    
+    const selectedAssignments = candidateAssignments.slice(0, numRequired);
+    console.log('Selected candidates:');
+    selectedAssignments.forEach(({candidate, score}) => {
+      console.log(`- ${candidate.name} (${candidate.netid}) with score ${score}`);
+    });
+
+    // Create and save assignments
+    const assignments = [];
+    for (const { candidate, score } of selectedAssignments) {
       const assignment = new Assignment({
         grader_id: candidate._id,
         course_section_id: section._id,
         status: 'pending',
         semester: semester,
         manuallyAssigned: false,
+        score: score
       });
 
-      const matchingKeywords = section.keywords.filter(keyword => candidate.resume_keywords.includes(keyword));
-      const matchingKeywordsRatio = matchingKeywords.length / section.keywords.length;
-
-      const seniorityScore = this.getSeniorityScore(candidate.seniority);
-      const experienceScore = candidate.previous_grader_experience ? 1 : 0;
-
-      // Calculate the score based on the weights
-      const score = (candidate.gpa * weights.gpa) + (seniorityScore * weights.seniority) +
-        (experienceScore * weights.experience) + (matchingKeywordsRatio * weights.keywords);
-      // console.log(`Candidate: ${candidate.name}, GPA: ${candidate.gpa},
-      //    Seniority: ${candidate.seniority}, Seniority Score: ${seniorityScore},
-      //     Experience: ${candidate.previous_grader_experience}, ExperienceScore: ${experienceScore},
-      //      Keywords: ${matchingKeywordsRatio}, Score: ${score}`);
-      assignment.score = score;
-
-      assignments.push(assignment);
+      try {
+        await assignment.save();
+        console.log(`Created assignment for ${candidate.name} to ${section.course_name}.${section.section_num}`);
+        assignments.push(assignment);
+      } catch (error) {
+        console.error('Error saving assignment:', error);
+      }
     }
 
-    // take top n scoring candidates where n == section.num_required_graders
-    assignments.sort((a, b) => b.score - a.score);
-    assignments.splice(section.num_required_graders);
-    // save the assignments to the database
-    for (const assignment of assignments) {
-      await assignment.save();
-    }
-
+    console.log(`Completed assignments for section ${section.course_name}.${section.section_num}\n`);
     return assignments;
   }
 
@@ -164,6 +229,38 @@ class AssignmentService {
     } else if (term === 'fall') {
       return `spring ${semesterYear}`;
     }
+  }
+
+  static async createAssignmentsForAllSections(semester) {
+    console.log('\n=== Starting bulk assignment process ===');
+    const sections = await Section.find({ semester: semester }).exec();
+    console.log(`Found ${sections.length} sections for semester ${semester}:`);
+    sections.forEach(s => console.log(`- ${s.course_name}.${s.section_num} (needs ${s.num_required_graders} graders)`));
+    
+    if (!sections || sections.length === 0) {
+      throw new Error('No sections found for this semester');
+    }
+
+    const allAssignments = [];
+    for (const section of sections) {
+      try {
+        console.log(`\nProcessing section ${section.course_name}.${section.section_num}`);
+        const sectionAssignments = await this.createAssignmentsForSection(section._id, semester);
+        console.log(`Created ${sectionAssignments.length} assignments for section ${section.course_name}.${section.section_num}`);
+        allAssignments.push(...sectionAssignments);
+      } catch (error) {
+        console.error(`Error assigning for section ${section.course_name}.${section.section_num}:`, error.message);
+        // Continue with other sections even if one fails
+      }
+    }
+
+    console.log(`\n=== Bulk assignment complete ===`);
+    console.log(`Total assignments created: ${allAssignments.length}`);
+    if (allAssignments.length === 0) {
+      throw new Error('No assignments could be created');
+    }
+
+    return allAssignments;
   }
 }
 
