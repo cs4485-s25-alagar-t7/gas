@@ -28,7 +28,7 @@
 - **Total Hours Worked: 6**
 - **Tasks Completed:**
   - Assisted in implementation of frontend suggestions from previous week's feedback
-  - Ensured/established a logical flow of website and its functionality
+  - Ensured/verified a logical flow of website and its functionality based on data provided
   - Worked on final project report
 - **Tasks For Next Week:**
   - Continue working on final report
