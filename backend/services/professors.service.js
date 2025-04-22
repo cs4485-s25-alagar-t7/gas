@@ -1,49 +1,56 @@
-import Course from '../models/Course.js';
+import Section from '../models/Section.js'; 
 import Assignment from '../models/Assignment.js';
 import Candidate from '../models/Candidate.js';
 
-export async function getProfessorView() {
-  const courses = await Course.find().lean();
-
-  const assignments = await Assignment.find()
+export async function getProfessorView(semester) {
+  // Filter sections by semester if provided
+  const query = semester ? { semester } : {};
+  
+  // Get all assignments first
+  const assignments = await Assignment.find(semester ? { semester } : {})
     .populate('grader_id')
-    .populate('course_section_id');
+    .populate({
+      path: 'course_section_id',
+      populate: {
+        path: 'instructor'
+      }
+    })
+    .lean();
 
-  const candidates = await Candidate.find().lean();
+  const candidates = await Candidate.find(semester ? { semester } : {}).lean();
 
-  const view = courses.map(course => {
-    const matchingAssignment = assignments.find(
-      a => a.course_section_id && a.course_section_id._id.toString() === course._id.toString()
-    );
+  // Map over assignments instead of sections to ensure we show all assignments
+  const view = assignments.map(assignment => {
+    const section = assignment.course_section_id;
+    if (!section) return null; // Skip if no section data
 
-    const assignedCandidate = matchingAssignment?.grader_id?.name || "—";
-    const recommendedCandidate = candidates.find(c => {
-      return c.resume_keywords.some(k => course.keywords.includes(k));
-    })?.name || "—";
+    const assignedCandidate = assignment.grader_id?.name || "—";
+    const recommendedCandidate = candidates.find(c => 
+      c.resume_keywords?.some(k => section.keywords?.includes(k))
+    )?.name || "—";
 
     const available = candidates.some(c =>
-      c.semester === course.semester &&
-      c.classes.includes(course.course_id)
+      c.semester === section.semester &&
+      c.classes?.includes(section.course_name)
     );
 
-    const reason = !available
-      ? "Not in Candidate Pool"
-      : recommendedCandidate === "—"
-        ? "-"
-        : assignedCandidate !== recommendedCandidate
-          ? "Candidate assigned to different course"
-          : "";
+    let reason = "";
+    if (!available) {
+      reason = "Not in Candidate Pool";
+    } else if (recommendedCandidate !== "—" && assignedCandidate !== recommendedCandidate) {
+      reason = "Candidate assigned to different course";
+    }
 
     return {
-      professorName: course.instructor.name, 
-      courseNumber: course.course_id,
-      section: course.section_id,
+      professorName: section.instructor?.name || "Unknown", 
+      courseNumber: section.course_name || "Unknown", 
+      section: section.section_num || "Unknown",      
       assignedCandidate,
       recommendedCandidate,
       available,
       reason
     };
-  });
+  }).filter(Boolean); // Remove any null entries
 
   return view;
 }
