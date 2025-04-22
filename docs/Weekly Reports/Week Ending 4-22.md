@@ -43,7 +43,14 @@
   - Finish up Final report: Testing & Validation
   - Assist full stack in integrating algorithms onto frontend
 
-### Member 5
-- **Total Hours Worked:**
+### Arsal Hussain
+- **Total Hours Worked: 8**
 - **Tasks Completed:**
+  - Created admin login endpoint API
+  - Created and styled Admin Login Model for frontend
+  - Integrated logout button to connect and return from site
+  - Enforced login flow using session storage to restrict access to protected routes
 - **Tasks For Next Week:**
+  - Review and refine UI responsiveness
+  - Work on integrating to UTD Server
+  - Assist Solomon on data models and integration as needed
