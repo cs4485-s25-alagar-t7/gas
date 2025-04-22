@@ -24,10 +24,15 @@
   - Test with real data w/ resume parse
   - Fix any frontend issues
 
-### Member 3
-- **Total Hours Worked:**
+### Sophie Tran
+- **Total Hours Worked: 6**
 - **Tasks Completed:**
+  - Assisted in implementation of frontend suggestions from previous week's feedback
+  - Ensured/established a logical flow of website and its functionality
+  - Worked on final project report
 - **Tasks For Next Week:**
+  - Continue working on final report
+  - Assist backend and full stack in integrating algorithms onto frontend
 
 ### Member 4
 - **Total Hours Worked:**
