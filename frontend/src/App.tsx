@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./components/Dashboard";
 import CandidatePage from "./components/CandidatesPage";
 import ProfessorsPage from "./components/ProfessorsPage";
 import AssignmentsPage from "./components/AssignmentsPage";
 import CreateSemester from "./components/CreateSemester";
 import Login from "./components/Login";
+import Layout from "./components/Layout";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -84,7 +85,9 @@ function App() {
           path="/"
           element={
             isAuthenticated ? (
-              <Dashboard onLogout={handleLogout} />
+              <Layout onLogout={handleLogout}>
+                <Dashboard />
+              </Layout>
             ) : (
               <Navigate to="/login" />
             )
@@ -94,7 +97,9 @@ function App() {
           path="/CandidatesPage"
           element={
             isAuthenticated ? (
-              <CandidatePage />
+              <Layout onLogout={handleLogout}>
+                <CandidatePage />
+              </Layout>
             ) : (
               <Navigate to="/login" />
             )
@@ -104,7 +109,9 @@ function App() {
           path="/ProfessorsPage"
           element={
             isAuthenticated ? (
-              <ProfessorsPage />
+              <Layout onLogout={handleLogout}>
+                <ProfessorsPage />
+              </Layout>
             ) : (
               <Navigate to="/login" />
             )
@@ -114,7 +121,9 @@ function App() {
           path="/AssignmentsPage"
           element={
             isAuthenticated ? (
-              <AssignmentsPage />
+              <Layout onLogout={handleLogout}>
+                <AssignmentsPage />
+              </Layout>
             ) : (
               <Navigate to="/login" />
             )
@@ -124,7 +133,9 @@ function App() {
           path="/create-semester"
           element={
             isAuthenticated ? (
-              <CreateSemester />
+              <Layout onLogout={handleLogout}>
+                <CreateSemester />
+              </Layout>
             ) : (
               <Navigate to="/login" />
             )

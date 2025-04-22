@@ -1,11 +1,36 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  onLogout: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   const navigate = useNavigate();
 
   const handleClick = (path: string) => {
     navigate(path);
+  };
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+        }
+      });
+
+      if (response.ok) {
+        onLogout();
+        navigate('/login');
+      } else {
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   return (
@@ -48,6 +73,7 @@ const Sidebar: React.FC = () => {
         </ul>
       </nav>
       <button
+        onClick={handleLogout}
         className="mt-6 py-2 px-4 bg-orange-600 hover:bg-orange-700 rounded-md"
       >
         Logout

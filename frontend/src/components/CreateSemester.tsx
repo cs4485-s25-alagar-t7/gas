@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Sidebar from "./Sidebar";
-import Navbar from "./Navbar";
 import { useNavigate } from "react-router-dom";
 
 const seasons = ["Fall", "Spring", "Summer"] as const;
@@ -64,10 +62,7 @@ const CreateSemester: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <Sidebar />
       <div className="flex-1 flex flex-col">
-        <Navbar />
-
         <div className="flex justify-center items-center flex-1">
           <div className="p-8 bg-orange-100 rounded-md shadow-md max-w-lg w-full space-y-6">
             <h1 className="text-2xl font-semibold text-center">Create New Semester</h1>

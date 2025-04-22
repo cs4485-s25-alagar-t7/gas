@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "./Navbar";
-import Sidebar from "./Sidebar";
 
 interface Candidate {
   _id: string;
@@ -236,9 +234,7 @@ const AssignmentPage: React.FC = () => {
 
   return (
     <div className="flex h-screen">
-      <Sidebar />
       <div className="flex-1 flex flex-col bg-gray-100">
-        <Navbar />
         <div className="p-8">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-semibold text-gray-800">Assignment View</h1>
