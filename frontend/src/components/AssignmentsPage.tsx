@@ -302,21 +302,24 @@ const AssignmentPage: React.FC = () => {
             </table>
           </div>
 
+          {/* Pagination Controls + Show All Toggle */}
           <div className="flex justify-between items-center mt-4">
-            {!showAll && (
-              <div className="flex space-x-2">
-                <button onClick={() => handlePageChange(1)} disabled={currentPage === 1} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">First</button>
-                <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">Previous</button>
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <button key={i + 1} onClick={() => handlePageChange(i + 1)} className={`px-3 py-1 rounded ${currentPage === i + 1 ? "bg-blue-500 text-white" : "bg-gray-200 hover:bg-gray-300"}`}>{i + 1}</button>
-                ))}
-                <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">Next</button>
-                <button onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">Last</button>
-              </div>
-            )}
-            <button onClick={() => setShowAll(v => !v)} className="px-4 py-2 rounded bg-orange-400 text-white hover:bg-orange-500">
-              {showAll ? "Show Paginated" : "Show All"}
-            </button>
+            <div className="flex items-center space-x-4">
+              {!showAll && (
+                <div className="flex space-x-2">
+                  <button onClick={() => handlePageChange(1)} disabled={currentPage === 1} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">First</button>
+                  <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">Previous</button>
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <button key={i + 1} onClick={() => handlePageChange(i + 1)} className={`px-3 py-1 rounded ${currentPage === i + 1 ? "bg-blue-500 text-white" : "bg-gray-200 hover:bg-gray-300"}`}>{i + 1}</button>
+                  ))}
+                  <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">Next</button>
+                  <button onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">Last</button>
+                </div>
+              )}
+              <button onClick={() => setShowAll(v => !v)} className="px-4 py-2 rounded bg-orange-400 text-white hover:bg-orange-500">
+                {showAll ? "Show Paginated" : "Show All"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

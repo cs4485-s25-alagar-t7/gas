@@ -210,59 +210,61 @@ const ProfessorsPage: React.FC = () => {
 
           {/* Pagination + Show All Toggle at Bottom */}
           <div className="flex justify-between items-center mt-6">
-            {/* Pagination on Left */}
-            {!showAll && (
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => handlePageChange(1)}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
-                >
-                  First
-                </button>
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
-                >
-                  Previous
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => (
+            <div className="flex items-center space-x-4">
+              {/* Pagination on Left */}
+              {!showAll && (
+                <div className="flex space-x-2">
                   <button
-                    key={i + 1}
-                    onClick={() => handlePageChange(i + 1)}
-                    className={`px-3 py-1 rounded-lg ${
-                      currentPage === i + 1
-                        ? "bg-orange-500 text-white"
-                        : "bg-gray-200 hover:bg-gray-300"
-                    }`}
+                    onClick={() => handlePageChange(1)}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
                   >
-                    {i + 1}
+                    First
                   </button>
-                ))}
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
-                >
-                  Next
-                </button>
-                <button
-                  onClick={() => handlePageChange(totalPages)}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
-                >
-                  Last
-                </button>
-              </div>
-            )}
-            {/* Show All / Paginate Toggle on Right */}
-            <button
-              onClick={() => setShowAll((prev) => !prev)}
-              className="px-4 py-2 rounded-lg bg-orange-400 text-white hover:bg-orange-500"
-            >
-              {showAll ? "Show Paginated" : "Show All"}
-            </button>
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                      key={i + 1}
+                      onClick={() => handlePageChange(i + 1)}
+                      className={`px-3 py-1 rounded-lg ${
+                        currentPage === i + 1
+                          ? "bg-orange-500 text-white"
+                          : "bg-gray-200 hover:bg-gray-300"
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                  <button
+                    onClick={() => handlePageChange(totalPages)}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                  >
+                    Last
+                  </button>
+                </div>
+              )}
+              {/* Show All / Paginate Toggle */}
+              <button
+                onClick={() => setShowAll((prev) => !prev)}
+                className="px-4 py-2 rounded-lg bg-orange-400 text-white hover:bg-orange-500"
+              >
+                {showAll ? "Show Paginated" : "Show All"}
+              </button>
+            </div>
           </div>
         </div>
       </div>
