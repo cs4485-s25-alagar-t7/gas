@@ -13,14 +13,7 @@ const CreateSemester: React.FC = () => {
   const [gradersFile, setGradersFile] = useState<File | null>(null);
   const [uploadDone, setUploadDone] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
-
-  // NEW: import-previous modal
-  const [showImportModal, setShowImportModal] = useState(true);
-
-  useEffect(() => {
-    // show on mount
-    setShowImportModal(true);
-  }, []);
+  const [importPreviousGraders, setImportPreviousGraders] = useState(false);
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -42,6 +35,9 @@ const CreateSemester: React.FC = () => {
 
   const handleStartAssignment = () => {
     setIsStarting(true);
+    if (importPreviousGraders) {
+      alert("Importing previous/returning graders into assignment (simulated).");
+    }
     setTimeout(() => {
       alert(`Assignment started for ${season} ${year}!`);
       setIsStarting(false);
@@ -50,14 +46,9 @@ const CreateSemester: React.FC = () => {
   };
 
   const handleResetLastSemester = () => {
-    if (window.confirm("Reset the most recent semester’s data? This cannot be undone.")) {
+    if (window.confirm("Reset the most recent semester's data? This cannot be undone.")) {
       alert("Last semester data has been reset (simulated).");
     }
-  };
-
-  const handleImportPrevious = () => {
-    alert("Importing previous/returning graders into assignment (simulated).");
-    setShowImportModal(false);
   };
 
   return (
@@ -66,6 +57,20 @@ const CreateSemester: React.FC = () => {
         <div className="flex justify-center items-center flex-1">
           <div className="p-8 bg-orange-100 rounded-md shadow-md max-w-lg w-full space-y-6">
             <h1 className="text-2xl font-semibold text-center">Create New Semester</h1>
+
+            {/* Import Previous Graders Checkbox */}
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="importPrevious"
+                checked={importPreviousGraders}
+                onChange={(e) => setImportPreviousGraders(e.target.checked)}
+                className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+              />
+              <label htmlFor="importPrevious" className="text-gray-700">
+                Import previous/returning graders into assignment
+              </label>
+            </div>
 
             {/* Season Selector */}
             <div className="flex justify-between">
@@ -191,50 +196,9 @@ const CreateSemester: React.FC = () => {
                 </button>
               )}
             </div>
-
-            {/* Reset / Re-open Import */}
-            <div className="flex justify-between mt-4 text-sm">
-              <button
-                onClick={handleResetLastSemester}
-                className="text-red-600 hover:underline"
-              >
-                Reset Last Semester
-              </button>
-              <button
-                onClick={() => setShowImportModal(true)}
-                className="text-blue-600 hover:underline"
-              >
-                Import Previous Graders
-              </button>
-            </div>
           </div>
         </div>
       </div>
-
-      {/* Import Previous Graders Modal */}
-      {showImportModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
-            <h2 className="text-lg font-semibold mb-4">
-              Import previous/returning graders into assignment?
-            </h2>
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => { setShowImportModal(false); }}
-                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded"
-              >
-                No
-              </button>
-              <button
-                onClick={handleImportPrevious}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
-              >
-                Yes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
