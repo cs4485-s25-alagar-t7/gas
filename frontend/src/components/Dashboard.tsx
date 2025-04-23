@@ -1,7 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import Navbar from "./Navbar";
 
+const seasons = ["Fall", "Spring", "Summer"] as const;
+
 const Dashboard: React.FC = () => {
+  const [currentSeason, setCurrentSeason] = useState<typeof seasons[number]>("Fall");
+  const [currentYear, setCurrentYear] = useState<string>("2025");
+
+  const handleResetSemester = () => {
+    if (window.confirm(`Are you sure you want to reset the data for ${currentSeason} ${currentYear}? This action cannot be undone.`)) {
+      alert("Semester data has been reset (simulated).");
+    }
+  };
+
   return (
     <div className="p-8">
       <div className="bg-white shadow-md p-6 rounded-lg flex justify-between items-center">
@@ -15,13 +26,21 @@ const Dashboard: React.FC = () => {
             </h1>
           </div>
 
-          <div className="mt-2">
-            <span className="text-sm font-medium text-gray-600 mr-2">
-              Current Semester:
-            </span>
-            <span className="bg-orange-300 text-white px-4 py-1 rounded-full text-sm font-semibold">
-              Fall 2025
-            </span>
+          <div className="mt-2 flex items-center space-x-4">
+            <div>
+              <span className="text-sm font-medium text-gray-600 mr-2">
+                Current Semester:
+              </span>
+              <span className="bg-orange-300 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                {currentSeason} {currentYear}
+              </span>
+            </div>
+            <button
+              onClick={handleResetSemester}
+              className="text-red-600 hover:text-red-700 text-sm font-medium hover:underline"
+            >
+              Reset Semester Data
+            </button>
           </div>
         </div>
 
