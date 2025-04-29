@@ -32,10 +32,12 @@
 ### Sophie Tran
 - **Total Hours Worked: 6**
 - **Tasks Completed:**
-
+  -  Designed and created demo presentation
+  -  Worked on final report
+  -  Assisted in frontend modifcations from previous week's meeting
 - **Tasks For Next Week:**
   - Continue working on final report
-  - Assist backend and full stack in integrating algorithms onto frontend
+  - Assist with project finalization for May 2 Demo
 
 ### Ji Min Yoon
 - **Total Hours Worked: 6**
