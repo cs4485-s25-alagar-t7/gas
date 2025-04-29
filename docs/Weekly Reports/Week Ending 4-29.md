@@ -52,7 +52,8 @@
 ### Arsal Hussain
 - **Total Hours Worked: 8**
 - **Tasks Completed:**
-
+  - Cloned and updated mongoConnectToFront branch to UTD Server
+  - Installed Docker to resolve issues
 - **Tasks For Next Week:**
   - Review and refine UI responsiveness
   - Work on integrating to UTD Server
