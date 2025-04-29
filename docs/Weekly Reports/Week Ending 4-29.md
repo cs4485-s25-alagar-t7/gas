@@ -16,14 +16,18 @@
   - do full e2e testing of whole system for every required use case 
 
 ### Rayyan Waris
-- **Total Hours Worked: 16**
+- **Total Hours Worked: 13**
 - **Tasks Completed:**
+  - Fixed frontend based on feedback from last week
+  - Implemented resume parser onto frontend
+  - Tested resume parser w/ real data
+  - Implemented Material UI and Shadcn for cleaner UI
+  - Implemented excel export for assignments and course recommendation tables
 
 - **Tasks For Next Week:**
-  - Implement resume parser onto frontend
-  - Implement returning cand algo onto frontend
-  - Test with real data w/ resume parse
-  - Fix any frontend issues
+  - Finish presentation powerpoint
+  - Integrate excel parse onto frontend
+  - Implement returning graders logic 
 
 ### Sophie Tran
 - **Total Hours Worked: 6**
