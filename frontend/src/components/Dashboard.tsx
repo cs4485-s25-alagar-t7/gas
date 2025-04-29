@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../@/components/ui/select";
+import { exportToExcel } from "../lib/utils";
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -114,44 +115,75 @@ const Dashboard: React.FC = () => {
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-        <Card className="p-6 hover:shadow-lg transition-shadow">
-          <h2 className="text-lg font-semibold mb-2">Quick Actions</h2>
-          <p className="text-gray-600 mb-4">Common tasks and operations</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6 items-stretch">
+        <Card className="p-6 hover:shadow-lg transition-shadow flex flex-col justify-between h-full">
+          <h2 className="text-lg font-semibold mb-2">Export Data</h2>
+          <p className="text-gray-600 mb-4">Download Excel sheets for key views</p>
           <div className="space-y-2">
             <Button
-              onClick={() => navigate("/assignments")}
+              onClick={async () => {
+                // Fetch course recommendations data from backend
+                const semester = `${season.charAt(0).toUpperCase() + season.slice(1)} ${year}`;
+                const response = await fetch(`http://localhost:5002/api/professors?semester=${semester}`);
+                const data = await response.json();
+                exportToExcel({
+                  data: data.map((item: {
+                    professorName: string;
+                    courseNumber: string;
+                    section: string;
+                    assignedCandidate: string;
+                    recommendedCandidate: string;
+                    reason: string;
+                  }) => ({
+                    professorName: item.professorName,
+                    courseNumber: item.courseNumber,
+                    section: item.section,
+                    assignedCandidate: item.assignedCandidate,
+                    recommendedCandidate: item.recommendedCandidate,
+                    reason: item.reason
+                  })),
+                  fileName: `professor_recommendations_${semester.replace(/\s+/g, '_').toLowerCase()}`,
+                  sheetName: 'Recommendations'
+                });
+              }}
               variant="outline"
               className="w-full justify-start hover:bg-orange-50"
             >
-              View Assignments
+              Export Course Recommendations
             </Button>
             <Button
-              onClick={() => navigate("/candidates")}
+              onClick={async () => {
+                // Fetch assignments data from backend
+                const semester = `${season.charAt(0).toUpperCase() + season.slice(1)} ${year}`;
+                const response = await fetch(`http://localhost:5002/api/assignments?semester=${semester}`);
+                const data = await response.json();
+                exportToExcel({
+                  data: data.map((a: {
+                    section: {
+                      course_name: string;
+                      section_num: string;
+                      num_required_graders: number;
+                      instructor: { name: string };
+                    };
+                    assignedCandidate?: { name: string };
+                  }) => ({
+                    courseSection: `${a.section.course_name}.${a.section.section_num}`,
+                    numGraders: a.section.num_required_graders,
+                    professorName: a.section.instructor.name,
+                    assignedCandidate: a.assignedCandidate?.name || 'Not Assigned',
+                  })),
+                  fileName: `assignments_${semester.replace(/\s+/g, '_').toLowerCase()}`,
+                  sheetName: 'Assignments'
+                });
+              }}
               variant="outline"
               className="w-full justify-start hover:bg-orange-50"
             >
-              Manage Candidates
+              Export Assigned Candidates
             </Button>
           </div>
         </Card>
-
-        <Card className="p-6 hover:shadow-lg transition-shadow">
-          <h2 className="text-lg font-semibold mb-2">System Status</h2>
-          <p className="text-gray-600 mb-4">Current system information</p>
-          <div className="space-y-2">
-            <div className="flex justify-between items-center p-2 bg-green-50 rounded">
-              <span>System Status</span>
-              <span className="text-green-600">Active</span>
-            </div>
-            <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
-              <span>Current Session</span>
-              <span className="text-blue-600">Connected</span>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6 hover:shadow-lg transition-shadow">
+        <Card className="p-6 hover:shadow-lg transition-shadow flex flex-col justify-between h-full">
           <h2 className="text-lg font-semibold mb-2">Help & Resources</h2>
           <p className="text-gray-600 mb-4">Documentation and support</p>
           <div className="space-y-2">
@@ -161,6 +193,13 @@ const Dashboard: React.FC = () => {
               onClick={() => window.open('https://github.com/cs4485-s25-alagar-t7/gas', '_blank')}
             >
               View Documentation
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full justify-start hover:bg-orange-50"
+              onClick={() => window.open('https://github.com/cs4485-s25-alagar-t7/gas', '_blank')}
+            >
+              Contact Us
             </Button>
           </div>
         </Card>

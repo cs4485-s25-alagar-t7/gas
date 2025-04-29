@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSemester } from "../context/SemesterContext";
 import { Button } from "../../@/components/ui/button";
 import { Card } from "../../@/components/ui/card";
+import { exportToExcel } from "../lib/utils";
 
 interface ProfessorCourseData {
   professorName: string;
@@ -15,7 +16,7 @@ interface ProfessorCourseData {
 
 const ITEMS_PER_PAGE = 7;
 
-const SEASONS = ["Spring", "Summer", "Fall"];
+const SEASONS = ["Spring", "Fall"];
 const YEARS = Array.from({ length: 6 }, (_, i) => (2023 + i).toString());
 
 const ProfessorsPage: React.FC = () => {
@@ -28,7 +29,7 @@ const ProfessorsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showAll, setShowAll] = useState(false);
   const { season, year } = useSemester();
-  const semesterString = `${season.toLowerCase()} ${year}`;
+  const semesterString = `${season.charAt(0).toUpperCase() + season.slice(1)} ${year}`;
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,8 +56,12 @@ const ProfessorsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchProfessorData();
-  }, [semesterString]);
+    if (season && year && season.trim() !== '' && year.trim() !== '') {
+      fetchProfessorData();
+    } else {
+      setCourses([]);
+    }
+  }, [season, year, semesterString]);
 
   const handleSort = (key: keyof ProfessorCourseData | "courseSection") => {
     setSortConfig((prev) =>
@@ -297,6 +302,25 @@ const ProfessorsPage: React.FC = () => {
                 className="bg-orange-500 hover:bg-orange-600 text-white"
               >
                 {showAll ? "Show Paginated" : "Show All"}
+              </Button>
+            </div>
+            <div className="flex justify-end w-full mt-4">
+              <Button
+                onClick={() => exportToExcel({
+                  data: filtered.map(({ professorName, courseNumber, section, assignedCandidate, recommendedCandidate, reason }) => ({
+                    professorName,
+                    courseNumber,
+                    section,
+                    assignedCandidate,
+                    recommendedCandidate,
+                    reason
+                  })),
+                  fileName: `professor_recommendations_${semesterString.replace(/\s+/g, '_').toLowerCase()}`,
+                  sheetName: 'Recommendations'
+                })}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 shadow-sm"
+              >
+                Export to Excel
               </Button>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-const SEASONS = ["Spring", "Summer", "Fall"];
+const SEASONS = ["Spring", "Fall"];
 
 // Helper to format semester string
 const formatSemester = (season: string, year: string) => `${season} ${year}`;
