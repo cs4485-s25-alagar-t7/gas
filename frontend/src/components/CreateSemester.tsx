@@ -14,6 +14,8 @@ const CreateSemester: React.FC = () => {
   const [importPreviousGraders, setImportPreviousGraders] = useState(false);
   const [resumeUploadStatus, setResumeUploadStatus] = useState<string | null>(null);
   const [resumeUploadError, setResumeUploadError] = useState<string | null>(null);
+  const [sectionsUploadStatus, setSectionsUploadStatus] = useState<string | null>(null);
+  const [sectionsUploadError, setSectionsUploadError] = useState<string | null>(null);
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -60,16 +62,55 @@ const CreateSemester: React.FC = () => {
     }
   };
 
+  // Upload sections Excel file
+  const handleSectionsUpload = async () => {
+    if (!sectionsFile) {
+      setSectionsUploadError("Please select an Excel file containing sections.");
+      return false;
+    }
+    setSectionsUploadStatus(null);
+    setSectionsUploadError(null);
+    try {
+      const formData = new FormData();
+      formData.append("sectionsSheet", sectionsFile);
+      formData.append("semester", semesterString);
+      const response = await fetch("http://localhost:5002/api/sections/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        setSectionsUploadError(`Failed to upload sections: ${errorText}`);
+        return false;
+      }
+      const result = await response.json();
+      if (result.length === 0) {
+        setSectionsUploadError("No sections were processed. Please check your Excel file format.");
+        return false;
+      }
+      setSectionsUploadStatus(`Successfully processed ${result.length} sections!`);
+      return true;
+    } catch (error) {
+      setSectionsUploadError(error instanceof Error ? error.message : "Failed to upload sections. Please try again.");
+      return false;
+    }
+  };
+
   const handleContinue = async () => {
     // if (!resumeFile || !sectionsFile || !gradersFile) {
     //   alert("Please upload all three files before continuing.");
-    if (!resumeFile) {
-      alert("Please upload a ZIP file containing resumes.");
+    if (!resumeFile || !sectionsFile) {
+      alert("Please upload a ZIP file containing resumes and an Excel sheet of sections.");
       return;
     }
     // Upload resume ZIP first
     const resumeOk = await handleResumeUpload();
     if (!resumeOk) return;
+    
+    // Upload sections Excel
+    const sectionsOk = await handleSectionsUpload();
+    if (!sectionsOk) return;
+    
     setUploadDone(true);
     alert("Files ready! You can now start the assignment.");
   };
@@ -152,7 +193,6 @@ const CreateSemester: React.FC = () => {
               </div>
 
               {/* Sections */}
-              {/*
               <div>
                 <label className="block text-gray-700 mb-1">Upload Excel Sheet of Sections</label>
                 <div className="border-dashed border-2 border-gray-400 p-4 text-center rounded bg-white">
@@ -172,8 +212,9 @@ const CreateSemester: React.FC = () => {
                   {sectionsFile && <p className="mt-2 text-sm">{sectionsFile.name}</p>}
                 </div>
                 <p className="text-sm text-gray-500">Format accepted: .xlsx</p>
+                {sectionsUploadStatus && <div className="text-green-700 mt-2">{sectionsUploadStatus}</div>}
+                {sectionsUploadError && <div className="text-red-600 mt-2 whitespace-pre-line">{sectionsUploadError}</div>}
               </div>
-              */}
 
               {/* Graders */}
               {/*

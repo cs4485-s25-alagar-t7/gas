@@ -67,7 +67,7 @@ router.post('/upload', upload.single('sectionsSheet'), async (req, res) => {
             keywords: section['Keywords'] ? section['Keywords'].split(',').map(keyword => keyword.trim()) : [],
             semester: semester,
             num_required_graders: parseInt(section['Num of graders']),
-            requested_candidate_UTDIDs: section['Requested Candidate UTDIDs'] ? section['Requested Candidate UTDIDs'].split(',').map(utdid => utdid.trim()) : []
+            requested_candidate_UTDIDs: section['Requested Student ID'] ? section['Requested Student ID'].split(',').map(utdid => utdid.trim()) : []
         };
     }
     );
@@ -76,7 +76,7 @@ router.post('/upload', upload.single('sectionsSheet'), async (req, res) => {
     console.log('First section parsed:', formatted_sections[0]);
 
     // create sections in the database
-    const createdSections = await Promise.all(sections.map(createSection));
+    const createdSections = await Promise.all(formatted_sections.map(createSection));
     res.status(201).json(createdSections);
 });
 

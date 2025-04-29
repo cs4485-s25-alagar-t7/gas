@@ -122,7 +122,7 @@ class AssignmentService {
     }
 
     const weights = {
-      gpa: 0.5,
+      gpa: 0,
       seniority: 0.2,
       experience: 0.8,
       keywords: 0.3
@@ -130,20 +130,22 @@ class AssignmentService {
 
     const candidateAssignments = [];
     for (const candidate of unassignedCandidates) {
-      const matchingKeywords = section.keywords ? 
-        section.keywords.filter(keyword => candidate.resume_keywords.includes(keyword)) : [];
-      const matchingKeywordsRatio = section.keywords ? 
-        matchingKeywords.length / section.keywords.length : 0;
-
+      const matchingKeywords = Array.isArray(section.keywords) && section.keywords.length > 0
+        ? section.keywords.filter(keyword => candidate.resume_keywords.includes(keyword))
+        : [];
+      const matchingKeywordsRatio = Array.isArray(section.keywords) && section.keywords.length > 0
+        ? matchingKeywords.length / section.keywords.length
+        : 0;
+    
       const seniorityScore = this.getSeniorityScore(candidate.seniority);
       const experienceScore = candidate.previous_grader_experience ? 1 : 0;
-
+    
       // Calculate the score based on the weights
       const score = (candidate.gpa * weights.gpa) + 
         (seniorityScore * weights.seniority) +
         (experienceScore * weights.experience) + 
         (matchingKeywordsRatio * weights.keywords);
-
+    
       console.log(`Candidate ${candidate.name} (${candidate.netid}):`);
       console.log(`  - GPA Score: ${candidate.gpa * weights.gpa}`);
       console.log(`  - Seniority Score: ${seniorityScore * weights.seniority}`);
@@ -151,13 +153,12 @@ class AssignmentService {
       console.log(`  - Keywords Score: ${matchingKeywordsRatio * weights.keywords}`);
       console.log(`  - Total Score: ${score}`);
       console.log(`  - Matching Keywords: ${matchingKeywords.join(', ')}`);
-
+    
       candidateAssignments.push({
         candidate,
         score,
       });
     }
-
     // Sort by score and take top n candidates
     candidateAssignments.sort((a, b) => b.score - a.score);
     const numRequired = section.num_required_graders || 1;
