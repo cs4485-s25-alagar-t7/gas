@@ -12,6 +12,7 @@
   - made revisions to presentation powerpoint
   - changed candidate model to use UTDID instead of netID
 - **Tasks For Next Week:**
+  - Add documentation for the matching algorithm
   - finish presentation powerpoint
   - do full e2e testing of whole system for every required use case
   - returning grader functionality
