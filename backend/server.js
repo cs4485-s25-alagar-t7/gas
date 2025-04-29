@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import assignmentsRouter from './controllers/assignments.controller.js';
 import candidatesRouter from './controllers/candidates.controller.js';
 import professorsRouter from './controllers/professors.controller.js';
+import sectionsRouter from './controllers/sections.controller.js';
 import authRoutes from './routes/authRoutes.js';
 
 const app = express();

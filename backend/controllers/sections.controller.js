@@ -1,4 +1,4 @@
-import { createSection } from "../services/sections.service";
+import { createSection } from "../services/sections.service.js";
 import { Router } from "express";
 import multer from "multer";
 import * as XLSX from 'xlsx/xlsx.mjs';
