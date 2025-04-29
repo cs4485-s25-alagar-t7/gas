@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-const seasons = ["Fall", "Spring", "Summer"] as const;
+import { useSemester } from "../context/SemesterContext";
 
 const CreateSemester: React.FC = () => {
   const navigate = useNavigate();
-
-  const [season, setSeason] = useState<typeof seasons[number]>("Fall");
-  const [year, setYear] = useState<string>("2025");
+  const { season, year, setSeason, setYear, SEASONS, addSemester } = useSemester();
+  const semesterString = `${season} ${year}`;
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [sectionsFile, setSectionsFile] = useState<File | null>(null);
   const [gradersFile, setGradersFile] = useState<File | null>(null);
   const [uploadDone, setUploadDone] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [importPreviousGraders, setImportPreviousGraders] = useState(false);
+  const [resumeUploadStatus, setResumeUploadStatus] = useState<string | null>(null);
+  const [resumeUploadError, setResumeUploadError] = useState<string | null>(null);
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -24,11 +24,52 @@ const CreateSemester: React.FC = () => {
     }
   };
 
-  const handleContinue = () => {
-    if (!resumeFile || !sectionsFile || !gradersFile) {
-      alert("Please upload all three files before continuing.");
+  // Upload resume ZIP logic (like CandidatesPage)
+  const handleResumeUpload = async () => {
+    if (!resumeFile) {
+      setResumeUploadError("Please select a ZIP file containing resumes.");
+      return false;
+    }
+    setResumeUploadStatus(null);
+    setResumeUploadError(null);
+    try {
+      const formData = new FormData();
+      formData.append("resumeZip", resumeFile);
+      formData.append("semester", semesterString);
+      const response = await fetch("http://localhost:5002/api/candidates/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        setResumeUploadError(`Failed to upload resumes: ${errorText}`);
+        return false;
+      }
+      const result = await response.json();
+      if (result.processedCount === 0) {
+        setResumeUploadError(`No resumes were processed. Please check that your ZIP file contains PDF files.\nFiles found: ${result.filesFound?.join(', ') || 'none'}`);
+        return false;
+      } else {
+        setResumeUploadStatus(`Successfully processed ${result.processedCount} resumes!`);
+        addSemester(semesterString);
+        return true;
+      }
+    } catch (error) {
+      setResumeUploadError(error instanceof Error ? error.message : "Failed to upload resumes. Please try again.");
+      return false;
+    }
+  };
+
+  const handleContinue = async () => {
+    // if (!resumeFile || !sectionsFile || !gradersFile) {
+    //   alert("Please upload all three files before continuing.");
+    if (!resumeFile) {
+      alert("Please upload a ZIP file containing resumes.");
       return;
     }
+    // Upload resume ZIP first
+    const resumeOk = await handleResumeUpload();
+    if (!resumeOk) return;
     setUploadDone(true);
     alert("Files ready! You can now start the assignment.");
   };
@@ -72,45 +113,34 @@ const CreateSemester: React.FC = () => {
               </label>
             </div>
 
-            {/* Season Selector */}
-            <div className="flex justify-between">
-              {seasons.map(s => (
-                <button
-                  key={s}
-                  onClick={() => setSeason(s)}
-                  className={`px-6 py-2 rounded shadow border ${
-                    season === s
-                      ? "bg-orange-400 text-white border-orange-500"
-                      : "bg-white text-orange-600 border-orange-400 hover:bg-orange-200"
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-
-            {/* Year Input */}
-            <div>
-              <label className="block text-gray-700 mb-1">Enter Year (20xx):</label>
+            {/* Season and Year Selectors */}
+            <div className="flex space-x-4 justify-between">
+              <select
+                value={season}
+                onChange={e => setSeason(e.target.value as typeof SEASONS[number])}
+                className="border px-4 py-2 rounded shadow-sm focus:ring focus:ring-orange-400 outline-none"
+              >
+                {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
               <input
                 type="text"
                 value={year}
                 onChange={e => setYear(e.target.value)}
-                placeholder="2025"
-                className="w-full border px-4 py-2 rounded shadow-sm"
+                placeholder="Year (e.g. 2025)"
+                className="border px-4 py-2 rounded shadow-sm focus:ring focus:ring-orange-400 outline-none w-32"
               />
             </div>
 
             {/* File Uploads */}
             <div className="space-y-4">
-              {/* Resume */}
+              {/* Resume (ZIP) */}
               <div>
-                <label className="block text-gray-700 mb-1">Upload Resume PDF</label>
+                <label className="block text-gray-700 mb-1">Upload Resumes (ZIP)</label>
                 <div className="border-dashed border-2 border-gray-400 p-4 text-center rounded bg-white">
                   <input
                     id="resume-upload"
                     type="file"
-                    accept=".pdf"
+                    accept=".zip,application/zip,application/x-zip-compressed"
                     className="hidden"
                     onChange={e => handleFileChange(e, setResumeFile)}
                   />
@@ -122,10 +152,13 @@ const CreateSemester: React.FC = () => {
                   </label>
                   {resumeFile && <p className="mt-2 text-sm">{resumeFile.name}</p>}
                 </div>
-                <p className="text-sm text-gray-500">Format accepted: .pdf</p>
+                <p className="text-sm text-gray-500">Format accepted: .zip (containing PDFs)</p>
+                {resumeUploadStatus && <div className="text-green-700 mt-2">{resumeUploadStatus}</div>}
+                {resumeUploadError && <div className="text-red-600 mt-2 whitespace-pre-line">{resumeUploadError}</div>}
               </div>
 
               {/* Sections */}
+              {/*
               <div>
                 <label className="block text-gray-700 mb-1">Upload Excel Sheet of Sections</label>
                 <div className="border-dashed border-2 border-gray-400 p-4 text-center rounded bg-white">
@@ -146,8 +179,10 @@ const CreateSemester: React.FC = () => {
                 </div>
                 <p className="text-sm text-gray-500">Format accepted: .xlsx</p>
               </div>
+              */}
 
               {/* Graders */}
+              {/*
               <div>
                 <label className="block text-gray-700 mb-1">Upload Excel Sheet of Graders</label>
                 <div className="border-dashed border-2 border-gray-400 p-4 text-center rounded bg-white">
@@ -168,6 +203,7 @@ const CreateSemester: React.FC = () => {
                 </div>
                 <p className="text-sm text-gray-500">Format accepted: .xlsx</p>
               </div>
+              */}
             </div>
 
             {/* Bottom Actions */}

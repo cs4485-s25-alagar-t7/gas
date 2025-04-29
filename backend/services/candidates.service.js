@@ -1,5 +1,6 @@
 import Candidate from '../models/Candidate.js';
 import Assignment from '../models/Assignment.js';
+import Section from '../models/Section.js';
 
 class CandidateService {
     static async getCandidates({ semester, unassigned }) {
@@ -34,6 +35,32 @@ class CandidateService {
 
     static async removeCandidate(id) {
         return await Candidate.findByIdAndDelete(id);
+    }
+
+    static async deleteAllBySemester(semester) {
+        const candidateResult = await Candidate.deleteMany({ semester });
+        const assignmentResult = await Assignment.deleteMany({ semester });
+        const sectionResult = await Section.deleteMany({ semester });
+        return {
+            candidates: candidateResult.deletedCount,
+            assignments: assignmentResult.deletedCount,
+            sections: sectionResult.deletedCount
+        };
+    }
+
+    static async deleteAll() {
+        return await Candidate.deleteMany({});
+    }
+
+    static async getAllSemesters() {
+        return await Candidate.distinct('semester');
+    }
+
+    static async getRecentCandidates(semester, count) {
+        return await Candidate
+            .find({ semester })
+            .sort({ _id: -1 })  // Sort by _id descending (most recent first)
+            .limit(count);
     }
 }
 

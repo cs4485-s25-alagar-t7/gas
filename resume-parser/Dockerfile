@@ -19,7 +19,7 @@ RUN npm run build
 # Expose port 5001
 EXPOSE 5001
 
-WORKDIR /app/dist
+WORKDIR /app
 
 # Start the application
 CMD ["npm", "run", "start"]

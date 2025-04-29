@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose';
 
 const candidateSchema = new Schema({
   name: { type: String, required: true },
-  netid: { type: String, required: true, unique: true },
+  netid: { type: String, required: true },
   gpa: { type: Number, required: true },
   major: { type: String, required: true },
   minor: { type: String },
@@ -12,5 +12,7 @@ const candidateSchema = new Schema({
   resume_keywords: [{ type: String }],
   semester: { type: String, required: true },
 });
+
+candidateSchema.index({ netid: 1, semester: 1 }, { unique: true });
 
 export default model('Candidate', candidateSchema);

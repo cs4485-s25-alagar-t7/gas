@@ -23,18 +23,21 @@ mongoose.connect(`mongodb://${admin}:${pw}@mongo:27017/gas?authSource=${authSour
 
 // Basic middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // CORS configuration
 app.use(cors({
   origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Content-Length'],
+  exposedHeaders: ['Content-Length']
 }));
 
 // Add response headers middleware
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, Accept');
   next();
 });
 

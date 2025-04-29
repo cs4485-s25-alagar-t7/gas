@@ -43,9 +43,10 @@ services:
     container_name: gas-backend
     restart: always
     ports:
-      - "5001:5000"
+      - "5002:5000"
     volumes:
       - ./backend:/app
+      - ./resume-parser:/resume-parser:ro
     environment: 
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}

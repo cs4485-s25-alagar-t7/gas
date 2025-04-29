@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "../../@/components/ui/card";
+import { Button } from "../../@/components/ui/button";
+import { Input } from "../../@/components/ui/input";
+import { Label } from "../../@/components/ui/label";
+import { Alert } from "@mui/material";
+import { Loader2 } from "lucide-react";
 
-const API_URL = 'http://localhost:5001';
+const API_URL = 'http://localhost:5002';
 
 interface LoginProps {
   onLogin: () => void;
@@ -26,9 +32,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     }
 
     try {
-      console.log('Attempting login...');
-      console.log('API URL:', `${API_URL}/api/auth/login`);
-      
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
@@ -43,20 +46,15 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         })
       });
 
-      console.log('Response status:', response.status);
       const data = await response.json();
-      console.log('Response data:', data);
       
       if (data.success) {
-        console.log('Login successful, navigating to home...');
         onLogin();
         navigate('/');
       } else {
-        console.log('Login failed:', data.message);
         setError(data.message || 'Invalid credentials');
       }
     } catch (err) {
-      console.error('Login error:', err);
       setError('Connection error - please try again');
     } finally {
       setIsLoading(false);
@@ -64,68 +62,85 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to UT Dallas Grader Assignment System
-          </h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="username" className="sr-only">
-                Username
-              </label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                disabled={isLoading}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-              />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md shadow-xl border-0">
+        <CardHeader className="space-y-1 pb-8">
+          <div className="flex justify-center items-center mb-6">
+            <div className="text-orange-600 font-extrabold text-5xl tracking-tight">
+              UT<span className="text-black">DALLAS</span>
             </div>
           </div>
+          <CardTitle className="text-2xl font-bold text-center text-gray-900">
+            Grader Assignment System
+          </CardTitle>
+          <CardDescription className="text-center text-gray-600 text-base">
+            Sign in to manage course assignments
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-sm font-medium text-gray-700">
+                  Username
+                </Label>
+                <Input
+                  id="username"
+                  name="username"
+                  type="text"
+                  required
+                  placeholder="Enter your username"
+                  value={username}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
+                  disabled={isLoading}
+                  className="h-11 px-4 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                  className="h-11 px-4 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                />
+              </div>
+            </div>
 
-          {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
-          )}
+            {error && (
+              <Alert 
+                severity="error" 
+                variant="outlined" 
+                className="border-red-200 bg-red-50 text-red-800"
+              >
+                {error}
+              </Alert>
+            )}
 
-          <div>
-            <button
+            <Button
               type="submit"
-              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${
-                isLoading 
-                  ? 'bg-indigo-400 cursor-not-allowed'
-                  : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
-              }`}
+              className="w-full h-11 bg-orange-500 hover:bg-orange-600 text-white font-semibold shadow-sm transition-all duration-150"
               disabled={isLoading}
             >
-              {isLoading ? 'Signing in...' : 'Sign in'}
-            </button>
-          </div>
-        </form>
-      </div>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                'Sign in'
+              )}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 };

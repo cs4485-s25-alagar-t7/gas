@@ -1,26 +1,27 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Dashboard from "./components/Dashboard";
-import CandidatePage from "./components/CandidatesPage";
-import ProfessorsPage from "./components/ProfessorsPage";
-import AssignmentsPage from "./components/AssignmentsPage";
-import CreateSemester from "./components/CreateSemester";
-import Login from "./components/Login";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { ThemeProvider } from './components/ThemeProvider';
+import { SemesterProvider } from "./context/SemesterContext";
 import Layout from "./components/Layout";
+import Login from "./components/Login";
+import Dashboard from "./components/Dashboard";
+import CandidatesPage from "./components/CandidatesPage";
+import AssignmentsPage from "./components/AssignmentsPage";
+import ProfessorsPage from "./components/ProfessorsPage";
+import CreateSemester from "./components/CreateSemester";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const checkAuth = async () => {
-    // Don't check auth if we're on the login page
     if (window.location.pathname === '/login') {
       setIsLoading(false);
       return;
     }
 
     try {
-      const response = await fetch('http://localhost:5001/api/auth/check-auth', {
+      const response = await fetch('http://localhost:5002/api/auth/check-auth', {
         credentials: 'include',
         headers: {
           'Accept': 'application/json',
@@ -39,18 +40,9 @@ function App() {
     setIsAuthenticated(true);
   };
 
-  useEffect(() => {
-    // Add a small delay before checking auth
-    const timer = setTimeout(() => {
-      checkAuth();
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:5001/api/auth/logout', {
+      await fetch('http://localhost:5002/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -63,85 +55,55 @@ function App() {
     }
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      checkAuth();
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   if (isLoading) {
-    return <div className="flex items-center justify-center min-h-screen">
-      <div className="text-xl">Loading...</div>
-    </div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
   }
 
-  // If we're on the login page and auth status is unknown, assume not authenticated
   if (window.location.pathname === '/login' && isAuthenticated === null) {
     setIsAuthenticated(false);
   }
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route
-          path="/login"
-          element={isAuthenticated ? <Navigate to="/" /> : <Login onLogin={handleLogin} />}
-        />
-        <Route
-          path="/"
-          element={
-            isAuthenticated ? (
-              <Layout onLogout={handleLogout}>
-                <Dashboard />
-              </Layout>
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
-        <Route
-          path="/CandidatesPage"
-          element={
-            isAuthenticated ? (
-              <Layout onLogout={handleLogout}>
-                <CandidatePage />
-              </Layout>
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
-        <Route
-          path="/ProfessorsPage"
-          element={
-            isAuthenticated ? (
-              <Layout onLogout={handleLogout}>
-                <ProfessorsPage />
-              </Layout>
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
-        <Route
-          path="/AssignmentsPage"
-          element={
-            isAuthenticated ? (
-              <Layout onLogout={handleLogout}>
-                <AssignmentsPage />
-              </Layout>
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
-        <Route
-          path="/create-semester"
-          element={
-            isAuthenticated ? (
-              <Layout onLogout={handleLogout}>
-                <CreateSemester />
-              </Layout>
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
-      </Routes>
+      <ThemeProvider>
+        <SemesterProvider>
+          <Routes>
+            <Route
+              path="/login"
+              element={isAuthenticated ? <Navigate to="/" /> : <Login onLogin={handleLogin} />}
+            />
+            <Route
+              element={
+                isAuthenticated ? (
+                  <Layout onLogout={handleLogout}>
+                    <Outlet />
+                  </Layout>
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            >
+              <Route index element={<Dashboard />} />
+              <Route path="assignments" element={<AssignmentsPage />} />
+              <Route path="candidates" element={<CandidatesPage />} />
+              <Route path="professors" element={<ProfessorsPage />} />
+              <Route path="create-semester" element={<CreateSemester />} />
+            </Route>
+          </Routes>
+        </SemesterProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

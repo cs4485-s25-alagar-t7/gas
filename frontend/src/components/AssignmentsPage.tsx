@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { useSemester } from "../context/SemesterContext";
+import { Button } from "../../@/components/ui/button";
+import { Card } from "../../@/components/ui/card";
 
 interface Candidate {
   _id: string;
@@ -35,7 +38,10 @@ interface Assignment {
   };
 }
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 7;
+
+const SEASONS = ["Spring", "Summer", "Fall"];
+const YEARS = Array.from({ length: 6 }, (_, i) => (2023 + i).toString());
 
 const AssignmentPage: React.FC = () => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -44,7 +50,8 @@ const AssignmentPage: React.FC = () => {
   const [sortField, setSortField] = useState<"course" | "instructor" | "">("");
   const [currentPage, setCurrentPage] = useState(1);
   const [showAll, setShowAll] = useState(false);
-  const [currentSemester, setCurrentSemester] = useState("spring 2024");
+  const { season, year } = useSemester();
+  const semesterString = `${season.toLowerCase()} ${year}`;
 
   const [methodSelector, setMethodSelector] = useState<Assignment | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -55,11 +62,11 @@ const AssignmentPage: React.FC = () => {
   useEffect(() => {
     fetchAssignments();
     fetchCandidates();
-  }, [currentSemester]);
+  }, [semesterString]);
 
   const fetchAssignments = async () => {
     try {
-      const response = await fetch(`http://localhost:5001/api/assignments?semester=${currentSemester}`, {
+      const response = await fetch(`http://localhost:5002/api/assignments?semester=${semesterString}`, {
         method: "GET"
       });
       if (!response.ok) {
@@ -77,7 +84,7 @@ const AssignmentPage: React.FC = () => {
 
   const fetchCandidates = async () => {
     try {
-      const response = await fetch("http://localhost:5001/api/candidates");
+      const response = await fetch("http://localhost:5002/api/candidates");
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Failed to fetch candidates: ${errorText}`);
@@ -102,7 +109,7 @@ const AssignmentPage: React.FC = () => {
       const res = await fetch("/api/assignments/returning", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ semester: currentSemester })
+        body: JSON.stringify({ semester: semesterString })
       });
       if (!res.ok) throw new Error("Failed to assign returning candidates");
       const data = await res.json();
@@ -117,14 +124,14 @@ const AssignmentPage: React.FC = () => {
   const handleAutoAssign = async (assignment: Assignment) => {
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:5001/api/assignments/generate", {
+      const res = await fetch("http://localhost:5002/api/assignments/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           sectionId: assignment.section._id,
-          semester: currentSemester
+          semester: semesterString
         }),
       });
 
@@ -149,13 +156,13 @@ const AssignmentPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch("http://localhost:5001/api/assignments/generate-all", {
+      const res = await fetch("http://localhost:5002/api/assignments/generate-all", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          semester: currentSemester
+          semester: semesterString
         }),
       });
 
@@ -188,7 +195,7 @@ const AssignmentPage: React.FC = () => {
         body: JSON.stringify({
           candidateId: candidate._id,
           sectionId: selectedAssignment.section._id,
-          semester: currentSemester
+          semester: semesterString
         })
       });
       if (!res.ok) throw new Error("Failed to assign candidate");
@@ -232,117 +239,210 @@ const AssignmentPage: React.FC = () => {
     setSelectedAssignment(null);
   };
 
+  const getSemesterDisplay = () => {
+    if (!season || !year || season.trim() === '' || year.trim() === '') return 'No semester selected';
+    return `${season.charAt(0).toUpperCase() + season.slice(1)} ${year}`;
+  };
+
   return (
     <div className="flex h-screen">
       <div className="flex-1 flex flex-col bg-gray-100">
         <div className="p-8">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-semibold text-gray-800">Assignment View</h1>
-            <div className="flex items-center space-x-4">
-              <select
-                value={currentSemester}
-                onChange={(e) => setCurrentSemester(e.target.value)}
-                className="border px-4 py-2 rounded shadow-sm focus:ring focus:ring-orange-400 outline-none"
-              >
-                <option value="spring 2024">Spring 2024</option>
-                <option value="fall 2024">Fall 2024</option>
-                <option value="spring 2025">Spring 2025</option>
-              </select>
-              <input
-                type="text"
-                placeholder="Search"
-                value={searchQuery}
-                onChange={handleSearch}
-                className="border px-4 py-2 w-64 rounded shadow-sm focus:ring focus:ring-orange-400 outline-none"
-              />
-              <button onClick={() => handleSort("instructor")} className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">
-                Sort by Professor
-              </button>
-              <button onClick={() => handleSort("course")} className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">
-                Sort by Course
-              </button>
-              {/* <button onClick={handleAssignReturning} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                Assign Returning
-              </button> */}
-              <button onClick={handleAutoAssignAll} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                Auto Assign All
-              </button>
+          <Card className="p-6 mb-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-2xl font-semibold text-gray-800">Assignment View</h1>
+                <div className="text-sm text-gray-500 mt-1">Viewing: {getSemesterDisplay()}</div>
+              </div>
+              <div className="flex items-center space-x-4">
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={searchQuery}
+                  onChange={handleSearch}
+                  className="border border-gray-300 rounded-lg px-4 py-2 w-64 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none"
+                />
+                <Button
+                  onClick={() => handleSort("instructor")}
+                  variant="outline"
+                  className="hover:bg-orange-50"
+                >
+                  Sort by Professor
+                </Button>
+                <Button
+                  onClick={() => handleSort("course")}
+                  variant="outline"
+                  className="hover:bg-orange-50"
+                >
+                  Sort by Course
+                </Button>
+                <Button
+                  onClick={handleAutoAssignAll}
+                  className="bg-green-500 hover:bg-green-600 text-white shadow-sm"
+                >
+                  Auto Assign All
+                </Button>
+              </div>
             </div>
-          </div>
+          </Card>
 
-          <div className="bg-white shadow-md rounded overflow-hidden">
+          <Card className="overflow-hidden">
             <table className="w-full border-collapse">
-              <thead className="bg-gray-200 text-left">
+              <thead className="bg-gray-50 text-left">
                 <tr>
-                  <th className="p-4">Course & Section</th>
-                  <th className="p-4"># of Graders</th>
-                  <th className="p-4">Professor Name</th>
-                  <th className="p-4">Assigned Candidate</th>
-                  <th className="p-4">Change Assignment</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-900">Course & Section</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-900"># of Graders</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-900">Professor Name</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-900">Assigned Candidate</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-900">Change Assignment</th>
                 </tr>
               </thead>
-              <tbody>
-                {displayed.map((a) => (
-                  <tr key={a._id} className="border-t">
-                    <td className="p-4">{a.section ? `${a.section.course_name}.${a.section.section_num}` : 'N/A'}</td>
-                    <td className="p-4">{a.section?.num_required_graders || 'N/A'}</td>
-                    <td className="p-4">{a.section?.instructor?.name || 'N/A'}</td>
-                    <td className="p-4">{a.assignedCandidate?.name || 'N/A'}</td>
-                    <td className="p-4">
-                      <button
-                        onClick={() => setMethodSelector(a)}
-                        className="bg-gray-300 px-3 py-1 rounded hover:bg-gray-400"
-                      >
-                        Select Method
-                      </button>
+              <tbody className="divide-y divide-gray-200">
+                {assignments.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                      No assignments found
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  displayed.map((a) => (
+                    <tr key={a._id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">{a.section ? `${a.section.course_name}.${a.section.section_num}` : 'N/A'}</td>
+                      <td className="px-6 py-4">{a.section?.num_required_graders || 'N/A'}</td>
+                      <td className="px-6 py-4">{a.section?.instructor?.name || 'N/A'}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          a.assignedCandidate?.name ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {a.assignedCandidate?.name || 'Not Assigned'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <Button
+                          onClick={() => setMethodSelector(a)}
+                          variant="outline"
+                          size="sm"
+                          className="hover:bg-orange-50"
+                        >
+                          Select Method
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
-          </div>
+          </Card>
 
           {/* Pagination Controls + Show All Toggle */}
-          <div className="flex justify-between items-center mt-4">
+          <div className="flex justify-between items-center mt-6">
             <div className="flex items-center space-x-4">
               {!showAll && (
                 <div className="flex space-x-2">
-                  <button onClick={() => handlePageChange(1)} disabled={currentPage === 1} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">First</button>
-                  <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">Previous</button>
+                  <Button
+                    onClick={() => handlePageChange(1)}
+                    disabled={currentPage === 1}
+                    variant="outline"
+                    size="sm"
+                    className="hover:bg-orange-50"
+                  >
+                    First
+                  </Button>
+                  <Button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    variant="outline"
+                    size="sm"
+                    className="hover:bg-orange-50"
+                  >
+                    Previous
+                  </Button>
                   {Array.from({ length: totalPages }, (_, i) => (
-                    <button key={i + 1} onClick={() => handlePageChange(i + 1)} className={`px-3 py-1 rounded ${currentPage === i + 1 ? "bg-blue-500 text-white" : "bg-gray-200 hover:bg-gray-300"}`}>{i + 1}</button>
+                    <Button
+                      key={i + 1}
+                      onClick={() => handlePageChange(i + 1)}
+                      variant={currentPage === i + 1 ? "default" : "outline"}
+                      size="sm"
+                      className={currentPage === i + 1 ? "bg-orange-500 hover:bg-orange-600" : "hover:bg-orange-50"}
+                    >
+                      {i + 1}
+                    </Button>
                   ))}
-                  <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">Next</button>
-                  <button onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">Last</button>
+                  <Button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    variant="outline"
+                    size="sm"
+                    className="hover:bg-orange-50"
+                  >
+                    Next
+                  </Button>
+                  <Button
+                    onClick={() => handlePageChange(totalPages)}
+                    disabled={currentPage === totalPages}
+                    variant="outline"
+                    size="sm"
+                    className="hover:bg-orange-50"
+                  >
+                    Last
+                  </Button>
                 </div>
               )}
-              <button onClick={() => setShowAll(v => !v)} className="px-4 py-2 rounded bg-orange-400 text-white hover:bg-orange-500">
+              <Button
+                onClick={() => setShowAll(v => !v)}
+                className="bg-orange-500 hover:bg-orange-600 text-white"
+              >
                 {showAll ? "Show Paginated" : "Show All"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Method Selector Modal */}
       {methodSelector && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg relative max-w-xs w-full">
-            <h2 className="text-lg font-semibold mb-4 text-center">Select Method</h2>
-            <div className="flex justify-around space-x-4">
-              <button onClick={() => openManual(methodSelector)} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">Manually Change</button>
-              <button onClick={() => handleAutoAssign(methodSelector)} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">Auto Assign</button>
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+            <h2 className="text-xl font-semibold mb-4">Select Assignment Method</h2>
+            <div className="space-y-4">
+              <Button
+                onClick={() => handleAutoAssign(methodSelector)}
+                className="w-full bg-green-500 hover:bg-green-600 text-white"
+              >
+                Auto Assign
+              </Button>
+              <Button
+                onClick={() => openManual(methodSelector)}
+                variant="outline"
+                className="w-full hover:bg-orange-50"
+              >
+                Manual Assign
+              </Button>
+              <Button
+                onClick={() => setMethodSelector(null)}
+                variant="outline"
+                className="w-full text-red-600 hover:bg-red-50"
+              >
+                Cancel
+              </Button>
             </div>
-            <button onClick={() => setMethodSelector(null)} className="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✕</button>
           </div>
         </div>
       )}
 
+      {/* Manual Assignment Modal */}
       {modalOpen && selectedAssignment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
-            <h2 className="text-lg font-semibold mb-4">Assign New Candidate</h2>
-            <input type="text" placeholder="Search candidates" value={searchQuery} onChange={e => setSearchQuery(e.target.value.toLowerCase())} className="border rounded px-4 py-2 w-full mb-4 shadow-sm focus:ring focus:ring-orange-400 outline-none" />
-            <ul className="max-h-64 overflow-y-auto space-y-2 mb-4">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+            <h2 className="text-xl font-semibold mb-4">Assign New Candidate</h2>
+            <input
+              type="text"
+              placeholder="Search candidates"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value.toLowerCase())}
+              className="border rounded-lg px-4 py-2 w-full mb-4 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none"
+            />
+            <div className="max-h-64 overflow-y-auto space-y-4 mb-4">
               {candidates.filter(c =>
                 c.name.toLowerCase().includes(searchQuery) ||
                 c.netid.toLowerCase().includes(searchQuery) ||
@@ -350,19 +450,36 @@ const AssignmentPage: React.FC = () => {
               ).map(c => {
                 const isAssigned = !!c.section;
                 return (
-                  <li key={c._id} className="flex justify-between items-center">
-                    <div>
-                      <p className="font-semibold">{c.name}</p>
-                      <p className="text-sm text-gray-500">{c.netid}</p>
-                      <p className="text-sm text-gray-500">Major: {c.major}</p>
-                      <p className="text-sm text-gray-500">GPA: {c.gpa}</p>
+                  <div key={c._id} className="p-4 border rounded-lg hover:bg-gray-50">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="font-semibold">{c.name}</p>
+                        <p className="text-sm text-gray-500">{c.netid}</p>
+                        <p className="text-sm text-gray-500">Major: {c.major}</p>
+                        <p className="text-sm text-gray-500">GPA: {c.gpa}</p>
+                      </div>
+                      <Button
+                        onClick={() => handleAssign(c)}
+                        disabled={isAssigned}
+                        variant={isAssigned ? "outline" : "default"}
+                        className={isAssigned ? "text-gray-400" : "bg-orange-500 hover:bg-orange-600 text-white"}
+                      >
+                        {isAssigned ? "Already Assigned" : "Assign"}
+                      </Button>
                     </div>
-                    <button onClick={() => handleAssign(c)} disabled={isAssigned} className={`px-4 py-2 rounded ${isAssigned ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-blue-500 text-white hover:bg-blue-600"}`}>Assign</button>
-                  </li>
+                  </div>
                 );
               })}
-            </ul>
-            <button onClick={closeModal} className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Cancel</button>
+            </div>
+            <div className="flex justify-end">
+              <Button
+                onClick={closeModal}
+                variant="outline"
+                className="text-red-600 hover:bg-red-50"
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
         </div>
       )}

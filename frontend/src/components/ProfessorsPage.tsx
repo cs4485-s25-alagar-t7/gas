@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { useSemester } from "../context/SemesterContext";
+import { Button } from "../../@/components/ui/button";
+import { Card } from "../../@/components/ui/card";
 
 interface ProfessorCourseData {
   professorName: string;
@@ -10,7 +13,10 @@ interface ProfessorCourseData {
   reason: string;
 }
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 7;
+
+const SEASONS = ["Spring", "Summer", "Fall"];
+const YEARS = Array.from({ length: 6 }, (_, i) => (2023 + i).toString());
 
 const ProfessorsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -21,7 +27,8 @@ const ProfessorsPage: React.FC = () => {
   } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [showAll, setShowAll] = useState(false);
-  const [currentSemester, setCurrentSemester] = useState("spring 2024");
+  const { season, year } = useSemester();
+  const semesterString = `${season.toLowerCase()} ${year}`;
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,7 +40,7 @@ const ProfessorsPage: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:5001/api/professors?semester=${currentSemester}`);
+      const response = await fetch(`http://localhost:5002/api/professors?semester=${semesterString}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -49,7 +56,7 @@ const ProfessorsPage: React.FC = () => {
 
   useEffect(() => {
     fetchProfessorData();
-  }, [currentSemester]);
+  }, [semesterString]);
 
   const handleSort = (key: keyof ProfessorCourseData | "courseSection") => {
     setSortConfig((prev) =>
@@ -113,157 +120,184 @@ const ProfessorsPage: React.FC = () => {
     alert(`Course file "${courseFile?.name}" selected.`);
   };
 
+  const getSemesterDisplay = () => {
+    if (!season || !year || season.trim() === '' || year.trim() === '') return 'No semester selected';
+    return `${season.charAt(0).toUpperCase() + season.slice(1)} ${year}`;
+  };
+
   return (
     <div className="flex h-screen">
       <div className="flex-1 flex flex-col bg-gray-100">
         <div className="p-8">
-          {/* Header + Controls */}
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-semibold text-gray-800">
-              Recommendations View
-            </h1>
-            <div className="flex items-center space-x-4">
-              <select
-                value={currentSemester}
-                onChange={(e) => setCurrentSemester(e.target.value)}
-                className="border px-4 py-2 rounded shadow-sm focus:ring focus:ring-orange-400 outline-none"
-              >
-                <option value="spring 2024">Spring 2024</option>
-                <option value="fall 2024">Fall 2024</option>
-                <option value="spring 2025">Spring 2025</option>
-              </select>
-              <input
-                type="text"
-                placeholder="Search"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="border border-gray-300 rounded-lg px-4 py-2 w-64 shadow-sm focus:ring focus:ring-orange-400 outline-none"
-              />
-              <button
-                onClick={() => handleSort("professorName")}
-                className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300"
-              >
-                Sort by Professor Name
-              </button>
-              <button
-                onClick={() => handleSort("courseSection")}
-                className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300"
-              >
-                Sort by Course & Section
-              </button>
-              <button
-                onClick={() => setShowCourseModal(true)}
-                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-              >
-                Add Course Sections
-              </button>
+          <Card className="p-6 mb-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-2xl font-semibold text-gray-800">
+                  Recommendations View
+                </h1>
+                <div className="text-sm text-gray-500 mt-1">Viewing: {getSemesterDisplay()}</div>
+              </div>
+              <div className="flex items-center space-x-4">
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="border border-gray-300 rounded-lg px-4 py-2 w-64 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none"
+                />
+                <Button
+                  onClick={() => handleSort("professorName")}
+                  variant="outline"
+                  className="hover:bg-orange-50"
+                >
+                  Sort by Professor Name
+                </Button>
+                <Button
+                  onClick={() => handleSort("courseSection")}
+                  variant="outline"
+                  className="hover:bg-orange-50"
+                >
+                  Sort by Course & Section
+                </Button>
+                <Button
+                  onClick={() => setShowCourseModal(true)}
+                  className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-2 shadow-sm"
+                >
+                  Add Course Sections
+                </Button>
+              </div>
             </div>
-          </div>
+          </Card>
 
-          {/* Table */}
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
               <div className="text-xl text-gray-600">Loading data...</div>
             </div>
           ) : error ? (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative" role="alert">
               <strong className="font-bold">Error: </strong>
               <span className="block sm:inline">{error}</span>
-            </div>
-          ) : courses.length === 0 ? (
-            <div className="bg-white shadow-md rounded-lg p-6 text-center">
-              <p className="text-gray-600">No course data found</p>
             </div>
           ) : (
             <div className="bg-white shadow-md rounded-lg overflow-hidden">
               <table className="w-full border-collapse">
-                <thead className="bg-gray-200 text-left">
+                <thead className="bg-gray-50 text-left">
                   <tr>
-                    <th className="p-4">Professor Name</th>
-                    <th className="p-4">Course & Section</th>
-                    <th className="p-4">Assigned Candidate</th>
-                    <th className="p-4">Recommended Candidate</th>
-                    <th className="p-4">Reason for mismatch</th>
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-900">Professor Name</th>
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-900">Course & Section</th>
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-900">Assigned Candidate</th>
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-900">Recommended Candidate</th>
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-900">Reason for mismatch</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {paged.map((course, idx) => (
-                    <tr key={idx} className="border-t">
-                      <td className="p-4">{course.professorName}</td>
-                      <td className="p-4">
-                        {`${course.courseNumber}.${course.section}`}
-                      </td>
-                      <td className="p-4">{course.assignedCandidate}</td>
-                      <td className="p-4">{course.recommendedCandidate}</td>
-                      <td className="p-4 text-red-500 italic">
-                        {course.reason || "—"}
+                <tbody className="divide-y divide-gray-200">
+                  {courses.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                        No course data found
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    paged.map((course, idx) => (
+                      <tr key={idx} className="hover:bg-gray-50">
+                        <td className="px-6 py-4">{course.professorName}</td>
+                        <td className="px-6 py-4">
+                          {`${course.courseNumber}.${course.section}`}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            course.assignedCandidate
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {course.assignedCandidate || "Not Assigned"}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            course.recommendedCandidate
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {course.recommendedCandidate || "None"}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-sm text-red-600 italic">
+                            {course.reason || "—"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
           )}
 
-          {/* Pagination + Show All Toggle at Bottom */}
+          {/* Pagination */}
           <div className="flex justify-between items-center mt-6">
             <div className="flex items-center space-x-4">
-              {/* Pagination on Left */}
               {!showAll && (
                 <div className="flex space-x-2">
-                  <button
+                  <Button
                     onClick={() => handlePageChange(1)}
                     disabled={currentPage === 1}
-                    className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                    variant="outline"
+                    size="sm"
+                    className="hover:bg-orange-50"
                   >
                     First
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                    variant="outline"
+                    size="sm"
+                    className="hover:bg-orange-50"
                   >
                     Previous
-                  </button>
+                  </Button>
                   {Array.from({ length: totalPages }, (_, i) => (
-                    <button
+                    <Button
                       key={i + 1}
                       onClick={() => handlePageChange(i + 1)}
-                      className={`px-3 py-1 rounded-lg ${
-                        currentPage === i + 1
-                          ? "bg-orange-500 text-white"
-                          : "bg-gray-200 hover:bg-gray-300"
-                      }`}
+                      variant={currentPage === i + 1 ? "default" : "outline"}
+                      size="sm"
+                      className={currentPage === i + 1 ? "bg-orange-500 hover:bg-orange-600" : "hover:bg-orange-50"}
                     >
                       {i + 1}
-                    </button>
+                    </Button>
                   ))}
-                  <button
+                  <Button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                    variant="outline"
+                    size="sm"
+                    className="hover:bg-orange-50"
                   >
                     Next
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => handlePageChange(totalPages)}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                    variant="outline"
+                    size="sm"
+                    className="hover:bg-orange-50"
                   >
                     Last
-                  </button>
+                  </Button>
                 </div>
               )}
-              {/* Show All / Paginate Toggle */}
-              <button
+              <Button
                 onClick={() => setShowAll((prev) => !prev)}
-                className="px-4 py-2 rounded-lg bg-orange-400 text-white hover:bg-orange-500"
+                className="bg-orange-500 hover:bg-orange-600 text-white"
               >
                 {showAll ? "Show Paginated" : "Show All"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -271,43 +305,71 @@ const ProfessorsPage: React.FC = () => {
 
       {/* Course Upload Modal */}
       {showCourseModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
-            <h2 className="text-lg font-semibold mb-4">
-              Upload Course Sections (.xlsx)
-            </h2>
-            <input
-              id="courses-upload"
-              type="file"
-              accept=".xlsx"
-              className="hidden"
-              onChange={handleCourseFileChange}
-            />
-            <label
-              htmlFor="courses-upload"
-              className="hover:bg-gray-100 border border-gray-300 px-4 py-2 rounded cursor-pointer block text-center mb-4"
-            >
-              Choose File
-            </label>
-            {courseFile && (
-              <p className="text-sm text-gray-700 mb-4">{courseFile.name}</p>
-            )}
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => setShowCourseModal(false)}
-                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCourseUploadConfirm}
-                disabled={!courseFile}
-                className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded disabled:opacity-50"
-              >
-                Upload
-              </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-lg bg-white shadow-xl rounded-xl">
+            <div className="flex flex-col">
+              {/* Header */}
+              <div className="flex justify-between items-center p-6 border-b border-gray-200">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Upload Course Sections</h2>
+                  <p className="text-sm text-gray-500 mt-1">Select an Excel (.xlsx) file to upload</p>
+                </div>
+                <Button
+                  onClick={() => setShowCourseModal(false)}
+                  variant="ghost"
+                  className="text-gray-500 hover:text-gray-700 p-2 h-auto rounded-full"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </Button>
+              </div>
+
+              {/* Content */}
+              <div className="p-6 space-y-6">
+                <input
+                  id="courses-upload"
+                  type="file"
+                  accept=".xlsx"
+                  className="hidden"
+                  onChange={handleCourseFileChange}
+                />
+                <label
+                  htmlFor="courses-upload"
+                  className="block w-full p-8 text-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                >
+                  <div className="space-y-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <div className="text-gray-600 font-medium">Click to upload or drag and drop</div>
+                    <div className="text-sm text-gray-500">Excel files only (.xlsx)</div>
+                    {courseFile && (
+                      <div className="text-sm text-green-600 font-medium mt-2">Selected: {courseFile.name}</div>
+                    )}
+                  </div>
+                </label>
+
+                {/* Footer */}
+                <div className="flex justify-end space-x-4 pt-4">
+                  <Button
+                    onClick={() => setShowCourseModal(false)}
+                    variant="outline"
+                    className="hover:bg-gray-50"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleCourseUploadConfirm}
+                    disabled={!courseFile}
+                    className="bg-green-500 hover:bg-green-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Upload File
+                  </Button>
+                </div>
+              </div>
             </div>
-          </div>
+          </Card>
         </div>
       )}
     </div>
