@@ -37,6 +37,7 @@
   - clarify remove button
     - option 1: remove assignment for this candidate
     - option 2: remove candidate from database
+      - make sure this change cascades to assignments
 
 ### Sophie Tran
 - **Total Hours Worked: 6**
