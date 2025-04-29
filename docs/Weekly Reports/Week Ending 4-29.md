@@ -42,10 +42,12 @@
 ### Ji Min Yoon
 - **Total Hours Worked: 6**
 - **Tasks Completed:**
-
+  - Aided in the creation of demo slides
+  - Worked on final report
+  - Tweaked features of the frontend from last meetings feedback
 - **Tasks For Next Week:**
-  - Finish up Final report: Testing & Validation
-  - Assist full stack in integrating algorithms onto frontend
+  - Finish up Final report
+  - Prepare for the final demo of the project
 
 ### Arsal Hussain
 - **Total Hours Worked: 8**
