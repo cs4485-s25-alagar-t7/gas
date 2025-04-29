@@ -384,6 +384,27 @@ class AssignmentService {
     await assignment.save();
     return assignment;
   }
+
+  static async unassignCandidate(assignmentId) {
+    try {
+      const assignment = await Assignment.findById(assignmentId);
+      if (!assignment) {
+        throw new Error('Assignment not found');
+      }
+
+      // Set the grader_id to null to unassign the candidate
+      assignment.grader_id = null;
+      assignment.manuallyAssigned = false;
+      assignment.status = 'pending';
+      assignment.score = 0;
+
+      await assignment.save();
+      return assignment;
+    } catch (error) {
+      console.error('Error in unassignCandidate:', error);
+      throw error;
+    }
+  }
 }
 
 export default AssignmentService;

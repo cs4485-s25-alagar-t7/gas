@@ -120,4 +120,15 @@ router.post('/auto-assign', async (req, res) => {
   }
 });
 
+// Unassign a candidate from an assignment
+router.post('/unassign', async (req, res) => {
+  try {
+    const { assignmentId } = req.body;
+    const assignment = await AssignmentService.unassignCandidate(assignmentId);
+    res.status(200).json({ message: 'Candidate unassigned successfully.', assignment });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export default router;

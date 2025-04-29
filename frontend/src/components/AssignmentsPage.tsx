@@ -59,6 +59,7 @@ const AssignmentPage: React.FC = () => {
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showUnassignedOnly, setShowUnassignedOnly] = useState(false);
 
   useEffect(() => {
     fetchAssignments();
@@ -200,14 +201,45 @@ const AssignmentPage: React.FC = () => {
     }
   };
 
+  const handleUnassign = async (assignment: Assignment) => {
+    try {
+      setLoading(true);
+      const res = await fetch("http://localhost:5002/api/assignments/unassign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignmentId: assignment._id })
+      });
+      if (!res.ok) throw new Error("Failed to unassign candidate");
+      alert("Candidate unassigned successfully");
+      setMethodSelector(null);
+      fetchAssignments();
+    } catch (error) {
+      console.error("Error unassigning candidate:", error);
+      alert("Failed to unassign candidate");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filtered = assignments
-    .filter(a =>
-      `${a.section.course_name}.${a.section.section_num}`.toLowerCase().includes(searchQuery) ||
-      a.section.instructor.name.toLowerCase().includes(searchQuery) ||
-      a.assignedCandidate.name.toLowerCase().includes(searchQuery)
-    )
+    .filter(a => {
+      const matchesSearch = 
+        `${a.section.course_name}.${a.section.section_num}`.toLowerCase().includes(searchQuery) ||
+        a.section.instructor.name.toLowerCase().includes(searchQuery) ||
+        (a.assignedCandidate?.name || '').toLowerCase().includes(searchQuery);
+      
+      if (showUnassignedOnly) {
+        return matchesSearch && !a.assignedCandidate?.name;
+      }
+      return matchesSearch;
+    })
     .sort((a, b) => {
-      if (!sortField) return 0;
+      if (!sortField) {
+        // Sort unassigned sections first
+        if (!a.assignedCandidate?.name && b.assignedCandidate?.name) return -1;
+        if (a.assignedCandidate?.name && !b.assignedCandidate?.name) return 1;
+        return 0;
+      }
       if (sortField === "instructor") {
         return a.section.instructor.name.localeCompare(b.section.instructor.name);
       }
@@ -267,6 +299,13 @@ const AssignmentPage: React.FC = () => {
                   onChange={handleSearch}
                   className="border border-gray-300 rounded-lg px-4 py-2 w-64 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none"
                 />
+                <Button
+                  onClick={() => setShowUnassignedOnly(!showUnassignedOnly)}
+                  variant={showUnassignedOnly ? "default" : "outline"}
+                  className={showUnassignedOnly ? "bg-orange-500 hover:bg-orange-600 text-white" : "hover:bg-orange-50"}
+                >
+                  {showUnassignedOnly ? "Show All" : "Show Unassigned Only"}
+                </Button>
                 <Button
                   onClick={() => handleSort("instructor")}
                   variant="outline"
@@ -443,10 +482,19 @@ const AssignmentPage: React.FC = () => {
               >
                 Manual Assign
               </Button>
+              {methodSelector.assignedCandidate && (
+                <Button
+                  onClick={() => handleUnassign(methodSelector)}
+                  variant="outline"
+                  className="w-full text-red-600 hover:bg-red-50"
+                >
+                  Unassign Current Candidate
+                </Button>
+              )}
               <Button
                 onClick={() => setMethodSelector(null)}
                 variant="outline"
-                className="w-full text-red-600 hover:bg-red-50"
+                className="w-full text-gray-600 hover:bg-gray-50"
               >
                 Cancel
               </Button>
@@ -474,7 +522,7 @@ const AssignmentPage: React.FC = () => {
                   c.netid.toLowerCase().includes(searchQuery) ||
                   c.major.toLowerCase().includes(searchQuery)) &&
                   // Only show unassigned candidates
-                  !assignments.some(a => a.assignedCandidate && a.assignedCandidate.netid === c.netid)
+                  !assignments.some(a => a.assignedCandidate && a.assignedCandidate?.netid === c.netid)
                 )
                 .map(c => (
                   <div key={c._id} className="p-4 border rounded-lg hover:bg-gray-50">
