@@ -34,6 +34,9 @@
   - Integrate excel parse for candidates sheet onto frontend
   - Implement returning graders logic
   - allow recommendations to be added from the professors page
+  - clarify remove button
+    - option 1: remove assignment for this candidate
+    - option 2: remove candidate from database
 
 ### Sophie Tran
 - **Total Hours Worked: 6**
