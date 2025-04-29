@@ -20,13 +20,14 @@
 - **Tasks Completed:**
   - Fixed frontend based on feedback from last week
   - Implemented resume parser onto frontend
+  - Implemented excel parser for sections onto frontend
   - Tested resume parser w/ real data
   - Implemented Material UI and Shadcn for cleaner UI
   - Implemented excel export for assignments and course recommendation tables
 
 - **Tasks For Next Week:**
   - Finish presentation powerpoint
-  - Integrate excel parse onto frontend
+  - Integrate excel parse for candidates sheet onto frontend
   - Implement returning graders logic 
 
 ### Sophie Tran
