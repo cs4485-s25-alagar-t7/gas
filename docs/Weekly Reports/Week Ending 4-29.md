@@ -13,7 +13,11 @@
   - changed candidate model to use UTDID instead of netID
 - **Tasks For Next Week:**
   - finish presentation powerpoint
-  - do full e2e testing of whole system for every required use case 
+  - do full e2e testing of whole system for every required use case
+  - returning grader functionality
+  - import candidates xlsx functionality
+    - fetch candidate UTDID from the candidates sheet using the document id from the resumes filenames as the key
+  - 
 
 ### Rayyan Waris
 - **Total Hours Worked: 13**
