@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSemester } from "../context/SemesterContext";
 import { Button } from "../../@/components/ui/button";
 import { Card } from "../../@/components/ui/card";
+import { exportToExcel } from "../lib/utils";
 
 interface Candidate {
   _id: string;
@@ -40,7 +41,7 @@ interface Assignment {
 
 const ITEMS_PER_PAGE = 7;
 
-const SEASONS = ["Spring", "Summer", "Fall"];
+const SEASONS = ["Spring", "Fall"];
 const YEARS = Array.from({ length: 6 }, (_, i) => (2023 + i).toString());
 
 const AssignmentPage: React.FC = () => {
@@ -51,7 +52,7 @@ const AssignmentPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showAll, setShowAll] = useState(false);
   const { season, year } = useSemester();
-  const semesterString = `${season.toLowerCase()} ${year}`;
+  const semesterString = `${season.charAt(0).toUpperCase() + season.slice(1)} ${year}`;
 
   const [methodSelector, setMethodSelector] = useState<Assignment | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -124,29 +125,18 @@ const AssignmentPage: React.FC = () => {
   const handleAutoAssign = async (assignment: Assignment) => {
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:5002/api/assignments/generate", {
+      const res = await fetch("http://localhost:5002/api/assignments/auto-assign", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          sectionId: assignment.section._id,
-          semester: semesterString
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignmentId: assignment._id })
       });
-
-      if (!res.ok) {
-        throw new Error("Failed to auto-assign candidates");
-      }
-
+      if (!res.ok) throw new Error("Failed to auto-assign candidate");
       const data = await res.json();
       console.log("Auto-assign response:", data);
-      
-      // Refresh assignments after auto-assign
       fetchAssignments();
     } catch (error) {
-      console.error("Error auto-assigning candidates:", error);
-      setError("Failed to auto-assign candidates");
+      console.error("Error auto-assigning candidate:", error);
+      setError("Failed to auto-assign candidate");
     } finally {
       setLoading(false);
     }
@@ -189,13 +179,13 @@ const AssignmentPage: React.FC = () => {
   const handleAssign = async (candidate: Candidate) => {
     if (!selectedAssignment) return;
     try {
-      const res = await fetch("/api/assignments/assign", {
+      setLoading(true);
+      const res = await fetch("http://localhost:5002/api/assignments/swap", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          candidateId: candidate._id,
-          sectionId: selectedAssignment.section._id,
-          semester: semesterString
+          assignmentId: selectedAssignment._id,
+          candidateId: candidate._id
         })
       });
       if (!res.ok) throw new Error("Failed to assign candidate");
@@ -205,6 +195,8 @@ const AssignmentPage: React.FC = () => {
     } catch (error) {
       console.error("Error assigning candidate:", error);
       alert("Failed to assign candidate");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -228,10 +220,23 @@ const AssignmentPage: React.FC = () => {
 
   const handlePageChange = (page: number) => setCurrentPage(page);
 
-  const openManual = (assignment: Assignment) => {
+  const openManual = async (assignment: Assignment) => {
     setSelectedAssignment(assignment);
     setModalOpen(true);
     setMethodSelector(null);
+    // Fetch only unassigned candidates for the current semester
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:5002/api/candidates?semester=${semesterString}&unassigned=true`);
+      if (!response.ok) throw new Error('Failed to fetch unassigned candidates');
+      const data = await response.json();
+      setCandidates(data);
+    } catch (error) {
+      console.error('Error fetching unassigned candidates:', error);
+      setCandidates([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const closeModal = () => {
@@ -305,8 +310,11 @@ const AssignmentPage: React.FC = () => {
                     </td>
                   </tr>
                 ) : (
-                  displayed.map((a) => (
-                    <tr key={a._id} className="hover:bg-gray-50">
+                  displayed.map((a, idx) => (
+                    <tr
+                      key={a._id}
+                      className={`hover:bg-gray-100 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                    >
                       <td className="px-6 py-4">{a.section ? `${a.section.course_name}.${a.section.section_num}` : 'N/A'}</td>
                       <td className="px-6 py-4">{a.section?.num_required_graders || 'N/A'}</td>
                       <td className="px-6 py-4">{a.section?.instructor?.name || 'N/A'}</td>
@@ -395,6 +403,23 @@ const AssignmentPage: React.FC = () => {
                 {showAll ? "Show Paginated" : "Show All"}
               </Button>
             </div>
+            <div className="flex justify-end w-full mt-4">
+              <Button
+                onClick={() => exportToExcel({
+                  data: filtered.map(a => ({
+                    courseSection: `${a.section.course_name}.${a.section.section_num}`,
+                    numGraders: a.section.num_required_graders,
+                    professorName: a.section.instructor.name,
+                    assignedCandidate: a.assignedCandidate?.name || 'Not Assigned',
+                  })),
+                  fileName: `assignments_${semesterString.replace(/\s+/g, '_').toLowerCase()}`,
+                  sheetName: 'Assignments'
+                })}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 shadow-sm"
+              >
+                Export to Excel
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -443,13 +468,15 @@ const AssignmentPage: React.FC = () => {
               className="border rounded-lg px-4 py-2 w-full mb-4 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none"
             />
             <div className="max-h-64 overflow-y-auto space-y-4 mb-4">
-              {candidates.filter(c =>
-                c.name.toLowerCase().includes(searchQuery) ||
-                c.netid.toLowerCase().includes(searchQuery) ||
-                c.major.toLowerCase().includes(searchQuery)
-              ).map(c => {
-                const isAssigned = !!c.section;
-                return (
+              {candidates
+                .filter(c =>
+                  (c.name.toLowerCase().includes(searchQuery) ||
+                  c.netid.toLowerCase().includes(searchQuery) ||
+                  c.major.toLowerCase().includes(searchQuery)) &&
+                  // Only show unassigned candidates
+                  !assignments.some(a => a.assignedCandidate && a.assignedCandidate.netid === c.netid)
+                )
+                .map(c => (
                   <div key={c._id} className="p-4 border rounded-lg hover:bg-gray-50">
                     <div className="flex justify-between items-center">
                       <div>
@@ -460,16 +487,14 @@ const AssignmentPage: React.FC = () => {
                       </div>
                       <Button
                         onClick={() => handleAssign(c)}
-                        disabled={isAssigned}
-                        variant={isAssigned ? "outline" : "default"}
-                        className={isAssigned ? "text-gray-400" : "bg-orange-500 hover:bg-orange-600 text-white"}
+                        variant="default"
+                        className="bg-orange-500 hover:bg-orange-600 text-white"
                       >
-                        {isAssigned ? "Already Assigned" : "Assign"}
+                        Assign
                       </Button>
                     </div>
                   </div>
-                );
-              })}
+                ))}
             </div>
             <div className="flex justify-end">
               <Button

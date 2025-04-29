@@ -86,12 +86,6 @@ const CreateSemester: React.FC = () => {
     }, 500);
   };
 
-  const handleResetLastSemester = () => {
-    if (window.confirm("Reset the most recent semester's data? This cannot be undone.")) {
-      alert("Last semester data has been reset (simulated).");
-    }
-  };
-
   return (
     <div className="flex h-screen bg-gray-100">
       <div className="flex-1 flex flex-col">

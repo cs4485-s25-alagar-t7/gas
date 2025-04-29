@@ -2,11 +2,11 @@ import express from 'express';
 const router = express.Router();
 import AssignmentService from '../services/assignments.service.js';
 
-// get all assignments for a specific semester
+// Get all assignments for a specific semester
 router.get('/', async (req, res) => {
   const { semester } = req.query;
   try {
-    const assignments = await AssignmentService.getAllAssignments(semester);
+    const assignments = await AssignmentService.getAllSectionAssignments(semester);
     res.json(assignments);
   } catch (error) {
     console.error(error);
@@ -95,6 +95,28 @@ router.delete('/:assignmentId', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Swap candidate in an assignment slot
+router.post('/swap', async (req, res) => {
+  try {
+    const { assignmentId, candidateId } = req.body;
+    const assignment = await AssignmentService.swapCandidateInAssignment(assignmentId, candidateId);
+    res.status(200).json({ message: 'Assignment updated.', assignment });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Auto-assign the next best candidate to an assignment slot
+router.post('/auto-assign', async (req, res) => {
+  try {
+    const { assignmentId } = req.body;
+    const assignment = await AssignmentService.autoAssignToAssignment(assignmentId);
+    res.status(200).json({ message: 'Auto-assigned candidate.', assignment });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

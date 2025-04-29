@@ -12,7 +12,7 @@ export default defineConfig({
     ]
   },
   optimizeDeps: {
-    include: ['@mui/material', '@emotion/react', '@emotion/styled']
+    include: ['@mui/material', '@emotion/react', '@emotion/styled', 'xlsx', 'file-saver']
   },
   server: {
     host: '0.0.0.0',

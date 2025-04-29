@@ -6,11 +6,15 @@ class CandidateService {
     static async getCandidates({ semester, unassigned }) {
         const filter = {};
         if (semester) filter.semester = semester;
-        if (unassigned !== undefined) filter.unassigned = unassigned === 'true';
 
-        console.log("Candidate filter:", filter);
+        let candidates = await Candidate.find(filter);
 
-        const candidates = await Candidate.find(filter);
+        if (unassigned === 'true' && semester) {
+            // Find all assigned candidate IDs for the semester
+            const assigned = await Assignment.find({ semester }).distinct('grader_id');
+            candidates = candidates.filter(c => !assigned.includes(c._id));
+        }
+
         const assignments = await Assignment.find(semester ? { semester } : {}).populate('course_section_id');
 
         console.log("Total candidates:", candidates.length);

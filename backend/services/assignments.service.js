@@ -87,6 +87,9 @@ class AssignmentService {
   }
 
   static async createAssignmentsForSection(sectionId, semester) {
+    // Delete existing assignments for this section and semester
+    await Assignment.deleteMany({ course_section_id: sectionId, semester });
+
     console.log('\n--- Starting assignment for section ---');
     const section = await Section.findById(sectionId).exec();
     if (!section) {
@@ -187,6 +190,26 @@ class AssignmentService {
       }
     }
 
+    // Fill remaining slots with unassigned assignments
+    const numToFill = numRequired - assignments.length;
+    for (let i = 0; i < numToFill; i++) {
+      const assignment = new Assignment({
+        grader_id: null,
+        course_section_id: section._id,
+        status: 'pending',
+        semester: semester,
+        manuallyAssigned: false,
+        score: 0
+      });
+      try {
+        await assignment.save();
+        console.log(`Created unassigned slot for ${section.course_name}.${section.section_num}`);
+        assignments.push(assignment);
+      } catch (error) {
+        console.error('Error saving unassigned assignment:', error);
+      }
+    }
+
     console.log(`Completed assignments for section ${section.course_name}.${section.section_num}\n`);
     return assignments;
   }
@@ -261,6 +284,104 @@ class AssignmentService {
     }
 
     return allAssignments;
+  }
+
+  static async getAllSectionAssignments(semester) {
+    const sections = await Section.find({ semester }).sort({ course_name: 1, section_num: 1 });
+    const assignments = await Assignment.find({ semester }).populate('grader_id').populate('course_section_id');
+
+    // Map sectionId to an array of assignments, sorted by _id
+    const assignmentMap = {};
+    assignments.forEach(a => {
+      const key = a.course_section_id._id.toString();
+      if (!assignmentMap[key]) assignmentMap[key] = [];
+      assignmentMap[key].push(a);
+    });
+
+    // Sort assignments for each section by _id to keep order consistent
+    Object.values(assignmentMap).forEach(arr => arr.sort((a, b) => String(a._id).localeCompare(String(b._id))));
+
+    // Build the response: one entry per assignment slot
+    const result = [];
+    sections.forEach(section => {
+      const sectionAssignments = assignmentMap[section._id.toString()] || [];
+      for (let i = 0; i < section.num_required_graders; i++) {
+        const assignment = sectionAssignments[i];
+        result.push({
+          _id: assignment ? assignment._id : `${section._id}-${i}`,
+          section: {
+            _id: section._id,
+            course_name: section.course_name,
+            section_num: section.section_num,
+            instructor: {
+              name: section.instructor.name,
+              email: section.instructor.netid
+            },
+            num_required_graders: section.num_required_graders
+          },
+          assignedCandidate: assignment && assignment.grader_id ? {
+            name: assignment.grader_id.name,
+            netid: assignment.grader_id.netid
+          } : null,
+          semester: section.semester,
+          status: assignment ? assignment.status : null,
+          score: assignment ? assignment.score : null
+        });
+      }
+    });
+    return result;
+  }
+
+  static async swapCandidateInAssignment(assignmentId, candidateId) {
+    const candidate = await Candidate.findById(candidateId);
+    if (!candidate) throw new Error("Candidate not found.");
+
+    // Ensure candidate is not already assigned elsewhere
+    const alreadyAssigned = await Assignment.findOne({ grader_id: candidateId });
+    if (alreadyAssigned) throw new Error("Candidate is already assigned.");
+
+    // Update the assignment slot
+    return Assignment.findByIdAndUpdate(
+      assignmentId,
+      { grader_id: candidateId, manuallyAssigned: true },
+      { new: true }
+    );
+  }
+
+  static async autoAssignToAssignment(assignmentId) {
+    const assignment = await Assignment.findById(assignmentId).populate('course_section_id');
+    if (!assignment) throw new Error("Assignment not found.");
+    const section = assignment.course_section_id;
+    const semester = assignment.semester;
+
+    // Find all candidates for the semester
+    const candidates = await Candidate.find({ semester }).exec();
+    // Find all assigned candidate IDs for the semester
+    const assignedAssignments = await Assignment.find({ semester });
+    const assignedCandidateIds = assignedAssignments.map(a => String(a.grader_id));
+    // Filter to unassigned candidates
+    const unassignedCandidates = candidates.filter(c => !assignedCandidateIds.includes(String(c._id)));
+    if (unassignedCandidates.length === 0) throw new Error("No unassigned candidates available");
+
+    // Scoring logic (reuse from createAssignmentsForSection)
+    const weights = { gpa: 0.5, seniority: 0.2, experience: 0.8, keywords: 0.3 };
+    const scored = unassignedCandidates.map(candidate => {
+      const matchingKeywords = section.keywords ? section.keywords.filter(keyword => candidate.resume_keywords.includes(keyword)) : [];
+      const matchingKeywordsRatio = section.keywords ? matchingKeywords.length / section.keywords.length : 0;
+      const seniorityScore = this.getSeniorityScore(candidate.seniority);
+      const experienceScore = candidate.previous_grader_experience ? 1 : 0;
+      const score = (candidate.gpa * weights.gpa) + (seniorityScore * weights.seniority) + (experienceScore * weights.experience) + (matchingKeywordsRatio * weights.keywords);
+      return { candidate, score };
+    });
+    scored.sort((a, b) => b.score - a.score);
+    const best = scored[0];
+    if (!best) throw new Error("No suitable candidate found");
+
+    // Swap into assignment slot
+    assignment.grader_id = best.candidate._id;
+    assignment.manuallyAssigned = false;
+    await assignment.save();
+    return assignment;
   }
 }
 

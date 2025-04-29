@@ -35,10 +35,12 @@ export async function getProfessorView(semester) {
     );
 
     let reason = "";
-    if (!available) {
-      reason = "Not in Candidate Pool";
-    } else if (recommendedCandidate !== "—" && assignedCandidate !== recommendedCandidate) {
-      reason = "Candidate assigned to different course";
+    if (recommendedCandidate !== "—") {
+      if (!available) {
+        reason = "Not in Candidate Pool";
+      } else if (assignedCandidate !== recommendedCandidate) {
+        reason = "Candidate assigned to different course";
+      }
     }
 
     return {

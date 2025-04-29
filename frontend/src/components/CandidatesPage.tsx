@@ -27,7 +27,7 @@ interface Candidate {
 
 const ITEMS_PER_PAGE = 7;
 
-const SEASONS = ["Spring", "Summer", "Fall"];
+const SEASONS = ["Spring", "Fall"];
 const YEARS = Array.from({ length: 6 }, (_, i) => (2023 + i).toString());
 
 const CandidatesPage: React.FC = () => {
