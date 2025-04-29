@@ -8,7 +8,7 @@
 - **Tasks Completed:**
   - added excel sheet parsing
   - modified resume parsing controller endpoint to save info to database
-  - added support (edited model & controller logic) for recommended candidates
+  - added backend support (edited model & controller logic) for recommended candidates
   - made revisions to presentation powerpoint
   - changed candidate model to use UTDID instead of netID
 - **Tasks For Next Week:**
@@ -17,7 +17,7 @@
   - returning grader functionality
   - import candidates xlsx functionality
     - fetch candidate UTDID from the candidates sheet using the document id from the resumes filenames as the key
-  - 
+  - make sure recommended candidates functionality is available on frontend
 
 ### Rayyan Waris
 - **Total Hours Worked: 13**
@@ -32,7 +32,8 @@
 - **Tasks For Next Week:**
   - Finish presentation powerpoint
   - Integrate excel parse for candidates sheet onto frontend
-  - Implement returning graders logic 
+  - Implement returning graders logic
+  - allow recommendations to be added from the professors page
 
 ### Sophie Tran
 - **Total Hours Worked: 6**
