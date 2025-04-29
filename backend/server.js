@@ -60,6 +60,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/assignments', assignmentsRouter);
 app.use('/api/candidates', candidatesRouter);
 app.use('/api/professors', professorsRouter);
+app.use('/api/sections', sectionsRouter);
 
 // Health check route
 app.get('/', (req, res) => {

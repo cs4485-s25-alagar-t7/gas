@@ -18,10 +18,12 @@
     "jszip": "^3.10.1",
     "mongoose": "^7.5.0",
     "multer": "^1.4.5-lts.1",
-    "resume-parser": "file:../resume-parser"
+    "resume-parser": "file:../resume-parser",
+    "xlsx": "^0.18.5"
   },
   "description": "",
   "devDependencies": {
+    "@types/xlsx": "^0.0.36",
     "nodemon": "^3.0.1"
   }
 }
