@@ -1,34 +1,71 @@
 import Candidate from '../models/Candidate.js';
+import Assignment from '../models/Assignment.js';
+import Section from '../models/Section.js';
 
-class CandidatesService {
-    // Fetch all candidates
-    static async getAllCandidates() {
-        try {
-            return await Candidate.find();
-        } catch (error) {
-            throw new Error('Error fetching candidates: ' + error.message);
+class CandidateService {
+    static async getCandidates({ semester, unassigned }) {
+        const filter = {};
+        if (semester) filter.semester = semester;
+
+        let candidates = await Candidate.find(filter);
+
+        if (unassigned === 'true' && semester) {
+            // Find all assigned candidate IDs for the semester
+            const assigned = await Assignment.find({ semester }).distinct('grader_id');
+            candidates = candidates.filter(c => !assigned.includes(c._id));
         }
+
+        const assignments = await Assignment.find(semester ? { semester } : {}).populate('course_section_id');
+
+        console.log("Total candidates:", candidates.length);
+        console.log("Total assignments:", assignments.length);
+
+        const result = candidates.map(candidate => {
+            const assigned = assignments.find(a => a.grader_id?.toString() === candidate._id.toString());
+            return {
+                ...candidate.toObject(),
+                assignmentStatus: !!assigned,
+                course: assigned?.course_section_id || null,
+            };
+        });
+
+        return result;
     }
 
-    // Fetch candidates by netId
-    static async getCandidateByNetId(netId) {
-        try {
-            return await Candidate.find({ netid: netId });
-        } catch (error) {
-            throw new Error('Error fetching candidates by netId: ' + error.message);
-        }
+    static async addCandidate(candidateData) {
+        const newCandidate = new Candidate(candidateData);
+        return await newCandidate.save();
     }
 
-    // Create a new candidate
-    static async createCandidate(candidateData) {
-        try {
-            const candidate = new Candidate(candidateData);
-            return await candidate.save();
-        } catch (error) {
-            throw new Error('Error creating candidate: ' + error.message);
-        }
+    static async removeCandidate(id) {
+        return await Candidate.findByIdAndDelete(id);
     }
 
+    static async deleteAllBySemester(semester) {
+        const candidateResult = await Candidate.deleteMany({ semester });
+        const assignmentResult = await Assignment.deleteMany({ semester });
+        const sectionResult = await Section.deleteMany({ semester });
+        return {
+            candidates: candidateResult.deletedCount,
+            assignments: assignmentResult.deletedCount,
+            sections: sectionResult.deletedCount
+        };
+    }
+
+    static async deleteAll() {
+        return await Candidate.deleteMany({});
+    }
+
+    static async getAllSemesters() {
+        return await Candidate.distinct('semester');
+    }
+
+    static async getRecentCandidates(semester, count) {
+        return await Candidate
+            .find({ semester })
+            .sort({ _id: -1 })  // Sort by _id descending (most recent first)
+            .limit(count);
+    }
 }
 
-export default CandidatesService;
+export default CandidateService;

@@ -10,6 +10,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     ports:
       - "27017:27017"
+    networks:
+      - app-network
 
   mongo-express:
     image: mongo-express
@@ -21,29 +23,59 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       ME_CONFIG_MONGODB_URL: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/
       ME_CONFIG_BASICAUTH: ${ME_CONFIG_BASICAUTH}
+    networks:
+      - app-network
       
+  resume-parser:
+    build: ./resume-parser
+    container_name: resume-parser
+    restart: always
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./resume-parser:/app
+    environment:
+      - NODE_ENV=development
+    command: ["node", "dist/server.js"]
+
   backend:
     build: ./backend
     container_name: gas-backend
     restart: always
     ports:
-      - "5000:5000"
+      - "5002:5000"
     volumes:
       - ./backend:/app
+      - ./resume-parser:/resume-parser:ro
     environment: 
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
-      MONGO_DB_AUTH_SOURCE: ${MONGO_DB_AUTH_SOURCE}
+      MONGO_DB_AUTH_SOURCE: admin
       BACKEND_AUTH_REQUIRED: ${BACKEND_AUTH_REQUIRED}
       NODE_ENV: "development"
     depends_on:
       - mongo
+      - resume-parser
     command: ["node", "server.js"]
+    networks:
+      - app-network
 
   frontend:
     build: ./frontend
     ports:
-      - "3000:3000"
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules  
     depends_on:
       - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+
+

@@ -2,11 +2,11 @@ import express from 'express';
 const router = express.Router();
 import AssignmentService from '../services/assignments.service.js';
 
-// get all assignments for a specific semester
+// Get all assignments for a specific semester
 router.get('/', async (req, res) => {
-  const { semester } = req.body;
+  const { semester } = req.query;
   try {
-    const assignments = await AssignmentService.getAllAssignments(semester);
+    const assignments = await AssignmentService.getAllSectionAssignments(semester);
     res.json(assignments);
   } catch (error) {
     console.error(error);
@@ -74,6 +74,18 @@ router.post('/generate', async (req, res) => {
   }
 });
 
+// Generate assignments for all sections
+router.post('/generate-all', async (req, res) => {
+  try {
+    const { semester } = req.body;
+    const assignments = await AssignmentService.createAssignmentsForAllSections(semester);
+    res.status(201).json({ message: 'All assignments created.', assignments });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Delete an assignment
 router.delete('/:assignmentId', async (req, res) => {
   try {
@@ -83,6 +95,39 @@ router.delete('/:assignmentId', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Swap candidate in an assignment slot
+router.post('/swap', async (req, res) => {
+  try {
+    const { assignmentId, candidateId } = req.body;
+    const assignment = await AssignmentService.swapCandidateInAssignment(assignmentId, candidateId);
+    res.status(200).json({ message: 'Assignment updated.', assignment });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Auto-assign the next best candidate to an assignment slot
+router.post('/auto-assign', async (req, res) => {
+  try {
+    const { assignmentId } = req.body;
+    const assignment = await AssignmentService.autoAssignToAssignment(assignmentId);
+    res.status(200).json({ message: 'Auto-assigned candidate.', assignment });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Unassign a candidate from an assignment
+router.post('/unassign', async (req, res) => {
+  try {
+    const { assignmentId } = req.body;
+    const assignment = await AssignmentService.unassignCandidate(assignmentId);
+    res.status(200).json({ message: 'Candidate unassigned successfully.', assignment });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

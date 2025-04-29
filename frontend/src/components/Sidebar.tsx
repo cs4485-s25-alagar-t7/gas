@@ -1,101 +1,101 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "../../@/components/ui/button";
+import { Card } from "../../@/components/ui/card";
+import { 
+  LayoutDashboard, 
+  FileText, 
+  Users, 
+  School,
+  LogOut 
+} from "lucide-react";
 
-const Sidebar = () => {
+interface SidebarProps {
+  onLogout: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   const navigate = useNavigate();
-  const [expanded, setExpanded] = useState(false);
 
   const handleClick = (path: string) => {
-    console.log(`Navigating to ${path}`);
     navigate(path);
   };
 
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('http://localhost:5002/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+        }
+      });
+
+      if (response.ok) {
+        onLogout();
+        navigate('/login');
+      } else {
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
   return (
-    <aside className="w-56 bg-[#514C4C] text-white p-6 flex flex-col h-screen z-50">
-      <h2 className="text-xl font-bold">Grader System</h2>
-      <nav className="mt-6 flex-1">
-        <ul className="space-y-4">
-          <li>
-            <button
+    <Card className="w-64 h-screen bg-[#514C4C] text-white border-none rounded-none">
+      <div className="p-6 flex flex-col h-full">
+        <h2 className="text-2xl font-bold mb-8">Grader System</h2>
+        <nav className="flex-1">
+          <div className="space-y-2">
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-white hover:bg-white/10 flex items-center pl-1"
               onClick={() => handleClick("/")}
-              className="w-full text-left p-2 hover:bg-gray-700 rounded-md"
             >
+              <LayoutDashboard className="mr-2 h-5 w-5 flex-shrink-0" />
               Dashboard
-            </button>
-          </li>
-            <li>
-            <button
-              onClick={() => setExpanded(!expanded)}
-              className="w-full text-left p-2 hover:bg-gray-700 rounded-md"
+            </Button>
+            
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-white hover:bg-white/10 flex items-center pl-1"
+              onClick={() => handleClick("/assignments")}
             >
-              <span>Views</span>
-              <span>{expanded ? " ↓" : " →" }</span>
-            </button>
-            {expanded && (
-              <ul className="pl-4 space-y-2">
-              <li>
-                <button
-                onClick={() => handleClick("/CandidatesPage")}
-                className="w-full text-left p-2 hover:bg-gray-700 rounded-md"
-                >
-                Candidate
-                </button>
-              </li>
-              <li>
-                <button
-                onClick={() => handleClick("/ProfessorsPage")}
-                className="w-full text-left p-2 hover:bg-gray-700 rounded-md"
-                >
-                Professor
-                </button>
-              </li>
-              <li>
-                <button
-                onClick={() => handleClick("/CoursesPage")}
-                className="w-full text-left p-2 hover:bg-gray-700 rounded-md"
-                >
-                Course
-                </button>
-              </li>
-              </ul>
-            )}
-            </li>
-          <li>
-            <button
-              onClick={() => handleClick("/upload")}
-              className="w-full text-left p-2 hover:bg-gray-700 rounded-md"
+              <FileText className="mr-2 h-5 w-5 flex-shrink-0" />
+              Assignment
+            </Button>
+            
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-white hover:bg-white/10 flex items-center pl-1"
+              onClick={() => handleClick("/candidates")}
             >
-              Upload
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => handleClick("/settings")}
-              className="w-full text-left p-2 hover:bg-gray-700 rounded-md"
+              <Users className="mr-2 h-5 w-5 flex-shrink-0" />
+              Candidate
+            </Button>
+            
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-white hover:bg-white/10 whitespace-nowrap flex items-center pl-1"
+              onClick={() => handleClick("/professors")}
             >
-              Settings
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => handleClick("/tools")}
-              className="w-full text-left p-2 hover:bg-gray-700 rounded-md"
-            >
-              Tools
-            </button>
-          </li>
-        </ul>
-      </nav>
-      <button
-        onClick={() => {
-          console.log("Logging out...");
-          alert("Logging out...");
-        }} // Placeholder for logout logic
-        className="mt-6 py-2 px-4 bg-orange-600 hover:bg-orange-700 rounded-md"
-      >
-        Logout
-      </button>
-    </aside>
+              <School className="mr-2 h-5 w-5 flex-shrink-0" />
+              Course Recommendation
+            </Button>
+          </div>
+        </nav>
+        
+        <Button
+          variant="ghost"
+          className="mt-6 w-full justify-start text-white hover:bg-white/10 hover:text-red-400"
+          onClick={handleLogout}
+        >
+          <LogOut className="mr-2" />
+          Logout
+        </Button>
+      </div>
+    </Card>
   );
 };
 
