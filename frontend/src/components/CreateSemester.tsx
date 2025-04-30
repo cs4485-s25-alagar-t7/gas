@@ -16,6 +16,7 @@ const CreateSemester: React.FC = () => {
   const [resumeUploadError, setResumeUploadError] = useState<string | null>(null);
   const [sectionsUploadStatus, setSectionsUploadStatus] = useState<string | null>(null);
   const [sectionsUploadError, setSectionsUploadError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -97,34 +98,30 @@ const CreateSemester: React.FC = () => {
   };
 
   const handleContinue = async () => {
-    // if (!resumeFile || !sectionsFile || !gradersFile) {
-    //   alert("Please upload all three files before continuing.");
     if (!resumeFile || !sectionsFile) {
       alert("Please upload a ZIP file containing resumes and an Excel sheet of sections.");
       return;
     }
+
+    setIsUploading(true);
+    
     // Upload resume ZIP first
     const resumeOk = await handleResumeUpload();
-    if (!resumeOk) return;
+    if (!resumeOk) {
+      setIsUploading(false);
+      return;
+    }
     
     // Upload sections Excel
     const sectionsOk = await handleSectionsUpload();
-    if (!sectionsOk) return;
-    
-    setUploadDone(true);
-    alert("Files ready! You can now start the assignment.");
-  };
-
-  const handleStartAssignment = () => {
-    setIsStarting(true);
-    if (importPreviousGraders) {
-      alert("Importing previous/returning graders into assignment (simulated).");
+    if (!sectionsOk) {
+      setIsUploading(false);
+      return;
     }
-    setTimeout(() => {
-      alert(`Assignment started for ${season} ${year}!`);
-      setIsStarting(false);
-      navigate("/");
-    }, 500);
+    
+    setIsUploading(false);
+    alert("Files uploaded successfully! Please return to the dashboard and click 'Start Assignment' to begin the assignment process.");
+    navigate("/");
   };
 
   return (
@@ -250,22 +247,13 @@ const CreateSemester: React.FC = () => {
                 Back to Dashboard
               </button>
 
-              {!uploadDone ? (
-                <button
-                  onClick={handleContinue}
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded flex-1 ml-2"
-                >
-                  Continue
-                </button>
-              ) : (
-                <button
-                  onClick={handleStartAssignment}
-                  disabled={isStarting}
-                  className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded flex-1 ml-2"
-                >
-                  {isStarting ? "Starting…" : "Start Assignment"}
-                </button>
-              )}
+              <button
+                onClick={handleContinue}
+                disabled={isUploading}
+                className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded flex-1 ml-2"
+              >
+                {isUploading ? "Uploading..." : "Continue"}
+              </button>
             </div>
           </div>
         </div>

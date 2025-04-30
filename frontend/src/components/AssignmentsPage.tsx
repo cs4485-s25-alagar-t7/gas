@@ -320,12 +320,6 @@ const AssignmentPage: React.FC = () => {
                 >
                   Sort by Course
                 </Button>
-                <Button
-                  onClick={handleAutoAssignAll}
-                  className="bg-green-500 hover:bg-green-600 text-white shadow-sm"
-                >
-                  Auto Assign All
-                </Button>
               </div>
             </div>
           </Card>
