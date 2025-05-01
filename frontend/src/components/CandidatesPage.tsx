@@ -491,10 +491,6 @@ const CandidatesPage: React.FC = () => {
                       <p className="font-medium text-gray-900">{selectedCandidate.major}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm text-gray-500">GPA</p>
-                      <p className="font-medium text-gray-900">{selectedCandidate.gpa.toFixed(2)}</p>
-                    </div>
-                    <div className="space-y-1">
                       <p className="text-sm text-gray-500">Seniority</p>
                       <p className="font-medium text-gray-900">{selectedCandidate.seniority}</p>
                     </div>
