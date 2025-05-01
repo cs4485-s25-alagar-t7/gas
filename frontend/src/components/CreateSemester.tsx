@@ -118,6 +118,9 @@ const CreateSemester: React.FC = () => {
       setIsUploading(false);
       return;
     }
+
+    // Store the import preference in localStorage
+    localStorage.setItem(`importPreviousGraders_${semesterString}`, JSON.stringify(importPreviousGraders));
     
     setIsUploading(false);
     alert("Files uploaded successfully! Please return to the dashboard and click 'Start Assignment' to begin the assignment process.");
@@ -149,9 +152,16 @@ const CreateSemester: React.FC = () => {
             <div className="flex space-x-4 justify-between">
               <select
                 value={season}
-                onChange={e => setSeason(e.target.value as typeof SEASONS[number])}
+                onChange={e => {
+                  const newSeason = e.target.value;
+                  setSeason(newSeason as typeof SEASONS[number]);
+                  if (newSeason === "none") {
+                    setYear("");
+                  }
+                }}
                 className="border px-4 py-2 rounded shadow-sm focus:ring focus:ring-orange-400 outline-none"
               >
+                <option value="none">No Semester Selected</option>
                 {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
               <input
@@ -159,7 +169,8 @@ const CreateSemester: React.FC = () => {
                 value={year}
                 onChange={e => setYear(e.target.value)}
                 placeholder="Year (e.g. 2025)"
-                className="border px-4 py-2 rounded shadow-sm focus:ring focus:ring-orange-400 outline-none w-32"
+                disabled={season === "none"}
+                className={`border px-4 py-2 rounded shadow-sm focus:ring focus:ring-orange-400 outline-none w-32 ${season === "none" ? 'bg-gray-100' : ''}`}
               />
             </div>
 

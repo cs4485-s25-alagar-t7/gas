@@ -74,10 +74,16 @@ const Dashboard: React.FC = () => {
     if (!season || !year) return;
     const semester = `${season.charAt(0).toUpperCase() + season.slice(1)} ${year}`;
     try {
+      // Get the import preference from localStorage
+      const importPreviousGraders = JSON.parse(localStorage.getItem(`importPreviousGraders_${semester}`) || 'false');
+      
       const res = await fetch("http://localhost:5002/api/assignments/generate-all", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ semester })
+        body: JSON.stringify({ 
+          semester,
+          importPreviousGraders 
+        })
       });
       const data = await res.json();
       if (!res.ok) {
