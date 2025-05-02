@@ -296,7 +296,7 @@ const CandidatesPage: React.FC = () => {
                   variant="outline"
                   className="hover:bg-orange-50"
                 >
-                  Sort by NetID
+                  Sort by UTD ID
                 </Button>
                 <Button
                   onClick={() => handleSort("course_id")}
@@ -360,7 +360,7 @@ const CandidatesPage: React.FC = () => {
                         >
                           {candidate.name}
                         </Button>
-                        <div className="text-xs text-gray-500">NetID: {candidate.netid}</div>
+                        <div className="text-xs text-gray-500">UTD ID: {candidate.netid}</div>
                       </td>
                       <td className="px-6 py-4">
                         {candidate.course
@@ -483,7 +483,7 @@ const CandidatesPage: React.FC = () => {
                   <h3 className="text-lg font-semibold text-gray-900">Academic Information</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <p className="text-sm text-gray-500">NetID</p>
+                      <p className="text-sm text-gray-500">UTD ID</p>
                       <p className="font-medium text-gray-900">{selectedCandidate.netid}</p>
                     </div>
                     <div className="space-y-1">
