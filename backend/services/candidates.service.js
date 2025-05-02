@@ -2,6 +2,8 @@ import Candidate from '../models/Candidate.js';
 import Assignment from '../models/Assignment.js';
 import Section from '../models/Section.js';
 import * as xlsx from 'xlsx/xlsx.mjs';
+import JSZip from 'jszip';
+import { parseResume } from '/resume-parser/dist/services/parsing.service.js';
 
 class CandidateService {
     static async getCandidates({ semester, unassigned }) {
@@ -126,6 +128,114 @@ class CandidateService {
             .find({ semester })
             .sort({ _id: -1 })  // Sort by _id descending (most recent first)
             .limit(count);
+    }
+
+    static async processResumeZip(zipBuffer, semester) {
+        // Helper function to generate random values
+        const generateRandomValues = (id) => {
+            const majors = ['Computer Science', 'Software Engineering', 'Computer Engineering', 'Data Science', 'Information Technology'];
+            const seniorities = ['Junior', 'Senior', 'Masters', 'Doctorate'];
+            const gpa = (3.0 + Math.random()).toFixed(2);
+            return {
+                major: majors[Math.floor(Math.random() * majors.length)],
+                seniority: seniorities[Math.floor(Math.random() * seniorities.length)],
+                gpa: parseFloat(gpa),
+                netid: id,
+            };
+        };
+
+        let zipContent;
+        try {
+            const zip = new JSZip();
+            zipContent = await zip.loadAsync(zipBuffer, {
+                createFolders: true,
+                checkCRC32: true
+            });
+        } catch (error) {
+            throw new Error('Invalid zip file: ' + error.message);
+        }
+
+        // Get all files recursively
+        const files = [];
+        zipContent.forEach((relativePath, file) => {
+            if (!file.dir) {
+                files.push({
+                    name: relativePath,
+                    file: file
+                });
+            }
+        });
+
+        let processedCount = 0;
+        let errors = [];
+
+        // Process each PDF file
+        for (const { name, file } of files) {
+            if (name.toLowerCase().endsWith('.pdf')) {
+                try {
+                    let pdfBuffer;
+                    try {
+                        pdfBuffer = await file.async('nodebuffer');
+                    } catch (error) {
+                        errors.push({ filename: name, error: 'Failed to extract PDF: ' + error.message });
+                        continue;
+                    }
+
+                    let resumeData;
+                    try {
+                        resumeData = await parseResume(pdfBuffer);
+
+                        // Extract name and ID from filename (e.g., "Douglas_Lewis_559082.pdf")
+                        const filenameParts = name.replace('.pdf', '').split('_');
+                        const extractedName = filenameParts.slice(0, -1).join(' ');
+                        const extractedId = filenameParts[filenameParts.length - 1];
+
+                        // Generate random values for required fields
+                        const randomValues = generateRandomValues(extractedId);
+
+                        // Add required fields with random values
+                        const candidateData = {
+                            name: extractedName,
+                            ...randomValues,
+                            semester,
+                            assignmentStatus: false,
+                            ...resumeData  // This will override defaults if values exist in resumeData
+                        };
+
+                        try {
+                            await CandidateService.addCandidate(candidateData);
+                            processedCount++;
+                        } catch (error) {
+                            errors.push({ filename: name, error: 'Failed to save to database: ' + error.message });
+                            continue;
+                        }
+                    } catch (error) {
+                        errors.push({ filename: name, error: 'Failed to parse resume: ' + error.message });
+                        continue;
+                    }
+                } catch (error) {
+                    errors.push({ filename: name, error: error.message });
+                }
+            }
+        }
+
+        if (processedCount === 0) {
+            return {
+                message: 'No resumes were processed. Please check that your ZIP file contains PDF files.',
+                processedCount: 0,
+                totalFiles: files.length,
+                filesFound: files.map(f => f.name),
+                errors: errors.length > 0 ? errors : undefined
+            };
+        }
+
+        return { 
+            message: `Successfully processed ${processedCount} resumes`,
+            processedCount,
+            totalFiles: files.length,
+            filesFound: files.map(f => f.name),
+            errors: errors.length > 0 ? errors : undefined
+        };
     }
 }
 
