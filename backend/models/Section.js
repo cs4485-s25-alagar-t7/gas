@@ -11,6 +11,7 @@ const sectionSchema = new Schema({
   semester: { type: String, required: true },
   num_required_graders: { type: Number, required: true },
   requested_candidate_UTDIDs: [{ type: String }],
+  recommended_candidate_names: [{ type: String }],
 });
 
 export default model('Section', sectionSchema);

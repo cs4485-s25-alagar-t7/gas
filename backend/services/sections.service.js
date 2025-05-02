@@ -59,7 +59,8 @@ export async function bulkCreateSectionsFromExcel(buffer, semester) {
     keywords: section['Keywords'] ? section['Keywords'].split(',').map(keyword => keyword.trim().toLowerCase()) : [],
     semester: semester,
     num_required_graders: parseInt(section['Num of graders']),
-    requested_candidate_UTDIDs: section['Recommended Student ID'] ? section['Recommended Student ID'].split(',').map(utdid => utdid.trim()) : []
+    requested_candidate_UTDIDs: section['Recommended Student ID'] ? section['Recommended Student ID'].split(',').map(utdid => utdid.trim()) : [],
+    recommended_candidate_names: section['Recommended Student Name'] ? section['Recommended Student Name'].split(',').map(name => name.trim()) : []
   }));
 
   // Optionally log the first parsed section
@@ -67,8 +68,22 @@ export async function bulkCreateSectionsFromExcel(buffer, semester) {
     console.log('First section parsed:', formatted_sections[0]);
   }
 
-  return await Promise.all(formatted_sections.map(data => {
-    const section = new Section(data);
-    return section.save();
-  }));
+  // Only add new sections (skip duplicates)
+  const addedSections = [];
+  for (const data of formatted_sections) {
+    const exists = await Section.findOne({
+      course_name: data.course_name,
+      section_num: data.section_num,
+      semester: data.semester
+    });
+    if (!exists) {
+      const section = new Section(data);
+      await section.save();
+      addedSections.push(section);
+    }
+  }
+  if (addedSections.length > 0) {
+    console.log('First section added:', addedSections[0]);
+  }
+  return addedSections;
 }
