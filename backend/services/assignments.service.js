@@ -416,7 +416,7 @@ class AssignmentService {
     if (unassignedCandidates.length === 0) throw new Error("No unassigned candidates available");
 
     // Scoring logic (reuse from createAssignmentsForSection)
-    const weights = { gpa: 0.5, seniority: 0.2, experience: 0.8, keywords: 0.3 };
+    const weights = { gpa: 0, seniority: 0.2, experience: 0.8, keywords: 0.3 };
     const scored = unassignedCandidates.map(candidate => {
       const matchingKeywords = section.keywords ? section.keywords.filter(keyword => candidate.resume_keywords.includes(keyword)) : [];
       const matchingKeywordsRatio = section.keywords ? matchingKeywords.length / section.keywords.length : 0;
