@@ -125,12 +125,22 @@ class CandidateService {
 
     static async getRecentCandidates(semester, count) {
         return await Candidate
-            .find({ semester })
-            .sort({ _id: -1 })  // Sort by _id descending (most recent first)
-            .limit(count);
+        .find({ semester })
+        .sort({ _id: -1 })  // Sort by _id descending (most recent first)
+        .limit(count);
     }
-
+    
     static async processResumeZip(zipBuffer, semester) {
+        // helper function reads the resume data and checks if the candidate has TA or grader experience
+        // does not look for previous grader experience in the database because previous
+        //  graders are already carried over from the previous semester
+        const hasGraderExperience = (resumeData) => {
+            const experience = resumeData.workExperiences.map(exp => exp.jobTitle + exp.company + exp.descriptions.join(' ')).join(' ');
+            const education = resumeData.educations.map(edu => edu.descriptions.join(' ')).join(' ');
+            const allText = experience + education;
+            const allTextLower = allText.toLowerCase(); 
+            return allText.includes('TA') || allTextLower.includes('grader') || allTextLower.includes('teaching assistant');
+        }
         // Helper function to generate random values
         const generateRandomValues = (id) => {
             const majors = ['Computer Science', 'Software Engineering', 'Computer Engineering', 'Data Science', 'Information Technology'];
@@ -193,14 +203,24 @@ class CandidateService {
                         // Generate random values for required fields
                         const randomValues = generateRandomValues(extractedId);
 
+                        // get keywords from resume
+                        console.log("Resume Data:", resumeData);
+                        const keywords = resumeData.skills.descriptions[0].split(',').map(skill => skill.trim().toLowerCase());
+                        console.log("Keywords:", keywords);
+                        // check if the resume includes TA or grader experience
+                        const experience = hasGraderExperience(resumeData);
                         // Add required fields with random values
                         const candidateData = {
                             name: extractedName,
                             ...randomValues,
                             semester,
+                            previous_grader_experience: experience,
                             assignmentStatus: false,
-                            ...resumeData  // This will override defaults if values exist in resumeData
+                            resume_keywords: keywords,
+                            // ...resumeData  // This will override defaults if values exist in resumeData
                         };
+
+
 
                         try {
                             await CandidateService.addCandidate(candidateData);
@@ -237,6 +257,7 @@ class CandidateService {
             errors: errors.length > 0 ? errors : undefined
         };
     }
+
 }
 
 export default CandidateService;

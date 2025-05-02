@@ -56,7 +56,7 @@ export async function bulkCreateSectionsFromExcel(buffer, semester) {
       name: section['Professor Name'],
       netid: section['Professor Email'] ? section['Professor Email'].split('@')[0] : ''
     },
-    keywords: section['Keywords'] ? section['Keywords'].split(',').map(keyword => keyword.trim()) : [],
+    keywords: section['Keywords'] ? section['Keywords'].split(',').map(keyword => keyword.trim().toLowerCase()) : [],
     semester: semester,
     num_required_graders: parseInt(section['Num of graders']),
     requested_candidate_UTDIDs: section['Requested Student ID'] ? section['Requested Student ID'].split(',').map(utdid => utdid.trim()) : []
