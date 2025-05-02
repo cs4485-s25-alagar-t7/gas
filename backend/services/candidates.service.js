@@ -125,11 +125,11 @@ class CandidateService {
 
     static async getRecentCandidates(semester, count) {
         return await Candidate
-        .find({ semester })
-        .sort({ _id: -1 })  // Sort by _id descending (most recent first)
-        .limit(count);
+            .find({ semester })
+            .sort({ _id: -1 })  // Sort by _id descending (most recent first)
+            .limit(count);
     }
-    
+
     static async processResumeZip(zipBuffer, semester) {
         // helper function reads the resume data and checks if the candidate has TA or grader experience
         // does not look for previous grader experience in the database because previous
@@ -138,7 +138,7 @@ class CandidateService {
             const experience = resumeData.workExperiences.map(exp => exp.jobTitle + exp.company + exp.descriptions.join(' ')).join(' ');
             const education = resumeData.educations.map(edu => edu.descriptions.join(' ')).join(' ');
             const allText = experience + education;
-            const allTextLower = allText.toLowerCase(); 
+            const allTextLower = allText.toLowerCase();
             return allText.includes('TA') || allTextLower.includes('grader') || allTextLower.includes('teaching assistant');
         }
         // Helper function to generate random values
@@ -190,7 +190,7 @@ class CandidateService {
                         errors.push({ filename: name, error: 'Failed to extract PDF: ' + error.message });
                         continue;
                     }
-
+                    //TODO: only save keywords if they appear in at least one section
                     let resumeData;
                     try {
                         resumeData = await parseResume(pdfBuffer);
@@ -204,7 +204,11 @@ class CandidateService {
                         const randomValues = generateRandomValues(extractedId);
 
                         // get keywords from resume
-                        const keywords = resumeData.skills.descriptions[0].split(',:').map(skill => skill.trim().toLowerCase());
+                        const keywords_string_from_featured = resumeData.skills.featuredSkills ? resumeData.skills.featuredSkills.map(featSkill => featSkill.skill.toLowerCase().trim() ?? "").join(",") : "";
+                        const all_keywords = resumeData.skills.descriptions ? (resumeData.skills.descriptions.join(",") + keywords_string_from_featured)
+                            .toLowerCase().split(/[,:()]/).map(skill => skill.trim())
+                            .filter(skill => skill.length > 0 && skill.length <= 18) : [];
+                        console.log("featuredSkills:", resumeData.skills.featuredSkills);
                         // check if the resume includes TA or grader experience
                         const experience = hasGraderExperience(resumeData);
                         // Add required fields with random values
@@ -214,7 +218,7 @@ class CandidateService {
                             semester,
                             previous_grader_experience: experience,
                             assignmentStatus: false,
-                            resume_keywords: keywords,
+                            resume_keywords: [...new Set(all_keywords)],
                             // ...resumeData  // This will override defaults if values exist in resumeData
                         };
 
@@ -247,7 +251,7 @@ class CandidateService {
             };
         }
 
-        return { 
+        return {
             message: `Successfully processed ${processedCount} resumes`,
             processedCount,
             totalFiles: files.length,
