@@ -40,6 +40,7 @@ const CandidatesPage: React.FC = () => {
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [isAddCandidateModalOpen, setIsAddCandidateModalOpen] = useState(false);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [excelFile, setExcelFile] = useState<File | null>(null);
   const [showAll, setShowAll] = useState(false);
   const { season, year } = useSemester();
   const semesterString = `${season} ${year}`;
@@ -127,6 +128,18 @@ const CandidatesPage: React.FC = () => {
     setIsAddCandidateModalOpen(true);
   };
 
+  const handleExcelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (!file.name.endsWith('.xlsx')) {
+        alert('Please upload an Excel file (.xlsx)');
+        e.target.value = '';
+        return;
+      }
+      setExcelFile(file);
+    }
+  };
+
   const handleResumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -141,53 +154,38 @@ const CandidatesPage: React.FC = () => {
   };
 
   const handleAddCandidateSubmit = async () => {
-    if (!resumeFile) {
-      alert("Please upload a ZIP file containing resumes.");
+    if (!resumeFile || !excelFile) {
+      alert("Please upload both a ZIP file containing resumes and an Excel sheet of candidates.");
       return;
     }
-
     try {
-      console.log('Preparing to upload file:', resumeFile.name);
       const formData = new FormData();
       formData.append("resumeZip", resumeFile);
+      formData.append("candidatesExcel", excelFile);
       formData.append("semester", semesterString);
-
-      console.log('Sending request with semester:', semesterString);
-      const response = await fetch("http://localhost:5002/api/candidates/upload", {
+      const response = await fetch("http://localhost:5002/api/candidates/upload-both", {
         method: "POST",
         body: formData,
       });
-
-      console.log('Response status:', response.status);
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Upload error response:', errorText);
-        throw new Error(`Failed to upload resumes: ${errorText}`);
+        throw new Error(`Failed to upload: ${errorText}`);
       }
-
       const result = await response.json();
-      console.log('Upload result:', result);
-      
-      if (result.processedCount === 0) {
-        alert(`No resumes were processed. Please check that your ZIP file contains PDF files.\nFiles found: ${result.filesFound?.join(', ') || 'none'}`);
-      } else {
-        // Fetch only the newly added candidates
-        const newCandidatesResponse = await fetch(`http://localhost:5002/api/candidates/recent?semester=${encodeURIComponent(semesterString)}&count=${result.processedCount}`);
-        if (!newCandidatesResponse.ok) {
-          throw new Error('Failed to fetch newly added candidates');
-        }
-        const newCandidates = await newCandidatesResponse.json();
-        
-        // Append new candidates to the existing list
-        setCandidates(prevCandidates => [...prevCandidates, ...newCandidates]);
-        
-        alert(`Successfully processed ${result.processedCount} resumes!`);
-        setIsAddCandidateModalOpen(false);
-        setResumeFile(null);
-        fetchCandidates(); // Refresh the candidates list
+      // Fetch only the newly added candidates
+      const newCandidatesResponse = await fetch(`http://localhost:5002/api/candidates/recent?semester=${encodeURIComponent(semesterString)}&count=${result.processedCount}`);
+      if (!newCandidatesResponse.ok) {
+        throw new Error('Failed to fetch newly added candidates');
       }
+      const newCandidates = await newCandidatesResponse.json();
+      setCandidates(prevCandidates => [...prevCandidates, ...newCandidates]);
+      alert(`Successfully processed ${result.processedCount} candidates!`);
+      setIsAddCandidateModalOpen(false);
+      setResumeFile(null);
+      setExcelFile(null);
+      fetchCandidates();
     } catch (error) {
-      console.error("Error uploading resumes:", error);
+      console.error("Error uploading candidates:", error);
       alert(error instanceof Error ? error.message : "Failed to add candidates. Please try again.");
     }
   };
@@ -548,12 +546,13 @@ const CandidatesPage: React.FC = () => {
               <div className="flex justify-between items-center p-6 border-b border-gray-200">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">Upload Candidates</h2>
-                  <p className="text-sm text-gray-500 mt-1">Upload a ZIP file containing candidate resumes</p>
+                  <p className="text-sm text-gray-500 mt-1">Upload both a ZIP file containing resumes and an Excel sheet of candidates</p>
                 </div>
                 <Button
                   onClick={() => {
                     setIsAddCandidateModalOpen(false);
                     setResumeFile(null);
+                    setExcelFile(null);
                   }}
                   variant="ghost"
                   className="text-gray-500 hover:text-gray-700 p-2 h-auto rounded-full"
@@ -566,6 +565,28 @@ const CandidatesPage: React.FC = () => {
 
               {/* Content */}
               <div className="p-6 space-y-6">
+                <input
+                  id="excel-upload"
+                  type="file"
+                  accept=".xlsx"
+                  className="hidden"
+                  onChange={handleExcelChange}
+                />
+                <label
+                  htmlFor="excel-upload"
+                  className="block w-full p-8 text-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                >
+                  <div className="space-y-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <div className="text-gray-600 font-medium">Click to upload or drag and drop Excel file</div>
+                    <div className="text-sm text-gray-500">Excel files only (.xlsx)</div>
+                    {excelFile && (
+                      <div className="text-sm text-green-600 font-medium mt-2">Selected: {excelFile.name}</div>
+                    )}
+                  </div>
+                </label>
                 <input
                   id="resume-upload"
                   type="file"
@@ -581,20 +602,20 @@ const CandidatesPage: React.FC = () => {
                     <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <div className="text-gray-600 font-medium">Click to upload or drag and drop</div>
+                    <div className="text-gray-600 font-medium">Click to upload or drag and drop ZIP file</div>
                     <div className="text-sm text-gray-500">ZIP files only (.zip)</div>
                     {resumeFile && (
                       <div className="text-sm text-green-600 font-medium mt-2">Selected: {resumeFile.name}</div>
                     )}
                   </div>
                 </label>
-
                 {/* Footer */}
                 <div className="flex justify-end space-x-4 pt-4">
                   <Button
                     onClick={() => {
                       setIsAddCandidateModalOpen(false);
                       setResumeFile(null);
+                      setExcelFile(null);
                     }}
                     variant="outline"
                     className="hover:bg-gray-50"
@@ -603,10 +624,10 @@ const CandidatesPage: React.FC = () => {
                   </Button>
                   <Button
                     onClick={handleAddCandidateSubmit}
-                    disabled={!resumeFile}
+                    disabled={!resumeFile || !excelFile}
                     className="bg-green-500 hover:bg-green-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Upload File
+                    Upload Files
                   </Button>
                 </div>
               </div>

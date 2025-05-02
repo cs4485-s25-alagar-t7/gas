@@ -177,8 +177,17 @@ const AssignmentPage: React.FC = () => {
     }
   };
 
+  // Utility to check for valid MongoDB ObjectId
+  function isValidObjectId(id: string) {
+    return /^[a-f\d]{24}$/i.test(id);
+  }
+
   const handleAssign = async (candidate: Candidate) => {
     if (!selectedAssignment) return;
+    if (!isValidObjectId(selectedAssignment._id)) {
+      alert("Cannot assign to this slot: not a real assignment slot.");
+      return;
+    }
     try {
       setLoading(true);
       const res = await fetch("http://localhost:5002/api/assignments/swap", {
