@@ -73,13 +73,16 @@ class AssignmentService {
     return assignment.save();
   }
 
+  //TODO: make this customizable by the hiring manager
   static getSeniorityScore(seniority) {
     switch (seniority) {
-      case 'Undergraduate':
+      case 'Junior':
+        return 0.25;
+      case 'Senior':
         return 0.5;
       case 'Masters':
         return 1;
-      case 'PhD':
+      case 'Doctorate':
         return 1.5;
       default:
         return 0;

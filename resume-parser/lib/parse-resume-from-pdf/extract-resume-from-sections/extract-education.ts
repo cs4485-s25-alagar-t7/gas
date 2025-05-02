@@ -30,7 +30,7 @@ const SCHOOLS = ['College', 'University', 'Institute', 'School', 'Academy', 'BAS
 const hasSchool = (item: TextItem) =>
   SCHOOLS.some((school) => item.text.includes(school));
 // prettier-ignore
-const DEGREES = ["Associate", "Bachelor", "Master", "PhD", "Ph."];
+const DEGREES = ["Associate", "Bachelor", "Master", "PhD", "Ph.", "Doctor"];
 const hasDegree = (item: TextItem) =>
   DEGREES.some((degree) => item.text.includes(degree)) ||
   /[ABM][A-Z\.]/.test(item.text); // Match AA, B.S., MBA, etc.

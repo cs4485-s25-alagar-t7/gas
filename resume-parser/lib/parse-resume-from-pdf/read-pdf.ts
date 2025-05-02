@@ -19,7 +19,6 @@ import type { TextItem as PdfjsTextItem } from "pdfjs-dist/types/src/display/api
  */
 export const readPdf = async (fileBuffer: Buffer<ArrayBufferLike>): Promise<TextItems> => {
   const pdfAsTypedArray = convertBufToUint8Array(fileBuffer);
-  //@ts-ignore
   const pdfFile = await pdfjs.getDocument(pdfAsTypedArray).promise;
   let textItems: TextItems = [];
 

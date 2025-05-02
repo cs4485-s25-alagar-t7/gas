@@ -18,6 +18,30 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Modifies the candidates in the database for a particular semester based on the data in the Excel file
+// should update the UTDID based on the matching document ID
+// should also update the seniority score and major 
+// returns list of UTDIDs that were updated
+// POST /api/candidates/upload
+router.post('/upload/excel', upload.single('candidatesSheet'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+    const { semester } = req.body;
+    if (!semester) {
+      return res.status(400).json({ message: 'Semester is required' });
+    }
+    const modifiedCandidates = await CandidatesService.bulkModifyCandidatesFromExcel(req.file.buffer, semester);
+    res.status(201).json(modifiedCandidates);
+  } catch (error) {
+    console.error('Error processing file:', error);
+    res.status(500).json({ message: 'Failed to process file', error: error.message });
+  }
+});
+
+
+
 // GET /api/candidates/candidate/:netId
 router.get('/candidate/:netId', async (req, res) => {
   try {
@@ -92,22 +116,16 @@ router.post('/upload', upload.single('resumeZip'), async (req, res) => {
     // Helper function to generate random values
     const generateRandomValues = (name, id) => {
       const majors = ['Computer Science', 'Software Engineering', 'Computer Engineering', 'Data Science', 'Information Technology'];
-      const seniorities = ['Undergraduate', 'Masters', 'PhD'];
+      const seniorities = ['Junior', 'Senior', 'Masters', 'Doctorate'];
       
       // Generate a realistic GPA between 3.0 and 4.0
       const gpa = (3.0 + Math.random()).toFixed(2);
-      
-      // Generate a realistic netID using first initial, last initial, and numbers
-      const nameParts = name.split(' ');
-      const firstInitial = nameParts[0][0].toLowerCase();
-      const lastInitial = nameParts[nameParts.length - 1][0].toLowerCase();
-      const netid = `${firstInitial}${lastInitial}${id.slice(-4)}`;
       
       return {
         major: majors[Math.floor(Math.random() * majors.length)],
         seniority: seniorities[Math.floor(Math.random() * seniorities.length)],
         gpa: parseFloat(gpa),
-        netid: netid
+        netid: id,
       };
     };
 
@@ -139,8 +157,6 @@ router.post('/upload', upload.single('resumeZip'), async (req, res) => {
       }
     });
 
-    console.log('Found files in zip:', files.map(f => f.name));
-
     let processedCount = 0;
     let errors = [];
 
@@ -152,7 +168,6 @@ router.post('/upload', upload.single('resumeZip'), async (req, res) => {
           let pdfBuffer;
           try {
             pdfBuffer = await file.async('nodebuffer');
-            console.log('PDF buffer extracted successfully:', name, 'Size:', pdfBuffer.length, 'bytes');
           } catch (error) {
             console.error('Error extracting PDF buffer:', error);
             errors.push({ filename: name, error: 'Failed to extract PDF: ' + error.message });
@@ -161,9 +176,8 @@ router.post('/upload', upload.single('resumeZip'), async (req, res) => {
 
           let resumeData;
           try {
-            console.log('Parsing resume:', name);
+            // console.log('Parsing resume:', name);
             resumeData = await parseResume(pdfBuffer);
-            console.log('Resume parsed successfully:', name, 'Data:', resumeData);
 
             // Extract name and ID from filename (e.g., "Douglas_Lewis_559082.pdf")
             const filenameParts = name.replace('.pdf', '').split('_');
@@ -183,7 +197,6 @@ router.post('/upload', upload.single('resumeZip'), async (req, res) => {
             };
             
             try {
-              console.log('Saving candidate data to database:', name, candidateData);
               await CandidatesService.addCandidate(candidateData);
               console.log('Successfully saved to database:', name);
               processedCount++;
