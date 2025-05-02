@@ -29,7 +29,14 @@ export async function getProfessorView(semester) {
     if (Array.isArray(section.requested_candidate_UTDIDs) && section.requested_candidate_UTDIDs.length > 0) {
       const utdid = section.requested_candidate_UTDIDs[0].trim();
       const candidate = candidates.find(c => String(c.netid).trim() === utdid);
-      recommendedCandidate = candidate ? candidate.name : "";
+      if (candidate) {
+        recommendedCandidate = candidate.name;
+      } else if (Array.isArray(section.recommended_candidate_names) && section.recommended_candidate_names.length > 0) {
+        // Use the name from the section if not in the pool
+        recommendedCandidate = section.recommended_candidate_names[0];
+      } else {
+        recommendedCandidate = utdid;
+      }
     }
 
     const available = candidates.some(c =>
@@ -38,24 +45,25 @@ export async function getProfessorView(semester) {
     );
 
     let reason = "";
-
-    // Enhanced mismatch handling
     if (Array.isArray(section.requested_candidate_UTDIDs) && section.requested_candidate_UTDIDs.length > 0) {
-      // For each requested UTD ID, check candidate pool and assignment
-      for (const utdid of section.requested_candidate_UTDIDs) {
-        const candidateInPool = candidates.find(c => String(c.netid).trim() === String(utdid).trim());
+      for (let idx = 0; idx < section.requested_candidate_UTDIDs.length; idx++) {
+        const utdid = section.requested_candidate_UTDIDs[idx].trim();
+        const candidateInPool = candidates.find(c => String(c.netid).trim() === utdid);
         if (!candidateInPool) {
           reason = "Not in Candidate Pool";
-          break;
         } else {
-          // Check if this candidate is assigned to this section
-          if (assignment.grader_id && String(candidateInPool._id) === String(assignment.grader_id._id)) {
+          // Find all assignments for this candidate in this semester
+          const candidateAssignments = assignments.filter(a => a.grader_id && String(a.grader_id._id) === String(candidateInPool._id));
+          const assignedHere = candidateAssignments.some(a => a.course_section_id && String(a.course_section_id._id) === String(section._id));
+          if (assignedHere) {
             reason = "";
-          } else {
+          } else if (candidateAssignments.length > 0) {
             reason = "Candidate is assigned to another course/section";
-            break;
+          } else {
+            reason = "Candidate is in pool but not assigned";
           }
         }
+        if (reason) break; // Stop at the first mismatch reason found
       }
     }
 
