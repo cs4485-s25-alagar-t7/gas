@@ -128,9 +128,10 @@ class AssignmentService {
     return null;
   }
 
-  static async createAssignmentsForSection(sectionId, semester, importPreviousGraders = false) {
+  static async createAssignmentsForSection(sectionId, semester, importPreviousGraders = false, globallyAssignedCandidateIds = new Set()) {
     // Delete existing assignments for this section and semester
     await Assignment.deleteMany({ course_section_id: sectionId, semester });
+    await Assignment.deleteMany({ course_section_id: sectionId, semester, grader_id: null });
 
     console.log('\n--- Starting assignment for section ---');
     const section = await Section.findById(sectionId).exec();
@@ -175,21 +176,19 @@ class AssignmentService {
       console.log('Other candidates:', otherCandidates.length);
     }
 
-    // Get existing assignments for the current semester
-    const existingAssignments = await this.getAllAssignments(semester);
-    console.log('Existing assignments:', existingAssignments.length);
+    // Get existing assignments for the current section and semester
+    const existingAssignments = await Assignment.find({ course_section_id: sectionId, semester });
+    const assignedCandidateIds = existingAssignments
+      .filter(a => a.grader_id)
+      .map(a => a.grader_id.toString());
+    console.log('Already assigned candidates for this section:', assignedCandidateIds);
     
-    const assignedCandidateIds = existingAssignments.map(assignment => 
-      assignment.assignedCandidate.netid
-    );
-    console.log('Already assigned candidates:', assignedCandidateIds);
-    
-    // Filter out already assigned candidates
+    // Filter out already assigned candidates (global)
     const unassignedPreviousGraders = previousGraders.filter(candidate => 
-      !assignedCandidateIds.includes(candidate.netid)
+      !globallyAssignedCandidateIds.has(candidate._id.toString())
     );
     const unassignedOtherCandidates = otherCandidates.filter(candidate => 
-      !assignedCandidateIds.includes(candidate.netid)
+      !globallyAssignedCandidateIds.has(candidate._id.toString())
     );
     
     console.log('Available unassigned previous graders:', unassignedPreviousGraders.length);
@@ -247,6 +246,7 @@ class AssignmentService {
 
       try {
         await assignment.save();
+        globallyAssignedCandidateIds.add(candidate._id.toString());
         console.log(`Created assignment for ${candidate.name} to ${section.course_name}.${section.section_num}`);
         assignments.push(assignment);
       } catch (error) {
@@ -318,10 +318,11 @@ class AssignmentService {
     }
 
     const allAssignments = [];
+    const globallyAssignedCandidateIds = new Set();
     for (const section of sections) {
       try {
         console.log(`\nProcessing section ${section.course_name}.${section.section_num}`);
-        const sectionAssignments = await this.createAssignmentsForSection(section._id, semester, importPreviousGraders);
+        const sectionAssignments = await this.createAssignmentsForSection(section._id, semester, importPreviousGraders, globallyAssignedCandidateIds);
         console.log(`Created ${sectionAssignments.length} assignments for section ${section.course_name}.${section.section_num}`);
         allAssignments.push(...sectionAssignments);
       } catch (error) {

@@ -24,7 +24,8 @@ export async function getProfessorView(semester) {
     const section = assignment.course_section_id;
     if (!section) return null; // Skip if no section data
 
-    const assignedCandidate = assignment.grader_id?.name || "—";
+    const assignedCandidate = assignment.grader_id && assignment.grader_id.name ? assignment.grader_id.name : "";
+    if (!assignedCandidate) return null; // Only include if there is an actual name
     let recommendedCandidate = "";
     if (Array.isArray(section.requested_candidate_UTDIDs) && section.requested_candidate_UTDIDs.length > 0) {
       const utdid = section.requested_candidate_UTDIDs[0].trim();
