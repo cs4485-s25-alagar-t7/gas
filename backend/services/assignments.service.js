@@ -1,6 +1,7 @@
 import Assignment from '../models/Assignment.js';
 import Candidate from '../models/Candidate.js';
 import Section from '../models/Section.js';
+import mongoose from 'mongoose';
 
 class AssignmentService {
   static async getAllAssignments(semester) {  
@@ -340,7 +341,7 @@ class AssignmentService {
 
   static async getAllSectionAssignments(semester) {
     const sections = await Section.find({ semester }).sort({ course_name: 1, section_num: 1 });
-    const assignments = await Assignment.find({ semester }).populate('grader_id').populate('course_section_id');
+    let assignments = await Assignment.find({ semester }).populate('grader_id').populate('course_section_id');
 
     // Map sectionId to an array of assignments, sorted by _id
     const assignmentMap = {};
@@ -352,6 +353,26 @@ class AssignmentService {
 
     // Sort assignments for each section by _id to keep order consistent
     Object.values(assignmentMap).forEach(arr => arr.sort((a, b) => String(a._id).localeCompare(String(b._id))));
+
+    // Ensure every section has enough real assignment slots
+    for (const section of sections) {
+      const sectionAssignments = assignmentMap[section._id.toString()] || [];
+      const missing = section.num_required_graders - sectionAssignments.length;
+      for (let i = 0; i < missing; i++) {
+        const newAssignment = new Assignment({
+          grader_id: null,
+          course_section_id: section._id,
+          status: 'pending',
+          semester: section.semester,
+          manuallyAssigned: false,
+          score: 0
+        });
+        await newAssignment.save();
+        sectionAssignments.push(newAssignment);
+        assignments.push(newAssignment);
+      }
+      assignmentMap[section._id.toString()] = sectionAssignments;
+    }
 
     // Build the response: one entry per assignment slot
     const result = [];
@@ -385,19 +406,38 @@ class AssignmentService {
   }
 
   static async swapCandidateInAssignment(assignmentId, candidateId) {
-    const candidate = await Candidate.findById(candidateId);
-    if (!candidate) throw new Error("Candidate not found.");
+    try {
+      if (!mongoose.Types.ObjectId.isValid(assignmentId)) {
+        throw new Error("Invalid assignment slot ID.");
+      }
+      const candidate = await Candidate.findById(candidateId);
+      if (!candidate) throw new Error("Candidate not found.");
 
-    // Ensure candidate is not already assigned elsewhere
-    const alreadyAssigned = await Assignment.findOne({ grader_id: candidateId });
-    if (alreadyAssigned) throw new Error("Candidate is already assigned.");
+      // Find the assignment slot to update
+      const assignmentToUpdate = await Assignment.findById(assignmentId);
+      if (!assignmentToUpdate) throw new Error("Assignment slot not found.");
+      const semester = assignmentToUpdate.semester;
 
-    // Update the assignment slot
-    return Assignment.findByIdAndUpdate(
-      assignmentId,
-      { grader_id: candidateId, manuallyAssigned: true },
-      { new: true }
-    );
+      // Ensure candidate is not already assigned elsewhere in the same semester (but allow reassigning to this slot)
+      const alreadyAssigned = await Assignment.findOne({
+        grader_id: candidateId,
+        semester: semester,
+        _id: { $ne: assignmentId }
+      });
+      if (alreadyAssigned) {
+        console.error(`Candidate ${candidateId} is already assigned to assignment ${alreadyAssigned._id} in semester ${semester}`);
+        throw new Error("Candidate is already assigned to another section in this semester.");
+      }
+
+      // Update the assignment slot
+      assignmentToUpdate.grader_id = candidateId;
+      assignmentToUpdate.manuallyAssigned = true;
+      await assignmentToUpdate.save();
+      return assignmentToUpdate;
+    } catch (error) {
+      console.error('Error in swapCandidateInAssignment:', error);
+      throw error;
+    }
   }
 
   static async autoAssignToAssignment(assignmentId) {
