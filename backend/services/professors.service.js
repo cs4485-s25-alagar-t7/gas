@@ -25,9 +25,12 @@ export async function getProfessorView(semester) {
     if (!section) return null; // Skip if no section data
 
     const assignedCandidate = assignment.grader_id?.name || "—";
-    const recommendedCandidate = candidates.find(c => 
-      c.resume_keywords?.some(k => section.keywords?.includes(k))
-    )?.name || "—";
+    let recommendedCandidate = "";
+    if (Array.isArray(section.requested_candidate_UTDIDs) && section.requested_candidate_UTDIDs.length > 0) {
+      const utdid = section.requested_candidate_UTDIDs[0].trim();
+      const candidate = candidates.find(c => String(c.netid).trim() === utdid);
+      recommendedCandidate = candidate ? candidate.name : "";
+    }
 
     const available = candidates.some(c =>
       c.semester === section.semester &&
@@ -35,11 +38,24 @@ export async function getProfessorView(semester) {
     );
 
     let reason = "";
-    if (recommendedCandidate !== "—") {
-      if (!available) {
-        reason = "Not in Candidate Pool";
-      } else if (assignedCandidate !== recommendedCandidate) {
-        reason = "Candidate assigned to different course";
+
+    // Enhanced mismatch handling
+    if (Array.isArray(section.requested_candidate_UTDIDs) && section.requested_candidate_UTDIDs.length > 0) {
+      // For each requested UTD ID, check candidate pool and assignment
+      for (const utdid of section.requested_candidate_UTDIDs) {
+        const candidateInPool = candidates.find(c => String(c.netid).trim() === String(utdid).trim());
+        if (!candidateInPool) {
+          reason = "Not in Candidate Pool";
+          break;
+        } else {
+          // Check if this candidate is assigned to this section
+          if (assignment.grader_id && String(candidateInPool._id) === String(assignment.grader_id._id)) {
+            reason = "";
+          } else {
+            reason = "Candidate is assigned to another course/section";
+            break;
+          }
+        }
       }
     }
 
