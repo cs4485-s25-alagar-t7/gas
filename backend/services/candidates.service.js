@@ -204,9 +204,7 @@ class CandidateService {
                         const randomValues = generateRandomValues(extractedId);
 
                         // get keywords from resume
-                        console.log("Resume Data:", resumeData);
-                        const keywords = resumeData.skills.descriptions[0].split(',').map(skill => skill.trim().toLowerCase());
-                        console.log("Keywords:", keywords);
+                        const keywords = resumeData.skills.descriptions[0].split(',:').map(skill => skill.trim().toLowerCase());
                         // check if the resume includes TA or grader experience
                         const experience = hasGraderExperience(resumeData);
                         // Add required fields with random values
