@@ -77,8 +77,8 @@ router.post('/generate', async (req, res) => {
 // Generate assignments for all sections
 router.post('/generate-all', async (req, res) => {
   try {
-    const { semester } = req.body;
-    const assignments = await AssignmentService.createAssignmentsForAllSections(semester);
+    const { semester, importPreviousGraders } = req.body;
+    const assignments = await AssignmentService.createAssignmentsForAllSections(semester, importPreviousGraders);
     res.status(201).json({ message: 'All assignments created.', assignments });
   } catch (error) {
     console.error(error);

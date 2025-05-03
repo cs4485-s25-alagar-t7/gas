@@ -5,7 +5,7 @@ import { useSemester } from "../context/SemesterContext";
 const CreateSemester: React.FC = () => {
   const navigate = useNavigate();
   const { season, year, setSeason, setYear, SEASONS, addSemester } = useSemester();
-  const semesterString = `${season} ${year}`;
+  const semesterString = season === "none" ? "" : `${season} ${year}`;
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [sectionsFile, setSectionsFile] = useState<File | null>(null);
   const [gradersFile, setGradersFile] = useState<File | null>(null);
@@ -16,6 +16,15 @@ const CreateSemester: React.FC = () => {
   const [resumeUploadError, setResumeUploadError] = useState<string | null>(null);
   const [sectionsUploadStatus, setSectionsUploadStatus] = useState<string | null>(null);
   const [sectionsUploadError, setSectionsUploadError] = useState<string | null>(null);
+  const [gradersUploadStatus, setGradersUploadStatus] = useState<string | null>(null);
+  const [gradersUploadError, setGradersUploadError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Set initial state when component mounts
+  useEffect(() => {
+    setSeason("none");
+    setYear("");
+  }, [setSeason, setYear]);
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -96,35 +105,85 @@ const CreateSemester: React.FC = () => {
     }
   };
 
+  // Upload graders Excel file
+  const handleGradersUpload = async () => {
+    if (!gradersFile) {
+      setGradersUploadError("Please select an Excel file containing graders information.");
+      return false;
+    }
+    setGradersUploadStatus(null);
+    setGradersUploadError(null);
+    try {
+      const formData = new FormData();
+      formData.append("candidatesSheet", gradersFile);
+      formData.append("semester", semesterString);
+      const response = await fetch("http://localhost:5002/api/candidates/upload/excel", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        setGradersUploadError(`Failed to upload graders: ${errorText}`);
+        return false;
+      }
+      const result = await response.json();
+      if (result.length === 0) {
+        setGradersUploadError("No graders were processed. Please check your Excel file format.");
+        return false;
+      }
+      setGradersUploadStatus(`Successfully processed ${result.length} graders!`);
+      return true;
+    } catch (error) {
+      setGradersUploadError(error instanceof Error ? error.message : "Failed to upload graders. Please try again.");
+      return false;
+    }
+  };
+
   const handleContinue = async () => {
-    // if (!resumeFile || !sectionsFile || !gradersFile) {
-    //   alert("Please upload all three files before continuing.");
-    if (!resumeFile || !sectionsFile) {
-      alert("Please upload a ZIP file containing resumes and an Excel sheet of sections.");
+    if (!resumeFile || !sectionsFile || !gradersFile) {
+      alert("Please upload all required files:\n- ZIP file containing resumes\n- Excel sheet of sections\n- Excel sheet of graders");
       return;
     }
+
+    setIsUploading(true);
+    
     // Upload resume ZIP first
     const resumeOk = await handleResumeUpload();
-    if (!resumeOk) return;
+    if (!resumeOk) {
+      setIsUploading(false);
+      return;
+    }
     
     // Upload sections Excel
     const sectionsOk = await handleSectionsUpload();
-    if (!sectionsOk) return;
+    if (!sectionsOk) {
+      setIsUploading(false);
+      return;
+    }
+
+    // Upload graders Excel
+    const gradersOk = await handleGradersUpload();
+    if (!gradersOk) {
+      setIsUploading(false);
+      return;
+    }
     
-    setUploadDone(true);
-    alert("Files ready! You can now start the assignment.");
+    // Store the import preference in localStorage
+    localStorage.setItem(`importPreviousGraders_${semesterString}`, JSON.stringify(importPreviousGraders));
+    
+    setIsUploading(false);
+    alert("Files uploaded successfully! Please return to the dashboard and click 'Start Assignment' to begin the assignment process.");
+    navigate("/");
   };
 
-  const handleStartAssignment = () => {
-    setIsStarting(true);
-    if (importPreviousGraders) {
-      alert("Importing previous/returning graders into assignment (simulated).");
+  const handleBackToDashboard = () => {
+    if (resumeFile || sectionsFile || gradersFile) {
+      const confirmed = window.confirm("You have uploaded files that haven't been saved. If you return to the dashboard, this data will be lost. Are you sure you want to continue?");
+      if (!confirmed) {
+        return;
+      }
     }
-    setTimeout(() => {
-      alert(`Assignment started for ${season} ${year}!`);
-      setIsStarting(false);
-      navigate("/");
-    }, 500);
+    navigate("/");
   };
 
   return (
@@ -152,9 +211,16 @@ const CreateSemester: React.FC = () => {
             <div className="flex space-x-4 justify-between">
               <select
                 value={season}
-                onChange={e => setSeason(e.target.value as typeof SEASONS[number])}
+                onChange={e => {
+                  const newSeason = e.target.value;
+                  setSeason(newSeason as typeof SEASONS[number]);
+                  if (newSeason === "none") {
+                    setYear("");
+                  }
+                }}
                 className="border px-4 py-2 rounded shadow-sm focus:ring focus:ring-orange-400 outline-none"
               >
+                <option value="none">No Semester Selected</option>
                 {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
               <input
@@ -162,7 +228,8 @@ const CreateSemester: React.FC = () => {
                 value={year}
                 onChange={e => setYear(e.target.value)}
                 placeholder="Year (e.g. 2025)"
-                className="border px-4 py-2 rounded shadow-sm focus:ring focus:ring-orange-400 outline-none w-32"
+                disabled={season === "none"}
+                className={`border px-4 py-2 rounded shadow-sm focus:ring focus:ring-orange-400 outline-none w-32 ${season === "none" ? 'bg-gray-100' : ''}`}
               />
             </div>
 
@@ -217,9 +284,8 @@ const CreateSemester: React.FC = () => {
               </div>
 
               {/* Graders */}
-              {/*
               <div>
-                <label className="block text-gray-700 mb-1">Upload Excel Sheet of Graders</label>
+                <label className="block text-gray-700 mb-1">Upload Excel Sheet of Candidates</label>
                 <div className="border-dashed border-2 border-gray-400 p-4 text-center rounded bg-white">
                   <input
                     id="graders-upload"
@@ -237,35 +303,27 @@ const CreateSemester: React.FC = () => {
                   {gradersFile && <p className="mt-2 text-sm">{gradersFile.name}</p>}
                 </div>
                 <p className="text-sm text-gray-500">Format accepted: .xlsx</p>
+                {gradersUploadStatus && <div className="text-green-700 mt-2">{gradersUploadStatus}</div>}
+                {gradersUploadError && <div className="text-red-600 mt-2 whitespace-pre-line">{gradersUploadError}</div>}
               </div>
-              */}
             </div>
 
             {/* Bottom Actions */}
             <div className="flex justify-between items-center">
               <button
-                onClick={() => navigate("/")}
+                onClick={handleBackToDashboard}
                 className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded flex-1 mr-2"
               >
                 Back to Dashboard
               </button>
 
-              {!uploadDone ? (
-                <button
-                  onClick={handleContinue}
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded flex-1 ml-2"
-                >
-                  Continue
-                </button>
-              ) : (
-                <button
-                  onClick={handleStartAssignment}
-                  disabled={isStarting}
-                  className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded flex-1 ml-2"
-                >
-                  {isStarting ? "Starting…" : "Start Assignment"}
-                </button>
-              )}
+              <button
+                onClick={handleContinue}
+                disabled={isUploading}
+                className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded flex-1 ml-2"
+              >
+                {isUploading ? "Uploading..." : "Continue"}
+              </button>
             </div>
           </div>
         </div>

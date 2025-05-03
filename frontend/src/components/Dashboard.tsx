@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../../@/components/ui/card";
 import { useSemester } from "../context/SemesterContext";
@@ -17,6 +17,41 @@ import { exportToExcel } from "../lib/utils";
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { season, year, availableSemesters, setCurrentSemester, refreshAvailableSemesters } = useSemester();
+  const [candidatesStatus, setCandidatesStatus] = useState(false);
+  const [assignmentsStatus, setAssignmentsStatus] = useState(false);
+  const [shouldFlash, setShouldFlash] = useState(false);
+
+  useEffect(() => {
+    const checkUploadStatus = async () => {
+      if (!season || !year) return;
+      try {
+        const semester = `${season.charAt(0).toUpperCase() + season.slice(1)} ${year}`;
+        const [candidatesRes, assignmentsRes, professorsRes] = await Promise.all([
+          fetch(`http://localhost:5002/api/candidates?semester=${semester}`),
+          fetch(`http://localhost:5002/api/assignments?semester=${semester}`),
+          fetch(`http://localhost:5002/api/professors?semester=${semester}`)
+        ]);
+        if (!candidatesRes.ok || !assignmentsRes.ok || !professorsRes.ok) {
+          console.error('Error fetching status:', await candidatesRes.text(), await assignmentsRes.text(), await professorsRes.text());
+          return;
+        }
+        const [candidatesData, assignmentsData, professorsData] = await Promise.all([
+          candidatesRes.json(),
+          assignmentsRes.json(),
+          professorsRes.json()
+        ]);
+        const hasCandidates = Array.isArray(candidatesData) && candidatesData.length > 0;
+        const hasAssignments = Array.isArray(assignmentsData) && assignmentsData.length > 0;
+        const hasProfessors = Array.isArray(professorsData) && professorsData.length > 0;
+        setCandidatesStatus(hasCandidates);
+        setAssignmentsStatus(hasAssignments);
+        setShouldFlash(hasCandidates && hasAssignments && !hasProfessors);
+      } catch (error) {
+        console.error('Error checking upload status:', error);
+      }
+    };
+    checkUploadStatus();
+  }, [season, year]);
 
   const handleResetSemester = async () => {
     if (window.confirm(`Are you sure you want to reset the data for ${season} ${year}? This action cannot be undone.`)) {
@@ -32,6 +67,33 @@ const Dashboard: React.FC = () => {
       } catch (e) {
         alert("Failed to reset semester data.");
       }
+    }
+  };
+
+  const handleAutoAssignAll = async () => {
+    if (!season || !year) return;
+    const semester = `${season.charAt(0).toUpperCase() + season.slice(1)} ${year}`;
+    try {
+      // Get the import preference from localStorage
+      const importPreviousGraders = JSON.parse(localStorage.getItem(`importPreviousGraders_${semester}`) || 'false');
+      
+      const res = await fetch("http://localhost:5002/api/assignments/generate-all", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          semester,
+          importPreviousGraders 
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to auto-assign all candidates');
+      }
+      alert(`Successfully created ${data.assignments.length} assignments`);
+      setShouldFlash(false);
+      // Optionally, refresh status here
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Failed to auto-assign all candidates");
     }
   };
 
@@ -181,6 +243,42 @@ const Dashboard: React.FC = () => {
             >
               Export Assigned Candidates
             </Button>
+          </div>
+        </Card>
+        <Card className="p-6 hover:shadow-lg transition-shadow flex flex-col justify-between h-full">
+          <h2 className="text-lg font-semibold mb-2">Start Assignment</h2>
+          <p className="text-gray-600 mb-4">Begin the grader assignment process</p>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <div className={`w-3 h-3 rounded-full ${candidatesStatus ? 'bg-green-500' : 'bg-gray-300'}`} />
+                <span className="text-sm text-gray-600">
+                  {candidatesStatus ? 'Candidates uploaded' : 'Candidates pending'}
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className={`w-3 h-3 rounded-full ${assignmentsStatus ? 'bg-green-500' : 'bg-gray-300'}`} />
+                <span className="text-sm text-gray-600">
+                  {assignmentsStatus ? 'Sections uploaded' : 'Sections pending'}
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className={`w-3 h-3 rounded-full ${season && year ? 'bg-green-500' : 'bg-gray-300'}`} />
+                <span className="text-sm text-gray-600">
+                  {season && year ? 'Semester selected' : 'No semester selected'}
+                </span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Button
+                onClick={handleAutoAssignAll}
+                variant="outline"
+                className={`w-full justify-start hover:bg-orange-50 ${shouldFlash ? 'animate-pulse bg-orange-100' : ''}`}
+                disabled={!season || !year || !shouldFlash}
+              >
+                Start Assignment
+              </Button>
+            </div>
           </div>
         </Card>
         <Card className="p-6 hover:shadow-lg transition-shadow flex flex-col justify-between h-full">

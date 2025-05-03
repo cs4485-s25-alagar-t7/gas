@@ -1,8 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
 import CandidatesService from '../services/candidates.service.js';
-import { parseResume, saveResumeInfoToDB } from '/resume-parser/dist/services/parsing.service.js';
-import JSZip from 'jszip';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -15,6 +13,28 @@ router.get('/', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Failed to fetch candidates' });
+  }
+});
+
+// Modifies the candidates in the database for a particular semester based on the data in the Excel file
+// should update the UTDID based on the matching document ID
+// should also update the seniority score and major 
+// returns list of UTDIDs that were updated
+// POST /api/candidates/upload
+router.post('/upload/excel', upload.single('candidatesSheet'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+    const { semester } = req.body;
+    if (!semester) {
+      return res.status(400).json({ message: 'Semester is required' });
+    }
+    const modifiedCandidates = await CandidatesService.bulkModifyCandidatesFromExcel(req.file.buffer, semester);
+    res.status(201).json(modifiedCandidates);
+  } catch (error) {
+    console.error('Error processing file:', error);
+    res.status(500).json({ message: 'Failed to process file', error: error.message });
   }
 });
 
@@ -33,7 +53,7 @@ router.get('/candidate/:netId', async (req, res) => {
 // POST /api/candidates
 router.post('/', async (req, res) => {
   try {
-    const newCandidate = await addCandidate(req.body);
+    const newCandidate = await CandidatesService.addCandidate(req.body);
     res.status(201).json(newCandidate);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -69,171 +89,19 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// Uploads a zip file containing resumes and parses them, returning the results + adding them to the database
 // POST /api/candidates/upload
 router.post('/upload', upload.single('resumeZip'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
-
-    console.log('File received:', {
-      fieldname: req.file.fieldname,
-      originalname: req.file.originalname,
-      mimetype: req.file.mimetype,
-      size: req.file.size,
-      buffer_length: req.file.buffer.length
-    });
-
     const { semester } = req.body;
     if (!semester) {
       return res.status(400).json({ message: 'Semester is required' });
     }
-
-    // Helper function to generate random values
-    const generateRandomValues = (name, id) => {
-      const majors = ['Computer Science', 'Software Engineering', 'Computer Engineering', 'Data Science', 'Information Technology'];
-      const seniorities = ['Undergraduate', 'Masters', 'PhD'];
-      
-      // Generate a realistic GPA between 3.0 and 4.0
-      const gpa = (3.0 + Math.random()).toFixed(2);
-      
-      // Generate a realistic netID using first initial, last initial, and numbers
-      const nameParts = name.split(' ');
-      const firstInitial = nameParts[0][0].toLowerCase();
-      const lastInitial = nameParts[nameParts.length - 1][0].toLowerCase();
-      const netid = `${firstInitial}${lastInitial}${id.slice(-4)}`;
-      
-      return {
-        major: majors[Math.floor(Math.random() * majors.length)],
-        seniority: seniorities[Math.floor(Math.random() * seniorities.length)],
-        gpa: parseFloat(gpa),
-        netid: netid
-      };
-    };
-
-    // Load and validate zip content
-    let zipContent;
-    try {
-      const zip = new JSZip();
-      console.log('Loading zip content...');
-      zipContent = await zip.loadAsync(req.file.buffer, {
-        createFolders: true,
-        checkCRC32: true
-      });
-    } catch (error) {
-      console.error('Error loading zip:', error);
-      return res.status(400).json({ 
-        message: 'Invalid zip file',
-        error: error.message
-      });
-    }
-
-    // Get all files recursively
-    const files = [];
-    zipContent.forEach((relativePath, file) => {
-      if (!file.dir) {
-        files.push({
-          name: relativePath,
-          file: file
-        });
-      }
-    });
-
-    console.log('Found files in zip:', files.map(f => f.name));
-
-    let processedCount = 0;
-    let errors = [];
-
-    // Process each PDF file
-    for (const { name, file } of files) {
-      if (name.toLowerCase().endsWith('.pdf')) {
-        try {
-          console.log('Processing PDF:', name);
-          let pdfBuffer;
-          try {
-            pdfBuffer = await file.async('nodebuffer');
-            console.log('PDF buffer extracted successfully:', name, 'Size:', pdfBuffer.length, 'bytes');
-          } catch (error) {
-            console.error('Error extracting PDF buffer:', error);
-            errors.push({ filename: name, error: 'Failed to extract PDF: ' + error.message });
-            continue;
-          }
-
-          let resumeData;
-          try {
-            console.log('Parsing resume:', name);
-            resumeData = await parseResume(pdfBuffer);
-            console.log('Resume parsed successfully:', name, 'Data:', resumeData);
-
-            // Extract name and ID from filename (e.g., "Douglas_Lewis_559082.pdf")
-            const filenameParts = name.replace('.pdf', '').split('_');
-            const extractedName = filenameParts.slice(0, -1).join(' ');
-            const extractedId = filenameParts[filenameParts.length - 1];
-
-            // Generate random values for required fields
-            const randomValues = generateRandomValues(extractedName, extractedId);
-
-            // Add required fields with random values
-            const candidateData = {
-              name: extractedName,
-              ...randomValues,
-              semester,
-              assignmentStatus: false,
-              ...resumeData  // This will override defaults if values exist in resumeData
-            };
-            
-            try {
-              console.log('Saving candidate data to database:', name, candidateData);
-              await CandidatesService.addCandidate(candidateData);
-              console.log('Successfully saved to database:', name);
-              processedCount++;
-            } catch (error) {
-              console.error('Error saving to database:', error);
-              errors.push({ filename: name, error: 'Failed to save to database: ' + error.message });
-              continue;
-            }
-
-            console.log('Successfully processed:', name);
-          } catch (error) {
-            console.error('Error parsing resume:', error);
-            errors.push({ filename: name, error: 'Failed to parse resume: ' + error.message });
-            continue;
-          }
-        } catch (error) {
-          const errorMessage = `Error processing ${name}: ${error.message}`;
-          console.error(errorMessage);
-          errors.push({ filename: name, error: error.message });
-        }
-      } else {
-        console.log('Skipping non-PDF file:', name);
-      }
-    }
-
-    console.log('Processing complete. Stats:', {
-      processedCount,
-      totalFiles: files.length,
-      pdfFiles: files.filter(f => f.name.toLowerCase().endsWith('.pdf')).length,
-      errors: errors.length,
-      errorDetails: errors
-    });
-
-    if (processedCount === 0) {
-      return res.json({
-        message: 'No resumes were processed. Please check that your ZIP file contains PDF files.',
-        processedCount: 0,
-        totalFiles: files.length,
-        filesFound: files.map(f => f.name),
-        errors: errors.length > 0 ? errors : undefined
-      });
-    }
-
-    res.json({ 
-      message: `Successfully processed ${processedCount} resumes`,
-      processedCount,
-      totalFiles: files.length,
-      filesFound: files.map(f => f.name),
-      errors: errors.length > 0 ? errors : undefined
-    });
+    const result = await CandidatesService.processResumeZip(req.file.buffer, semester);
+    res.json(result);
   } catch (error) {
     console.error('Error processing zip file:', error);
     res.status(500).json({ 
@@ -261,7 +129,6 @@ router.get('/recent', async (req, res) => {
     if (!semester || !count) {
       return res.status(400).json({ message: 'Semester and count are required' });
     }
-
     const recentCandidates = await CandidatesService.getRecentCandidates(semester, parseInt(count));
     res.json(recentCandidates);
   } catch (error) {
