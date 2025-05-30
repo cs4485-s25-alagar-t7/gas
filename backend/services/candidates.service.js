@@ -3,7 +3,7 @@ import Assignment from '../models/Assignment.js';
 import Section from '../models/Section.js';
 import * as xlsx from 'xlsx/xlsx.mjs';
 import JSZip from 'jszip';
-import { parseResume } from '/resume-parser/dist/services/parsing.service.js';
+import { parseResume } from '../lib/resume-parser/services/parsing.service.js';
 
 class CandidateService {
     static async getCandidates({ semester, unassigned }) {
