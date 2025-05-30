@@ -31,8 +31,6 @@ services:
     restart: always
     ports:
       - "5002:5000"
-    volumes:
-      - ./backend:/app
     environment: 
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}

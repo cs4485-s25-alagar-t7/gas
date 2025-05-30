@@ -14,7 +14,8 @@ To run the mongodb and mongo express admin ui:
 
 1. ``cp template.env .env``
 1. fill in a password for the database in the .env file
-1. ``docker compose up`` 
+1. ``docker compose build --no-cache``
+1. ``docker compose up``
 
 ## Main Features
 - View Candidates
