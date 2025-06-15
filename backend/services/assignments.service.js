@@ -142,9 +142,24 @@ class AssignmentService {
     console.log(`Processing section: ${section.course_name}.${section.section_num}`);
     console.log(`Number of graders needed: ${section.num_required_graders}`);
 
-    // Get all candidates for the current semester
-    const currentSemesterCandidates = await Candidate.find({ semester: semester }).exec();
+    // Filter to only fully qualified candidates
+    const currentSemesterCandidates = await Candidate.find({ semester, fullyQualified: true });
     console.log('Total current semester candidates found:', currentSemesterCandidates.length);
+
+    // 1. Assign recommended/requested candidates first
+    let recommendedAssignments = [];
+    let recommendedCandidateIds = new Set();
+    if (Array.isArray(section.requested_candidate_UTDIDs) && section.requested_candidate_UTDIDs.length > 0) {
+      for (const utdid of section.requested_candidate_UTDIDs) {
+        const candidate = currentSemesterCandidates.find(c => String(c.netid).trim() === String(utdid).trim());
+        if (candidate && !globallyAssignedCandidateIds.has(candidate._id.toString())) {
+          recommendedAssignments.push({ candidate, score: 3.0 }); // Highest priority
+          recommendedCandidateIds.add(candidate._id.toString());
+          globallyAssignedCandidateIds.add(candidate._id.toString());
+          if (recommendedAssignments.length >= section.num_required_graders) break;
+        }
+      }
+    }
 
     // Get previous semester assignments if importPreviousGraders is true
     let previousGraders = [];
@@ -169,11 +184,14 @@ class AssignmentService {
       console.log('Previous semester grader netIDs:', Array.from(prevGraderNetIds));
 
       // Separate candidates into previous graders and others
-      previousGraders = currentSemesterCandidates.filter(c => prevGraderNetIds.has(c.netid));
-      otherCandidates = currentSemesterCandidates.filter(c => !prevGraderNetIds.has(c.netid));
+      previousGraders = currentSemesterCandidates.filter(c => prevGraderNetIds.has(c.netid) && !recommendedCandidateIds.has(c._id.toString()));
+      otherCandidates = currentSemesterCandidates.filter(c => !prevGraderNetIds.has(c.netid) && !recommendedCandidateIds.has(c._id.toString()));
 
       console.log('Found previous graders in current semester:', previousGraders.length);
       console.log('Other candidates:', otherCandidates.length);
+    } else {
+      // Remove recommended from others if not using previous graders
+      otherCandidates = currentSemesterCandidates.filter(c => !recommendedCandidateIds.has(c._id.toString()));
     }
 
     // Get existing assignments for the current section and semester
@@ -194,7 +212,7 @@ class AssignmentService {
     console.log('Available unassigned previous graders:', unassignedPreviousGraders.length);
     console.log('Available unassigned other candidates:', unassignedOtherCandidates.length);
     
-    if (unassignedPreviousGraders.length + unassignedOtherCandidates.length === 0) {
+    if (recommendedAssignments.length + unassignedPreviousGraders.length + unassignedOtherCandidates.length === 0) {
       console.log('No unassigned candidates available');
       throw new Error('No unassigned candidates found for this semester');
     }
@@ -206,19 +224,21 @@ class AssignmentService {
       keywords: 0.3
     };
 
-    // First assign previous graders if available and importPreviousGraders is true
-    let selectedAssignments = [];
-    if (importPreviousGraders && unassignedPreviousGraders.length > 0) {
-      console.log('Assigning previous graders first...');
+    // 2. Assign previous graders if available and importPreviousGraders is true
+    let selectedAssignments = [...recommendedAssignments];
+    if (selectedAssignments.length < section.num_required_graders && importPreviousGraders && unassignedPreviousGraders.length > 0) {
+      console.log('Assigning previous graders next...');
       const previousGraderAssignments = unassignedPreviousGraders.map(candidate => ({
         candidate,
-        score: 2.0 // Give previous graders highest priority
+        score: 2.0 // Priority below recommended
       }));
-      selectedAssignments = previousGraderAssignments.slice(0, section.num_required_graders);
-      console.log(`Selected ${selectedAssignments.length} previous graders for assignment`);
+      const slotsLeft = section.num_required_graders - selectedAssignments.length;
+      selectedAssignments = [...selectedAssignments, ...previousGraderAssignments.slice(0, slotsLeft)];
+      previousGraderAssignments.slice(0, slotsLeft).forEach(a => globallyAssignedCandidateIds.add(a.candidate._id.toString()));
+      console.log(`Selected ${previousGraderAssignments.length} previous graders for assignment`);
     }
 
-    // If we still need more graders, assign from other candidates
+    // 3. If we still need more graders, assign from other candidates
     if (selectedAssignments.length < section.num_required_graders) {
       console.log('Assigning other candidates to fill remaining slots...');
       const remainingSlots = section.num_required_graders - selectedAssignments.length;
@@ -227,7 +247,7 @@ class AssignmentService {
         return { candidate, score };
       }).sort((a, b) => b.score - a.score)
         .slice(0, remainingSlots);
-      
+      otherAssignments.forEach(a => globallyAssignedCandidateIds.add(a.candidate._id.toString()));
       selectedAssignments = [...selectedAssignments, ...otherAssignments];
       console.log(`Added ${otherAssignments.length} other candidates to fill remaining slots`);
     }
@@ -309,13 +329,21 @@ class AssignmentService {
 
   static async createAssignmentsForAllSections(semester, importPreviousGraders = false) {
     console.log('\n=== Starting bulk assignment process ===');
-    const sections = await Section.find({ semester: semester }).exec();
+    let sections = await Section.find({ semester: semester }).exec();
     console.log(`Found ${sections.length} sections for semester ${semester}:`);
     sections.forEach(s => console.log(`- ${s.course_name}.${s.section_num} (needs ${s.num_required_graders} graders)`));
     
     if (!sections || sections.length === 0) {
       throw new Error('No sections found for this semester');
     }
+
+    // Sort sections: those with a non-empty requested_candidate_UTDIDs come first
+    sections = sections.sort((a, b) => {
+      const aHasRec = Array.isArray(a.requested_candidate_UTDIDs) && a.requested_candidate_UTDIDs.length > 0;
+      const bHasRec = Array.isArray(b.requested_candidate_UTDIDs) && b.requested_candidate_UTDIDs.length > 0;
+      if (aHasRec === bHasRec) return 0;
+      return aHasRec ? -1 : 1;
+    });
 
     const allAssignments = [];
     const globallyAssignedCandidateIds = new Set();
@@ -447,8 +475,8 @@ class AssignmentService {
     const section = assignment.course_section_id;
     const semester = assignment.semester;
 
-    // Find all candidates for the semester
-    const candidates = await Candidate.find({ semester }).exec();
+    // Find all fully qualified candidates for the semester
+    const candidates = await Candidate.find({ semester, fullyQualified: true }).exec();
     // Find all assigned candidate IDs for the semester
     const assignedAssignments = await Assignment.find({ semester });
     const assignedCandidateIds = assignedAssignments.map(a => String(a.grader_id));
@@ -496,6 +524,25 @@ class AssignmentService {
       console.error('Error in unassignCandidate:', error);
       throw error;
     }
+  }
+
+  /**
+   * Checks that all recommended candidate IDs from the section input file are present in the database for the given semester.
+   * Logs any missing recommended candidates.
+   * @param {Array<string>} recommendedCandidateIds - Array of recommended candidate UTDIDs from the section input file
+   * @param {string} semester - The semester to check
+   */
+  static async verifyRecommendedCandidatesInDatabase(recommendedCandidateIds, semester) {
+    // Fetch all candidate netids for the semester
+    const candidates = await Candidate.find({ semester }).select('netid').lean();
+    const candidateNetids = new Set(candidates.map(c => String(c.netid).trim()));
+    const missing = recommendedCandidateIds.filter(id => !candidateNetids.has(String(id).trim()));
+    if (missing.length > 0) {
+      console.warn(`Recommended candidate IDs missing from database for semester ${semester}:`, missing);
+    } else {
+      console.log('All recommended candidate IDs are present in the database for semester', semester);
+    }
+    return missing;
   }
 }
 

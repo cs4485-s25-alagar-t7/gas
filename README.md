@@ -24,7 +24,6 @@ To run the mongodb and mongo express admin ui:
 - Automatically carry over previous graders
     - Click a button to re-assign graders from last semester
 - Automatically assign recommended graders
-    - Click a button to assign a candidate to sections as a professor has requested
 - Automatically score candidates for each section and assign the best match.
 - Authentication 
     - WIP 
@@ -36,7 +35,7 @@ To run the mongodb and mongo express admin ui:
 The grader assignment algorithm works based on a weighted sum of attribute scores. 
 
 ### Attributes considered:
-- Seniority a.k.a. class standing or school year
+- Seniority (a.k.a. class standing or school year)
     - sourced from handshake excel sheet
 - Prior Grader Experience
     - has the candidate been a TA or grader before?
@@ -45,6 +44,8 @@ The grader assignment algorithm works based on a weighted sum of attribute score
     - how many of the section keywords are mentioned in this candidate's resume?
     - candidate keywords sourced from resume
     - section keywords sourced from section/professor excel sheet
+- Professor Requests
+    - was this candidate recommended/requested by a professor?
 
 
 ### Attributes collected but not currently considered"
