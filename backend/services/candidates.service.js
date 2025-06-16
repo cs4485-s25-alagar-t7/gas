@@ -62,8 +62,9 @@ class CandidateService {
             const major = row['Majors'];
             const name = row['Student First Name'] + ' ' + row['Student Last Name'];
             const document_id = row['Document IDs'].toString();
+            const fullyQualified = row['Fully Qualified'] === 'TRUE';
 
-            if (!document_id || !seniority || !major || !UTDID) {
+            if (!document_id || !seniority || !major || !UTDID || !fullyQualified) {
                 throw new Error('Missing required fields in the Excel file');
             }
             const candidate = existingCandidatesMap.get(document_id);
@@ -74,7 +75,8 @@ class CandidateService {
                         seniority: seniority,
                         major: major,
                         netid: UTDID,
-                        name: name
+                        name: name,
+                        fullyQualified: fullyQualified
                     }, { new: true }).then(updated => {
                         if (updated) {
                             updatedCandidates.push(updated.netid);
@@ -146,11 +148,13 @@ class CandidateService {
             const majors = ['Computer Science', 'Software Engineering', 'Computer Engineering', 'Data Science', 'Information Technology'];
             const seniorities = ['Junior', 'Senior', 'Masters', 'Doctorate'];
             const gpa = (3.0 + Math.random()).toFixed(2);
+            const major = majors[Math.floor(Math.random() * majors.length)];
             return {
-                major: majors[Math.floor(Math.random() * majors.length)],
+                major,
                 seniority: seniorities[Math.floor(Math.random() * seniorities.length)],
                 gpa: parseFloat(gpa),
                 netid: id,
+                fullyQualified: major === 'Computer Science' || major === 'Software Engineering'
             };
         };
 
@@ -219,7 +223,7 @@ class CandidateService {
                             previous_grader_experience: experience,
                             assignmentStatus: false,
                             resume_keywords: [...new Set(all_keywords)],
-                            // ...resumeData  // This will override defaults if values exist in resumeData
+                            fullyQualified: false
                         };
 
 
