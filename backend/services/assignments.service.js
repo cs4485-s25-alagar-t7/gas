@@ -142,8 +142,8 @@ class AssignmentService {
     console.log(`Processing section: ${section.course_name}.${section.section_num}`);
     console.log(`Number of graders needed: ${section.num_required_graders}`);
 
-    // Get all candidates for the current semester
-    const currentSemesterCandidates = await Candidate.find({ semester: semester }).exec();
+    // Filter to only fully qualified candidates
+    const currentSemesterCandidates = await Candidate.find({ semester, fullyQualified: true });
     console.log('Total current semester candidates found:', currentSemesterCandidates.length);
 
     // Get previous semester assignments if importPreviousGraders is true
@@ -447,8 +447,8 @@ class AssignmentService {
     const section = assignment.course_section_id;
     const semester = assignment.semester;
 
-    // Find all candidates for the semester
-    const candidates = await Candidate.find({ semester }).exec();
+    // Find all fully qualified candidates for the semester
+    const candidates = await Candidate.find({ semester, fullyQualified: true }).exec();
     // Find all assigned candidate IDs for the semester
     const assignedAssignments = await Assignment.find({ semester });
     const assignedCandidateIds = assignedAssignments.map(a => String(a.grader_id));
