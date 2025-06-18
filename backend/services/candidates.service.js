@@ -43,7 +43,9 @@ class CandidateService {
         const workbook = xlsx.read(excelBuffer, { type: 'buffer' });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
-        const data = xlsx.utils.sheet_to_json(sheet, { range: 1 });
+        const data = xlsx.utils.sheet_to_json(sheet);
+
+        console.log(data)
 
         if (!data.length) {
             throw new Error('No data found in the Excel file');
@@ -57,24 +59,29 @@ class CandidateService {
         const updatedCandidates = [];
 
         for (const row of data) {
+            console.log("Point 2");
             const UTDID = row['Student ID'].toString();
             const seniority = row['Student School Year Name'];
             const major = row['Majors'];
             const name = row['Student First Name'] + ' ' + row['Student Last Name'];
             const document_id = row['Document IDs'].toString();
+            const fullyQualified = row['Fully Qualified'].toString() === "true";
 
             if (!document_id || !seniority || !major || !UTDID) {
+
                 throw new Error('Missing required fields in the Excel file');
             }
             const candidate = existingCandidatesMap.get(document_id);
             if (candidate) {
                 // Prepare update
+                console.log("candidate", name, "FQ Row", row['Fully Qualified'], "Extracted", fullyQualified);
                 updatePromises.push(
                     Candidate.findByIdAndUpdate(candidate._id, {
                         seniority: seniority,
                         major: major,
                         netid: UTDID,
-                        name: name
+                        name: name,
+                        fullyQualified: fullyQualified
                     }, { new: true }).then(updated => {
                         if (updated) {
                             updatedCandidates.push(updated.netid);
@@ -229,10 +236,12 @@ class CandidateService {
                             processedCount++;
                         } catch (error) {
                             errors.push({ filename: name, error: 'Failed to save to database: ' + error.message });
+                            console.log({ filename: name, error: 'Failed to save to database: ' + error.message });
                             continue;
                         }
                     } catch (error) {
                         errors.push({ filename: name, error: 'Failed to parse resume: ' + error.message });
+                        console.log({ filename: name, error: 'Failed to parse resume: ' + error.message });
                         continue;
                     }
                 } catch (error) {

@@ -59,8 +59,13 @@ export async function bulkCreateSectionsFromExcel(buffer, semester) {
     keywords: section['Keywords'] ? section['Keywords'].split(',').map(keyword => keyword.trim().toLowerCase()) : [],
     semester: semester,
     num_required_graders: parseInt(section['Num of graders']),
-    requested_candidate_UTDIDs: section['Recommended Student ID'] ? section['Recommended Student ID'].split(',').map(utdid => utdid.trim()) : [],
-    recommended_candidate_names: section['Recommended Student Name'] ? section['Recommended Student Name'].split(',').map(name => name.trim()) : []
+// <<<<<<< Updated upstream
+//     requested_candidate_UTDIDs: section['Recommended Student ID'] ? section['Recommended Student ID'].split(',').map(utdid => utdid.trim()) : [],
+//     recommended_candidate_names: section['Recommended Student Name'] ? section['Recommended Student Name'].split(',').map(name => name.trim()) : []
+// =======
+    requested_candidate_UTDIDs: typeof section['Recommended Student ID'] === 'string' ? section['Recommended Student ID'].split(',').map(utdid => utdid.trim()) : [],
+    recommended_candidate_names: typeof section['Recommended Student Name'] === 'string' ? section['Recommended Student Name'].split(',').map(name => name.trim()) : []
+// >>>>>>> Stashed changes
   }));
 
   // Optionally log the first parsed section

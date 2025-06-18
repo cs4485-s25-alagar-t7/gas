@@ -188,7 +188,7 @@ class AssignmentService {
       !globallyAssignedCandidateIds.has(candidate._id.toString())
     );
     const unassignedOtherCandidates = otherCandidates.filter(candidate => 
-      !globallyAssignedCandidateIds.has(candidate._id.toString())
+      !globallyAssignedCandidateIds.has(candidate._id.toString()) && candidate.fullyQualified
     );
     
     console.log('Available unassigned previous graders:', unassignedPreviousGraders.length);
