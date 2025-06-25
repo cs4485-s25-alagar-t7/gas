@@ -28,16 +28,23 @@ export async function getProfessorView(semester) {
     if (!assignedCandidate) return null; // Only include if there is an actual name
     let recommendedCandidate = "";
     if (Array.isArray(section.requested_candidate_UTDIDs) && section.requested_candidate_UTDIDs.length > 0) {
-      const utdid = section.requested_candidate_UTDIDs[0].trim();
-      const candidate = candidates.find(c => String(c.netid).trim() === utdid);
-      if (candidate) {
-        recommendedCandidate = candidate.name;
-      } else if (Array.isArray(section.recommended_candidate_names) && section.recommended_candidate_names.length > 0) {
-        // Use the name from the section if not in the pool
-        recommendedCandidate = section.recommended_candidate_names[0];
-      } else {
-        recommendedCandidate = utdid;
-      }
+      // WHY ARE MULTIPLE CHECKS NEEDED? DONT WE JUST SHOW THE RECOMMENDED STUDENTS TO THE FRONTEND DIRECTLY?
+      // WHAT IF THERE ARE INVALID STRINGS? SHOULD BURDEN OF VALIDATION OF RECOMMENDED CANDIDATES FALL ON THE USER?  
+
+      // const utdid = section.requested_candidate_UTDIDs[0].trim();
+      // const candidate = candidates.find(c => String(c.netid).trim() === utdid);
+      // if (candidate) {
+      //   recommendedCandidate = candidate.name;
+      // } else if (Array.isArray(section.recommended_candidate_names) && section.recommended_candidate_names.length > 0) {
+      //   // Use the name from the section if not in the pool
+      //   recommendedCandidate = section.recommended_candidate_names;
+      //   console.log("Recommended candidate for frontend", recommendedCandidate);
+      // } else {
+      //   recommendedCandidate = utdid;
+      // }
+
+      // SKIPPING THESE FOR NOW:
+      recommendedCandidate = section.recommended_candidate_names;
     }
 
     const available = candidates.some(c =>

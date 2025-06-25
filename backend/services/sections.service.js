@@ -49,7 +49,11 @@ export async function bulkCreateSectionsFromExcel(buffer, semester) {
     throw new Error('No valid sections found in the file');
   }
 
-  const formatted_sections = sections.map(section => ({
+  const formatted_sections = sections.map(section => {
+    
+    console.log(section['Recommended Student ID'], typeof section['Recommended Student ID']);
+
+    return ({
     course_name: section['Course Number'],
     section_num: section['Section'],
     instructor: {
@@ -59,14 +63,10 @@ export async function bulkCreateSectionsFromExcel(buffer, semester) {
     keywords: section['Keywords'] ? section['Keywords'].split(',').map(keyword => keyword.trim().toLowerCase()) : [],
     semester: semester,
     num_required_graders: parseInt(section['Num of graders']),
-// <<<<<<< Updated upstream
-//     requested_candidate_UTDIDs: section['Recommended Student ID'] ? section['Recommended Student ID'].split(',').map(utdid => utdid.trim()) : [],
-//     recommended_candidate_names: section['Recommended Student Name'] ? section['Recommended Student Name'].split(',').map(name => name.trim()) : []
-// =======
-    requested_candidate_UTDIDs: typeof section['Recommended Student ID'] === 'string' ? section['Recommended Student ID'].split(',').map(utdid => utdid.trim()) : [],
+    requested_candidate_UTDIDs: section['Recommended Student ID'] != null ? section['Recommended Student ID'].toString().split(',').map(utdid => utdid.trim()) : [],
     recommended_candidate_names: typeof section['Recommended Student Name'] === 'string' ? section['Recommended Student Name'].split(',').map(name => name.trim()) : []
-// >>>>>>> Stashed changes
-  }));
+
+  })});
 
   // Optionally log the first parsed section
   if (formatted_sections.length > 0) {

@@ -141,6 +141,7 @@ class AssignmentService {
     }
     console.log(`Processing section: ${section.course_name}.${section.section_num}`);
     console.log(`Number of graders needed: ${section.num_required_graders}`);
+    console.log(`Recommended candidate: ${section.requested_candidate_UTDIDs}, ${typeof section.recommended_candidate_names}`);
 
     // Get all candidates for the current semester
     const currentSemesterCandidates = await Candidate.find({ semester: semester }).exec();
@@ -185,10 +186,10 @@ class AssignmentService {
     
     // Filter out already assigned candidates (global)
     const unassignedPreviousGraders = previousGraders.filter(candidate => 
-      !globallyAssignedCandidateIds.has(candidate._id.toString())
+      !globallyAssignedCandidateIds.has(candidate.netid.toString())
     );
     const unassignedOtherCandidates = otherCandidates.filter(candidate => 
-      !globallyAssignedCandidateIds.has(candidate._id.toString()) && candidate.fullyQualified
+      !globallyAssignedCandidateIds.has(candidate.netid.toString()) && candidate.fullyQualified
     );
     
     console.log('Available unassigned previous graders:', unassignedPreviousGraders.length);
@@ -206,15 +207,34 @@ class AssignmentService {
       keywords: 0.3
     };
 
-    // First assign previous graders if available and importPreviousGraders is true
+
     let selectedAssignments = [];
+
+    // First must check if the recommended candidate is available
+    console.log("Recommendation logic - ", section.requested_candidate_UTDIDs.toString());
+
+    for (const studentid of section.requested_candidate_UTDIDs) {
+      console.log("Recommended student id - ", studentid);
+      if (globallyAssignedCandidateIds.has(studentid)){
+        console.log(studentid, "already assigned!!");
+      }else{
+        const recommendedcandidate = currentSemesterCandidates.filter(candidate => candidate.netid == studentid)[0]
+        if (recommendedcandidate){
+          console.log("recommended student found - ", recommendedcandidate);
+          selectedAssignments.push({candidate: recommendedcandidate, score: 2.0})
+        }
+      }
+    }
+
+    // First assign previous graders if available and importPreviousGraders is true
+    
     if (importPreviousGraders && unassignedPreviousGraders.length > 0) {
       console.log('Assigning previous graders first...');
       const previousGraderAssignments = unassignedPreviousGraders.map(candidate => ({
         candidate,
         score: 2.0 // Give previous graders highest priority
       }));
-      selectedAssignments = previousGraderAssignments.slice(0, section.num_required_graders);
+      selectedAssignments = [...selectedAssignments, ...previousGraderAssignments.slice(0, section.num_required_graders)];
       console.log(`Selected ${selectedAssignments.length} previous graders for assignment`);
     }
 
@@ -246,7 +266,8 @@ class AssignmentService {
 
       try {
         await assignment.save();
-        globallyAssignedCandidateIds.add(candidate._id.toString());
+        //globallyAssignedCandidateIds.add(candidate._id.toString());
+        globallyAssignedCandidateIds.add(candidate.netid);
         console.log(`Created assignment for ${candidate.name} to ${section.course_name}.${section.section_num}`);
         assignments.push(assignment);
       } catch (error) {
@@ -319,7 +340,61 @@ class AssignmentService {
 
     const allAssignments = [];
     const globallyAssignedCandidateIds = new Set();
+
+    // we first  need to allocate graders for professors that sent their recommendations
+
+    const currentSemesterCandidates = await Candidate.find({ semester: semester }).exec();
+
+    console.log("=========== Starting with sections with recommendations ===============");
     for (const section of sections) {
+
+      // skip if candidate id is null
+      //console.log(section);
+      if (section.requested_candidate_UTDIDs == null || section.requested_candidate_UTDIDs.length === 0){
+        console.log("No candidates requested for section", section.section_num);
+        continue;
+      }
+
+
+      // // check if all candidates recommended are valid else remove the recommendations
+      // if (!currentSemesterCandidates.has(section.requested_candidate_UTDIDs[0].toString())){
+      //   console.log("Requested candidate ", section.);
+      //   continue;
+      // }
+
+      try {
+        console.log(`\nProcessing section ${section.course_name}.${section.section_num}`);
+        const sectionAssignments = await this.createAssignmentsForSection(section._id, semester, importPreviousGraders, globallyAssignedCandidateIds);
+        console.log(`Created ${sectionAssignments.length} assignments for section ${section.course_name}.${section.section_num}`);
+        allAssignments.push(...sectionAssignments);
+      } catch (error) {
+        console.error(`Error assigning for section ${section.course_name}.${section.section_num}:`, error.message);
+        // Continue with other sections even if one fails
+      }
+    }
+
+
+    // second time loop for sections without recommendations or if recommended candidates were not available
+    // in this case a simple negation condition of the previous if statement will not work. since a section may have recommended candidates but still be
+    // unassigned due to a variety of reasons.
+    // so think of iterating through sections that are still missing in the allAssignments array
+
+
+    console.log("========= Proceeding with other sections ===============");
+
+    for (const section of sections) {
+
+
+      allAssignments.forEach((asgnmnt, index) => {
+        console.log("Assignment.course_section_id =", asgnmnt.course_section_id, "section._id", section._id, "equal?=", asgnmnt.course_section_id.equals(section._id));
+      })
+
+      // so if a section is assigned already we skip it.
+      if (allAssignments.some(asgnmnt => asgnmnt.course_section_id.equals(section._id))){
+        console.log("Section already assigned", section.course_name, section.section_num);
+        continue;
+      }
+
       try {
         console.log(`\nProcessing section ${section.course_name}.${section.section_num}`);
         const sectionAssignments = await this.createAssignmentsForSection(section._id, semester, importPreviousGraders, globallyAssignedCandidateIds);

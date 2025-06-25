@@ -222,13 +222,27 @@ const ProfessorsPage: React.FC = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          {/* <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                             course.recommendedCandidate
                               ? 'bg-blue-100 text-blue-800'
                               : 'bg-gray-100 text-gray-800'
                           }`}>
                             {course.recommendedCandidate || "None"}
-                          </span>
+                          </span> */}
+                          {Array.isArray(course.recommendedCandidate) && course.recommendedCandidate.length > 0 ? (
+                              course.recommendedCandidate.map((name, i) => (
+                                <span
+                                  key={i}
+                                  className="inline-block px-3 py-1 mr-2 mb-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+                                >
+                                  {name}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                                None
+                              </span>
+                            )}
                         </td>
                         <td className="px-6 py-4">
                           <span className="text-sm text-red-600 italic">
