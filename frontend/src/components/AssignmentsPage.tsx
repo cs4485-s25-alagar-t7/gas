@@ -447,16 +447,28 @@ const AssignmentPage: React.FC = () => {
             </div>
             <div className="flex justify-end w-full mt-4">
               <Button
-                onClick={() => exportToExcel({
+                onClick={() => {
+
+                  const unassigned = filtered.filter(a => !a.assignedCandidate);
+                  const unassigned_count = unassigned.length;
+
+                  if (unassigned_count > 0){
+                    alert(`Wanring: ${unassigned_count} section${unassigned_count > 1 ? `'s are `: `is`} still unassigned`);
+                  }
+                  
+                  exportToExcel({
                   data: filtered.map(a => ({
                     courseSection: `${a.section.course_name}.${a.section.section_num}`,
                     numGraders: a.section.num_required_graders,
                     professorName: a.section.instructor.name,
                     assignedCandidate: a.assignedCandidate?.name || 'Not Assigned',
+                    assignedCandidate_UTDID: a.assignedCandidate?.netid || '-',
                   })),
                   fileName: `assignments_${semesterString.replace(/\s+/g, '_').toLowerCase()}`,
                   sheetName: 'Assignments'
-                })}
+                })
+              
+              }}
                 className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 shadow-sm"
               >
                 Export to Excel

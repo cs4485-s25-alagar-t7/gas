@@ -20,6 +20,17 @@ const Dashboard: React.FC = () => {
   const [candidatesStatus, setCandidatesStatus] = useState(false);
   const [assignmentsStatus, setAssignmentsStatus] = useState(false);
   const [shouldFlash, setShouldFlash] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+
+  const onStartAssignment = async () => {
+    setIsLoading(true);
+    try {
+      await handleAutoAssignAll(); // or whatever your actual logic is
+    } finally {
+      setIsLoading(false); // Optional: comment this out if you never want to re-enable
+    }
+  };
 
   useEffect(() => {
     const checkUploadStatus = async () => {
@@ -271,13 +282,45 @@ const Dashboard: React.FC = () => {
             </div>
             <div className="space-y-2">
               <Button
-                onClick={handleAutoAssignAll}
-                variant="outline"
-                className={`w-full justify-start hover:bg-orange-50 ${shouldFlash ? 'animate-pulse bg-orange-100' : ''}`}
-                disabled={!season || !year || !shouldFlash}
-              >
-                Start Assignment
-              </Button>
+    onClick={onStartAssignment}
+    variant="outline"
+    className={`w-full justify-start ${
+      isLoading
+        ? 'bg-orange-100 cursor-not-allowed'
+        : shouldFlash
+        ? 'animate-pulse bg-orange-100 hover:bg-orange-50'
+        : ''
+    }`}
+    disabled={!season || !year || !shouldFlash || isLoading}
+  >
+    {isLoading ? (
+      <>
+        <svg
+          className="animate-spin h-4 w-4 mr-2 text-orange-600"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v8z"
+          />
+        </svg>
+        Assignment in progress...
+      </>
+    ) : (
+      'Start Assignment'
+    )}
+  </Button>
             </div>
           </div>
         </Card>

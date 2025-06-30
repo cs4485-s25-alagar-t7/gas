@@ -214,11 +214,17 @@ class AssignmentService {
     console.log("Recommendation logic - ", section.requested_candidate_UTDIDs.toString());
 
     for (const studentid of section.requested_candidate_UTDIDs) {
+
+      if (selectedAssignments.length  >= section.num_required_graders){
+        console.log("Sufficient graders selected", section.c)
+        break;
+      }
+
       console.log("Recommended student id - ", studentid);
       if (globallyAssignedCandidateIds.has(studentid)){
         console.log(studentid, "already assigned!!");
       }else{
-        const recommendedcandidate = currentSemesterCandidates.filter(candidate => candidate.netid == studentid)[0]
+        const recommendedcandidate = currentSemesterCandidates.filter(candidate => candidate.netid == studentid && candidate.fullyQualified)[0]
         if (recommendedcandidate){
           console.log("recommended student found - ", recommendedcandidate);
           selectedAssignments.push({candidate: recommendedcandidate, score: 2.0})
